@@ -50,13 +50,26 @@ public class SignupActivity extends AppCompatActivity {
                 String password = passwordEditText.getText().toString();
                 String confirm = confirmEditText.getText().toString();
 
-                if (password.equals(confirm)){
+                if (validateInputs(username, password, confirm)) {
                     Toast.makeText(getApplicationContext(), "Signing up", Toast.LENGTH_LONG).show();
-                }
-                else {
-                    Toast.makeText(getApplicationContext(), "Password don't match", Toast.LENGTH_LONG).show();
                 }
             }
         });
+    }
+
+    private boolean validateInputs(String username, String password, String confirm) {
+        if (username.isEmpty() || password.isEmpty() || confirm.isEmpty()) {
+            Toast.makeText(getApplicationContext(), "Fields cannot be empty", Toast.LENGTH_LONG).show();
+            return false;
+        }
+        if (password.length() < 6) {
+            Toast.makeText(getApplicationContext(), "Password must be at least 6 characters", Toast.LENGTH_LONG).show();
+            return false;
+        }
+        if (!password.equals(confirm)) {
+            Toast.makeText(getApplicationContext(), "Passwords don't match", Toast.LENGTH_LONG).show();
+            return false;
+        }
+        return true;
     }
 }

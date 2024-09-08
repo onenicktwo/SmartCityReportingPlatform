@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -35,11 +36,12 @@ public class LoginActivity extends AppCompatActivity {
                 String username = usernameEditText.getText().toString();
                 String password = passwordEditText.getText().toString();
 
-                /* when login button is pressed, use intent to switch to Login Activity */
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                intent.putExtra("USERNAME", username);  // key-value to pass to the MainActivity
-                intent.putExtra("PASSWORD", password);  // key-value to pass to the MainActivity
-                startActivity(intent);  // go to MainActivity with the key-value data
+                if (validateInputs(username, password)) {
+                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    intent.putExtra("USERNAME", username);
+                    intent.putExtra("PASSWORD", password);
+                    startActivity(intent);
+                }
             }
         });
 
@@ -53,5 +55,17 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(intent);  // go to SignupActivity
             }
         });
+    }
+
+    private boolean validateInputs(String username, String password) {
+        if (username.isEmpty() || password.isEmpty()) {
+            Toast.makeText(getApplicationContext(), "Fields cannot be empty", Toast.LENGTH_LONG).show();
+            return false;
+        }
+        if (password.length() < 6) {
+            Toast.makeText(getApplicationContext(), "Password must be at least 6 characters", Toast.LENGTH_LONG).show();
+            return false;
+        }
+        return true;
     }
 }
