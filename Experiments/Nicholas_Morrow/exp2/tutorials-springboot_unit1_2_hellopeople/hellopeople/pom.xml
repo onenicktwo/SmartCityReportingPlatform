@@ -5,7 +5,7 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>coms309</groupId>
-  <artifactId>hellopeople</artifactId>
+  <artifactId>smart-city-reporting</artifactId>
   <version>1.0.0</version>
 
   <!-- To make it a spring boot project -->
@@ -15,28 +15,36 @@
     <version>3.1.4</version>
   </parent>
 
-  <name>hellopeople</name>
+  <name>smart-city-reporting</name>
+  <description>Smart City Reporting Platform</description>
 
   <properties>
-
-    <!-- Generic properties -->
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
+    <java.version>17</java.version>
+    <spring-boot.version>3.1.4</spring-boot.version>
+    <junit.jupiter.version>5.9.3</junit.jupiter.version>
   </properties>
 
   <dependencies>
-
-    <!-- Spring Boot Web dependencies -->
+    <!-- Spring Boot Starter dependencies -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
 
+    <!-- Spring Boot Test dependencies -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.junit.vintage</groupId>
+          <artifactId>junit-vintage-engine</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
   </dependencies>
 
-
-  <!-- Add The SpringBoot plugin to make it work with maven -->
   <build>
     <plugins>
       <plugin>
