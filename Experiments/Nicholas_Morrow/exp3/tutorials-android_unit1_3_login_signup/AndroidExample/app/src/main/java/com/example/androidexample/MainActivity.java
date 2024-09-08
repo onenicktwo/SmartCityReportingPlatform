@@ -3,6 +3,7 @@ package com.example.androidexample;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -16,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView usernameText;  // define username textview variable
     private Button loginButton;     // define login button variable
     private Button signupButton;    // define signup button variable
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,18 +29,17 @@ public class MainActivity extends AppCompatActivity {
         usernameText = findViewById(R.id.main_username_txt);// link to username textview in the Main activity XML
         loginButton = findViewById(R.id.main_login_btn);    // link to login button in the Main activity XML
         signupButton = findViewById(R.id.main_signup_btn);  // link to signup button in the Main activity XML
+        sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
 
-        /* extract data passed into this activity from another activity */
-        Bundle extras = getIntent().getExtras();
-        if(extras == null) {
-            messageText.setText("Home Page");
-            usernameText.setVisibility(View.INVISIBLE);             // set username text invisible initially
-        } else {
+        if (sharedPreferences.getBoolean("isLoggedIn", false)) {
             messageText.setText("Welcome");
-            usernameText.setText(extras.getString("USERNAME")); // this will come from LoginActivity
+            usernameText.setText(sharedPreferences.getString("username", ""));
             usernameText.setVisibility(View.VISIBLE);
-            loginButton.setVisibility(View.INVISIBLE);              // set login button invisible
-            signupButton.setVisibility(View.INVISIBLE);             // set signup button invisible
+            loginButton.setVisibility(View.INVISIBLE);
+            signupButton.setVisibility(View.INVISIBLE);
+        } else {
+            messageText.setText("Home Page");
+            usernameText.setVisibility(View.INVISIBLE);
         }
 
         /* click listener on login button pressed */
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
                 /* when login button is pressed, use intent to switch to Login Activity */
                 Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                 startActivity(intent);
+                finish();
             }
         });
 
@@ -60,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
                 /* when signup button is pressed, use intent to switch to Signup Activity */
                 Intent intent = new Intent(MainActivity.this, SignupActivity.class);
                 startActivity(intent);
+                finish();
             }
         });
     }

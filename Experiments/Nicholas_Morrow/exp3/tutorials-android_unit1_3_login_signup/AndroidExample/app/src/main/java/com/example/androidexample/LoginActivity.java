@@ -3,6 +3,7 @@ package com.example.androidexample;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -15,6 +16,7 @@ public class LoginActivity extends AppCompatActivity {
     private EditText passwordEditText;  // define password edittext variable
     private Button loginButton;         // define login button variable
     private Button signupButton;        // define signup button variable
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +28,7 @@ public class LoginActivity extends AppCompatActivity {
         passwordEditText = findViewById(R.id.login_password_edt);
         loginButton = findViewById(R.id.login_login_btn);    // link to login button in the Login activity XML
         signupButton = findViewById(R.id.login_signup_btn);  // link to signup button in the Login activity XML
+        sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
 
         /* click listener on login button pressed */
         loginButton.setOnClickListener(new View.OnClickListener() {
@@ -35,12 +38,22 @@ public class LoginActivity extends AppCompatActivity {
                 /* grab strings from user inputs */
                 String username = usernameEditText.getText().toString();
                 String password = passwordEditText.getText().toString();
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean("isLoggedIn", false);
 
                 if (validateInputs(username, password)) {
+                    // Save login session
+                    editor.putBoolean("isLoggedIn", true); // Set isLoggedIn to true
+                    editor.putString("username", username); // Store username (optional)
+                    editor.apply();
+
+                    // Go to MainActivity
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                    intent.putExtra("USERNAME", username);
-                    intent.putExtra("PASSWORD", password);
                     startActivity(intent);
+                    finish(); // Finish LoginActivity to prevent going back
+                } else {
+                    // Authentication failed
+                    Toast.makeText(getApplicationContext(), "Invalid credentials", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -66,6 +79,15 @@ public class LoginActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Password must be at least 6 characters", Toast.LENGTH_LONG).show();
             return false;
         }
-        return true;
+
+        String storedUsername = sharedPreferences.getString("username", username);
+        String storedPassword = sharedPreferences.getString("password", password);
+
+        if (username.equals(storedUsername) && password.equals(storedPassword)) {
+            return true;
+        } else {
+            Toast.makeText(getApplicationContext(), "Invalid credentials", Toast.LENGTH_SHORT).show();
+            return false;
+        }
     }
 }

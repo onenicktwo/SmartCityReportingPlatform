@@ -52,6 +52,8 @@ public class SignupActivity extends AppCompatActivity {
 
                 if (validateInputs(username, password, confirm)) {
                     Toast.makeText(getApplicationContext(), "Signing up", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(SignupActivity.this, LoginActivity.class);
+                    startActivity(intent);
                 }
             }
         });
