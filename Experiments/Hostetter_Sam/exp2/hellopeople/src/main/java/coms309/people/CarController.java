@@ -19,11 +19,11 @@ import java.util.HashMap;
  */
 
 @RestController
-public class PeopleController {
+public class CarController {
 
     // Note that there is only ONE instance of PeopleController in 
-    // Springboot system.
-    HashMap<String, Person> peopleList = new  HashMap<>();
+    // Springboot system.`
+    HashMap<String, Car> carList = new  HashMap<>();
 
     //CRUDL (create/read/update/delete/list)
     // use POST, GET, PUT, DELETE, GET methods for CRUDL
@@ -34,9 +34,9 @@ public class PeopleController {
     // Springboot automatically converts the list to JSON format 
     // in this case because of @ResponseBody
     // Note: To LIST, we use the GET method
-    @GetMapping("/people")
-    public  HashMap<String,Person> getAllPersons() {
-        return peopleList;
+    @GetMapping("/car")
+    public  HashMap<String,Car> getAllCars() {
+        return carList;
     }
 
     // THIS IS THE CREATE OPERATION
@@ -45,11 +45,11 @@ public class PeopleController {
     // It returns a string message in THIS example.
     // in this case because of @ResponseBody
     // Note: To CREATE we use POST method
-    @PostMapping("/people")
-    public  String createPerson(@RequestBody Person person) {
-        System.out.println(person);
-        peopleList.put(person.getFirstName(), person);
-        return "New person "+ person.getFirstName() + " Saved";
+    @PostMapping("/car")
+    public  String createCar(@RequestBody Car car) {
+        System.out.println(car);
+        carList.put(car.getMakeAndModel(),car);
+        return "New car "+ car.getMakeAndModel()+ " Saved";
     }
 
     // THIS IS THE READ OPERATION
@@ -58,10 +58,10 @@ public class PeopleController {
     // springboot automatically converts Person to JSON format when we return it
     // in this case because of @ResponseBody
     // Note: To READ we use GET method
-    @GetMapping("/people/{firstName}")
-    public Person getPerson(@PathVariable String firstName) {
-        Person p = peopleList.get(firstName);
-        return p;
+    @GetMapping("/car/{model}")
+    public Car getCar(@PathVariable String firstName) {
+        Car c = carList.get(firstName);
+        return c;
     }
 
     // THIS IS THE UPDATE OPERATION
@@ -71,11 +71,12 @@ public class PeopleController {
     // Here we are returning what we sent to the method
     // in this case because of @ResponseBody
     // Note: To UPDATE we use PUT method
-    @PutMapping("/people/{firstName}")
-    public Person updatePerson(@PathVariable String firstName, @RequestBody Person p) {
-        peopleList.replace(firstName, p);
-        return peopleList.get(firstName);
+    @PutMapping("/car/{model}")
+    public Car updateCar(@PathVariable String model, @RequestBody Car c) {
+        carList.replace(model, c);
+        return carList.get(model);
     }
+
 
     // THIS IS THE DELETE OPERATION
     // Springboot gets the PATHVARIABLE from the URL
@@ -83,10 +84,10 @@ public class PeopleController {
     // in this case because of @ResponseBody
     // Note: To DELETE we use delete method
     
-    @DeleteMapping("/people/{firstName}")
-    public HashMap<String, Person> deletePerson(@PathVariable String firstName) {
-        peopleList.remove(firstName);
-        return peopleList;
+    @DeleteMapping("/cars/{modelAndMake}")
+    public HashMap<String, Car> deleteCar(@PathVariable String modelAndMake) {
+        carList.remove(modelAndMake);
+        return carList;
     }
 }
 
