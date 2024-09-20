@@ -92,3 +92,24 @@ public class CarController {
     }
 }
 
+/*
+Copy paste for putting in JSON data
+{
+  "model": "Honda",
+  "make": "Pilot",
+  "year": 2011,
+  "color": "Red",
+  "modelAndMake" :"Honda-Pilot"
+}
+
+{
+    "Toyota-Camery": {
+        "model": "Toyota",
+        "make": "Camery",
+        "year": 2015,
+        "color": "Red",
+        "makeAndModel": "Toyota-Camery"
+    }
+}
+ */
+
