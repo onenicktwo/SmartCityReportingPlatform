@@ -1,6 +1,10 @@
 package org.citywatcher.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -21,6 +25,14 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role;
+
+    @JsonManagedReference(value = "issue-reporter")
+    @OneToMany(mappedBy = "reporter")
+    private List<Issue> reportedIssues = new ArrayList<>();
+
+    @JsonManagedReference(value = "issue-assignedOfficial")
+    @OneToMany(mappedBy = "assignedOfficial")
+    private List<Issue> assignedIssues = new ArrayList<>();
 
     public User() {
         this.id = null;

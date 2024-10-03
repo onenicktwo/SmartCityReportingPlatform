@@ -1,5 +1,8 @@
 package org.citywatcher.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,10 +16,12 @@ public class Issue {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonBackReference(value = "issue-reporter")
     @ManyToOne
     @JoinColumn(name = "reporter_id", nullable = false)
     private User reporter;
 
+    @JsonBackReference(value = "issue-assignedOfficial")
     @ManyToOne
     @JoinColumn(name = "assigned_official_id")
     private User assignedOfficial;
@@ -51,6 +56,7 @@ public class Issue {
     @Column(name = "image_path")
     private String imagePath;
 
+    @JsonManagedReference(value = "issue-comments")
     @OneToMany(mappedBy = "issue", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
