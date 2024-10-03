@@ -24,8 +24,9 @@ public class Issue {
     @Column(nullable = false)
     private String category;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private IssueStatus status;
 
     @Column(nullable = false)
     private String title;
@@ -85,11 +86,11 @@ public class Issue {
         this.category = category;
     }
 
-    public String getStatus() {
+    public IssueStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(IssueStatus status) {
         this.status = status;
     }
 
