@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/citywatcher/issues/comments")
+@RequestMapping("/citywatcher/users/{userId}/issues/{issueId}/comments")
 public class CommentController {
 
     private final CommentsService commentService;
@@ -21,19 +21,25 @@ public class CommentController {
     }
 
     @PostMapping
-    public ResponseEntity<Comment> createComment(@RequestBody Comment comment) {
+    public ResponseEntity<Comment> createComment(
+            @PathVariable Long userId,
+            @PathVariable Long issueId,
+            @RequestBody Comment comment) {
         try {
-            Comment createdComment = commentService.createComment(comment);
+            Comment createdComment = commentService.createComment(userId, issueId, comment);
             return new ResponseEntity<>(createdComment, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Comment> getCommentById(@PathVariable Long id) {
-        Comment comment = commentService.getCommentById(id);
-        if (comment != null) {
+    @GetMapping("/{commentId}")
+    public ResponseEntity<Comment> getCommentById(
+            @PathVariable Long userId,
+            @PathVariable Long issueId,
+            @PathVariable Long commentId) {
+        Comment comment = commentService.getCommentById(commentId);
+        if (comment != null && comment.getUser().getId().equals(userId) && comment.getIssue().getId().equals(issueId)) {
             return new ResponseEntity<>(comment, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -41,15 +47,21 @@ public class CommentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Comment>> getAllComments() {
-        List<Comment> comments = commentService.getAllComments();
+    public ResponseEntity<List<Comment>> getCommentsByIssue(
+            @PathVariable Long userId,
+            @PathVariable Long issueId) {
+        List<Comment> comments = commentService.getCommentsByIssue(issueId);
         return new ResponseEntity<>(comments, HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Comment> updateComment(@PathVariable Long id, @RequestBody Comment comment) {
+    @PutMapping("/{commentId}")
+    public ResponseEntity<Comment> updateComment(
+            @PathVariable Long userId,
+            @PathVariable Long issueId,
+            @PathVariable Long commentId,
+            @RequestBody Comment comment) {
         try {
-            Comment updatedComment = commentService.updateComment(id, comment);
+            Comment updatedComment = commentService.updateComment(commentId, userId, issueId, comment);
             if (updatedComment != null) {
                 return new ResponseEntity<>(updatedComment, HttpStatus.OK);
             } else {
@@ -60,9 +72,12 @@ public class CommentController {
         }
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteComment(@PathVariable Long id) {
-        boolean deleted = commentService.deleteComment(id);
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<Void> deleteComment(
+            @PathVariable Long userId,
+            @PathVariable Long issueId,
+            @PathVariable Long commentId) {
+        boolean deleted = commentService.deleteComment(commentId, userId, issueId);
         if (deleted) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
