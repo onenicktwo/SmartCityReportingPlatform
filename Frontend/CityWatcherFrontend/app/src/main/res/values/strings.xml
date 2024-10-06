@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">CityWatcherFrontend</string>
+    <string name="title_activity_issue_views">IssueViewsActivity</string>
+</resources>
