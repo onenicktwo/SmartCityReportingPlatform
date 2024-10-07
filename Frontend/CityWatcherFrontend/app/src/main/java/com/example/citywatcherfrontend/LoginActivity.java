@@ -1,4 +1,4 @@
-package com.example.androidexample;
+package com.example.citywatcherfrontend;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -7,6 +7,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+/*
+Author @Sam Hostetter
+ */
 
 public class LoginActivity extends AppCompatActivity {
 

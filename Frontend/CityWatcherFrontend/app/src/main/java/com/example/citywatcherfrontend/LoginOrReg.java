@@ -1,5 +1,8 @@
-package com.example.androidexample;
+package com.example.citywatcherfrontend;
 
+/*
+Author @Sam Hostetter
+ */
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
