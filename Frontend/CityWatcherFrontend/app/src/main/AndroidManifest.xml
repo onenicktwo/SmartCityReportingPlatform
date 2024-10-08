@@ -11,6 +11,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.CityWatcherFrontend"
+        android:usesCleartextTraffic="true"
+
         tools:targetApi="31">
         <activity
             android:name=".LoginOrReg"
@@ -52,5 +54,6 @@
             android:value="YOUR_API_KEY" />
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
+
 
 </manifest>

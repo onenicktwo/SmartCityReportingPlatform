@@ -22,11 +22,18 @@ import java.util.HashMap;
 import java.util.Map;
 import com.android.volley.RequestQueue;
 import android.content.Intent;
+import android.widget.TextView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 public class RegisterActivity extends AppCompatActivity {
     private EditText etUsername, etEmail, etPassword;
     private Button btnRegister;
+    private TextView textView2;
+    private JSONObject jsonTest;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,17 +44,22 @@ public class RegisterActivity extends AppCompatActivity {
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         btnRegister = findViewById(R.id.btnRegister);
+        textView2 = findViewById(R.id.textView2);
 
 
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                registerUser();
+                try {
+                    registerUser();
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
     }
 
-            private void registerUser() {
+            private void registerUser() throws JSONException {
                 String username = etUsername.getText().toString();
                 String email = etEmail.getText().toString();
                 String password = etPassword.getText().toString();
@@ -60,6 +72,8 @@ public class RegisterActivity extends AppCompatActivity {
                     Toast.makeText(RegisterActivity.this, "Password must be at least 8 characters long", Toast.LENGTH_SHORT).show();
                     return;
                 }
+
+
                 String url = "https://e19bc4b7-d061-4be9-9307-ebe48071998e.mock.pstmn.io/register";
 
                 StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
@@ -69,12 +83,15 @@ public class RegisterActivity extends AppCompatActivity {
                                 Toast.makeText(RegisterActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
                                 Intent loginIntent = new Intent(RegisterActivity.this, LoginActivity.class);
                                 startActivity(loginIntent);
+                                textView2.setText(response.toString());
+
                             }
                         },
                         new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
                                 Toast.makeText(RegisterActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                                textView2.setText(error.getMessage());
                             }
                         }){
                     @Override
