@@ -16,6 +16,9 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 import com.android.volley.RequestQueue;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 /*
@@ -36,8 +39,6 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin = findViewById(R.id.btnLogin);
 
 
-
-
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -47,8 +48,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (username.isEmpty() || password.isEmpty()) {
                     Toast.makeText(LoginActivity.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
                     return;
-                }
-                else {
+                } else {
                     loginUser(username, password);
                 }
 
@@ -57,23 +57,49 @@ public class LoginActivity extends AppCompatActivity {
         });
 
     }
-    private void loginUser(String username, String password) {
-        String url = "https://e19bc4b7-d061-4be9-9307-ebe48071998e.mock.pstmn.io/login?username=" + username + "&password=" + password;
 
+    private void loginUser(String username, String password) {
+
+        String url = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/";
+
+        // Fetch all users or a specific user (based on your API)
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Toast.makeText(LoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
-                        Intent homeIntent = new Intent(LoginActivity.this, MainActivity.class);
-                        startActivity(homeIntent);
+                        try {
+                            // Assuming the response is an array of users
+                            JSONArray usersArray = new JSONArray(response);
+                            boolean loginSuccessful = false;
+
+                            // Loop through users and check if the username and password match
+                            for (int i = 0; i < usersArray.length(); i++) {
+                                JSONObject user = usersArray.getJSONObject(i);
+                                if (user.getString("username").equals(username) && user.getString("password").equals(password)) {
+                                    loginSuccessful = true;
+                                    break;
+                                }
+
+                            }
+
+                            if (loginSuccessful) {
+                                Toast.makeText(LoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
+                                Intent homeIntent = new Intent(LoginActivity.this, MainActivity.class);
+                                startActivity(homeIntent);
+                            } else {
+                                Toast.makeText(LoginActivity.this, "Invalid credentials", Toast.LENGTH_SHORT).show();
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Toast.makeText(LoginActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        }
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        String errorMessage = "Error: " + error.getMessage();
-                        Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                        Toast.makeText(LoginActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
         );
@@ -82,6 +108,7 @@ public class LoginActivity extends AppCompatActivity {
         requestQueue.add(stringRequest);
     }
 }
+
 
 
 
