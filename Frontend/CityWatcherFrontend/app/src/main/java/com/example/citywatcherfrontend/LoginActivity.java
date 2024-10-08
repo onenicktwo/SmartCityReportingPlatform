@@ -62,13 +62,12 @@ public class LoginActivity extends AppCompatActivity {
 
         String url = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/";
 
-        // Fetch all users or a specific user (based on your API)
+
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         try {
-                            // Assuming the response is an array of users
                             JSONArray usersArray = new JSONArray(response);
                             boolean loginSuccessful = false;
 
