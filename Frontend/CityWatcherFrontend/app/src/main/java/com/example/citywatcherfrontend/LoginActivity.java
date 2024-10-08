@@ -14,8 +14,6 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.VolleyError;
-import java.util.HashMap;
-import java.util.Map;
 import com.android.volley.toolbox.Volley;
 import com.android.volley.RequestQueue;
 
@@ -60,43 +58,25 @@ public class LoginActivity extends AppCompatActivity {
 
     }
     private void loginUser(String username, String password) {
-        String url = "https://e19bc4b7-d061-4be9-9307-ebe48071998e.mock.pstmn.io/login";
+        String url = "https://e19bc4b7-d061-4be9-9307-ebe48071998e.mock.pstmn.io/login?username=" + username + "&password=" + password;
 
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-
                         Toast.makeText(LoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
-
-
                         Intent homeIntent = new Intent(LoginActivity.this, MainActivity.class);
                         startActivity(homeIntent);
-
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        // Handle error response
-                        String errorMessage;
-                        if (error.networkResponse != null && error.networkResponse.data != null) {
-                            errorMessage = new String(error.networkResponse.data);
-                        } else {
-                            errorMessage = error.getMessage();
-                        }
-                        Toast.makeText(LoginActivity.this, "Error: " + errorMessage, Toast.LENGTH_LONG).show();
+                        String errorMessage = "Error: " + error.getMessage();
+                        Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_LONG).show();
                     }
-                }) {
-            @Override
-            protected Map<String, String> getParams() {
-                // Send parameters to the backend
-                Map<String, String> params = new HashMap<>();
-                params.put("username", username);
-                params.put("password", password);
-                return params;
-            }
-        };
+                }
+        );
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
         requestQueue.add(stringRequest);

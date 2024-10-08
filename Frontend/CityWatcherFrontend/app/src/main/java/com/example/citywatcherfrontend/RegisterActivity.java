@@ -14,7 +14,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
@@ -59,59 +59,54 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
-            private void registerUser() throws JSONException {
-                String username = etUsername.getText().toString();
-                String email = etEmail.getText().toString();
-                String password = etPassword.getText().toString();
+    private void registerUser() throws JSONException {
+        String username = etUsername.getText().toString();
+        String email = etEmail.getText().toString();
+        String password = etPassword.getText().toString();
 
-                if (username.isEmpty() || email.isEmpty() || password.isEmpty()) {
-                    Toast.makeText(RegisterActivity.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
-                    return;
+        if (username.isEmpty() || email.isEmpty() || password.isEmpty()) {
+            Toast.makeText(RegisterActivity.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            return;
+        } else if (password.length() < 8) {
+            Toast.makeText(RegisterActivity.this, "Password must be at least 8 characters long", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-                } else if (password.length() < 8) {
-                    Toast.makeText(RegisterActivity.this, "Password must be at least 8 characters long", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+        // Create a JSON object with the input data
+        JSONObject jsonBody = new JSONObject();
+        jsonBody.put("username", username);
+        jsonBody.put("email", email);
+        jsonBody.put("password", password);
 
+        String url = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/register";
 
-                String url = "https://e19bc4b7-d061-4be9-9307-ebe48071998e.mock.pstmn.io/register";
-
-                StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
-                        new Response.Listener<String>() {
-                            @Override
-                            public void onResponse(String response) {
-                                Toast.makeText(RegisterActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
-                                Intent loginIntent = new Intent(RegisterActivity.this, LoginActivity.class);
-                                startActivity(loginIntent);
-                                textView2.setText(response.toString());
-
-                            }
-                        },
-                        new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                Toast.makeText(RegisterActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                                textView2.setText(error.getMessage());
-                            }
-                        }){
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, jsonBody,
+                new Response.Listener<JSONObject>() {
                     @Override
-                    protected Map<String, String> getParams(){
-                        Map<String, String> params = new HashMap<>();
-                        params.put("username", username);
-                        params.put("email", email);
-                        params.put("password", password);
-                        return params;
+                    public void onResponse(JSONObject response) {
+                        Toast.makeText(RegisterActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
+                        Intent loginIntent = new Intent(RegisterActivity.this, LoginActivity.class);
+                        startActivity(loginIntent);
+                        textView2.setText(response.toString());
                     }
-                };
-
-                RequestQueue requestQueue = Volley.newRequestQueue(this);
-                requestQueue.add(stringRequest);
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(RegisterActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                        textView2.setText(error.getMessage());
+                    }
+                }) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type", "application/json"); // Set the content type
+                return headers;
             }
+        };
 
-
+        // Add the request to the RequestQueue
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        requestQueue.add(jsonObjectRequest);
     }
-
-
-
-
-
+}
