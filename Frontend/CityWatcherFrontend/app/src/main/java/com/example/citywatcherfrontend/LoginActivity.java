@@ -62,7 +62,7 @@ public class LoginActivity extends AppCompatActivity {
     private void loginUser(String username, String password) {
         String url = "https://e19bc4b7-d061-4be9-9307-ebe48071998e.mock.pstmn.io/login";
 
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
