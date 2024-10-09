@@ -48,7 +48,8 @@ public class NavbarActivity extends AppCompatActivity {
             startActivity(intent);
 
         } else if (itemId == R.id.navbar_menu_viewIssues) {
-            Toast.makeText(this, "Viewing Issues", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, ViewIssuesActivity.class);
+            startActivity(intent);
         } else if (itemId == R.id.navbar_profile_login) {
             Toast.makeText(this, "Logging In", Toast.LENGTH_SHORT).show();
             // Intent intent = new Intent(this, LoginActivity.class);

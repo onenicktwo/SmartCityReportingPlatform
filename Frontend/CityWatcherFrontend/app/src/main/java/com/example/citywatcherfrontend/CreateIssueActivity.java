@@ -27,7 +27,8 @@ import java.util.Map;
 
 public class CreateIssueActivity extends NavbarActivity {
 
-    private static final String URL = "https://9e46c104-36a4-402d-8e2a-545063f0e49c.mock.pstmn.io/issue/create";
+    private User user = new User();
+    private String URL;
 
     // Initialize activity variables
     // TODO Allow options for users to upload an image and select a location
@@ -41,6 +42,8 @@ public class CreateIssueActivity extends NavbarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        URL = "https://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/3/issues";
+
         setContentView(R.layout.activity_create_issue);
         toolbar.setSubtitle("Create Issue");
 
@@ -58,11 +61,10 @@ public class CreateIssueActivity extends NavbarActivity {
                         requestParams.put("title", editIssueName.getText().toString());
                         requestParams.put("category", editIssueType.getText().toString());
                         requestParams.put("status", 0);
-                        requestParams.put("imagePath", null);
+                        // requestParams.put("imagePath", null);
                         requestParams.put("description", editIssueDescription.getText().toString());
-                        requestParams.put("latitude", null);
-                        requestParams.put("longitude", null);
-                        requestParams.put("assignedOfficial", null);
+                        // requestParams.put("latitude", null);
+                        // requestParams.put("longitude", null);
                         makeCreateIssueReq();
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
@@ -93,8 +95,7 @@ public class CreateIssueActivity extends NavbarActivity {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 HashMap<String, String> headers = new HashMap<String, String>();
-//                headers.put("Authorization", "Bearer YOUR_ACCESS_TOKEN");
-//                headers.put("Content-Type", "application/json");
+                headers.put("Content-Type", "application/json");
                 return headers;
             }
 
@@ -102,7 +103,6 @@ public class CreateIssueActivity extends NavbarActivity {
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<String, String>();
 //                params.put("param1", "value1");
-//                params.put("param2", "value2");
                 return params;
             }
         };
