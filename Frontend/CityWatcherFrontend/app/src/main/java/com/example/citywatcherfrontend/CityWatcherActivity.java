@@ -6,16 +6,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
-public class NavbarActivity extends AppCompatActivity {
+
+
+public class CityWatcherActivity extends AppCompatActivity {
+
+    protected int userId = 3;
 
     // Initialize activity variables
     protected ActionBar toolbar;
@@ -43,20 +42,24 @@ public class NavbarActivity extends AppCompatActivity {
         // TODO Uncomment Intents and remove Toast calls after activities have been made
         int itemId = item.getItemId();
         if (itemId == R.id.navbar_menu_createIssue) {
-            Toast.makeText(this, "Creating Issue", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(this, CreateIssueActivity.class);
             startActivity(intent);
 
         } else if (itemId == R.id.navbar_menu_viewIssues) {
-            Toast.makeText(this, "Viewing Issues", Toast.LENGTH_SHORT).show();
+            Intent intent;
+            // TODO Check if the user is logged in
+            if (true) {
+                 intent = new Intent(this, ViewIssuesActivity.class);
+            } else {
+                 intent = new Intent(this, LoginActivity.class);
+            }
+            startActivity(intent);
         } else if (itemId == R.id.navbar_profile_login) {
-            Toast.makeText(this, "Logging In", Toast.LENGTH_SHORT).show();
-            // Intent intent = new Intent(this, LoginActivity.class);
-            // startActivity(intent);
+             Intent intent = new Intent(this, LoginActivity.class);
+             startActivity(intent);
         } else if (itemId == R.id.navbar_profile_signUp) {
-            Toast.makeText(this, "Signing Up", Toast.LENGTH_SHORT).show();
-            //Intent intent = new Intent(this, SignupActivity.class);
-            //startActivity(intent);
+            Intent intent = new Intent(this, RegisterActivity.class);
+            startActivity(intent);
         } else if (itemId == R.id.navbar_profile_viewProfile) {
             Toast.makeText(this, "Viewing Profile", Toast.LENGTH_SHORT).show();
             //Intent intent = new Intent(this, ViewProfileActivity.class);

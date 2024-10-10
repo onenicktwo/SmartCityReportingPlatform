@@ -25,7 +25,7 @@ import org.json.JSONObject;
 Author @Sam Hostetter
  */
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends CityWatcherActivity {
     private EditText etUsername, etPassword;
     private Button btnLogin;
 

@@ -8,7 +8,7 @@ import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-public class MainActivity extends NavbarActivity implements View.OnClickListener {
+public class MainActivity extends CityWatcherActivity implements View.OnClickListener {
 
     private Button btnAdminView;
 

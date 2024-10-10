@@ -19,9 +19,10 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CreateIssueActivity extends CityWatcherActivity {
+public class UpdateIssueActivity extends CityWatcherActivity {
 
 
+    private int issueId;
     private String URL;
 
     // Initialize activity variables
@@ -36,9 +37,11 @@ public class CreateIssueActivity extends CityWatcherActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        URL = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/" + userId + "/issues";
+        Bundle bundle = new Bundle(getIntent().getExtras());
 
-        setContentView(R.layout.activity_create_issue);
+        setContentView(R.layout.activity_update_issue);
+        issueId = bundle.getInt("id");
+        URL = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/" + userId + "/issues/" + issueId;
 
         editIssueName = findViewById(R.id.editIssueName);
         editIssueType = findViewById(R.id.editIssueType);
@@ -70,7 +73,7 @@ public class CreateIssueActivity extends CityWatcherActivity {
     // POST Request to create an issue
     private void makeCreateIssueReq() {
         JsonObjectRequest jsonObjReq = new JsonObjectRequest(
-                Request.Method.POST,
+                Request.Method.PUT,
                 URL,
                 requestParams,
                 new Response.Listener<JSONObject>() {
@@ -103,7 +106,7 @@ public class CreateIssueActivity extends CityWatcherActivity {
 
         // Adding request to request queue
         VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonObjReq);
-        Intent intent = new Intent(CreateIssueActivity.this, ViewIssuesActivity.class);
+        Intent intent = new Intent(UpdateIssueActivity.this, ViewIssuesActivity.class);
         startActivity(intent);
     }
 }

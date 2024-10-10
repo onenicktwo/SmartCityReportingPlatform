@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/issueDetailsImage"
+        android:layout_width="131dp"
+        android:layout_height="127dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:icon="@drawable/baseline_warning_24"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/issueDetailsTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:text="Title"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@+id/issueDetailsImage"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/issueDetailsDescriptionLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:text="Description"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/issueDetailsImage" />
+
+    <TextView
+        android:id="@+id/issueDetailsCommentsLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:text="Comments"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonEditIssue" />
+
+    <TextView
+        android:id="@+id/issueDetailsDescription"
+        android:layout_width="359dp"
+        android:layout_height="211dp"
+        android:layout_marginTop="10dp"
+        android:text="Description Body"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/issueDetailsDescriptionLabel" />
+
+    <TextView
+        android:id="@+id/issueDetailsReporter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="1dp"
+        android:text="Reporter"
+        app:layout_constraintStart_toEndOf="@+id/issueDetailsImage"
+        app:layout_constraintTop_toBottomOf="@+id/issueDetailsCategory" />
+
+    <TextView
+        android:id="@+id/issueDetailsLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="5dp"
+        android:text="Location"
+        app:layout_constraintStart_toEndOf="@+id/issueDetailsImage"
+        app:layout_constraintTop_toBottomOf="@+id/issueDetailsReporter" />
+
+    <TextView
+        android:id="@+id/issueDetailsStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="4dp"
+        android:text="Status"
+        app:layout_constraintStart_toEndOf="@+id/issueDetailsImage"
+        app:layout_constraintTop_toBottomOf="@+id/issueDetailsLocation" />
+
+    <TextView
+        android:id="@+id/issueDetailsCategory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="4dp"
+        android:text="Category"
+        app:layout_constraintStart_toEndOf="@+id/issueDetailsImage"
+        app:layout_constraintTop_toBottomOf="@+id/issueDetailsTitle" />
+
+    <Button
+        android:id="@+id/buttonEditIssue"
+        android:layout_width="111dp"
+        android:layout_height="41dp"
+        android:layout_marginStart="72dp"
+        android:layout_marginTop="10dp"
+        android:text="EDIT"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/issueDetailsDescription" />
+
+    <Button
+        android:id="@+id/buttonDeleteIssue"
+        android:layout_width="111dp"
+        android:layout_height="41dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="72dp"
+        android:text="DELETE"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/issueDetailsDescription" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
