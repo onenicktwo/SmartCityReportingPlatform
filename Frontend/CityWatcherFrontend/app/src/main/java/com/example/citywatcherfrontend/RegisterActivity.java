@@ -78,7 +78,7 @@ public class RegisterActivity extends CityWatcherActivity {
         jsonBody.put("email", email);
         jsonBody.put("password", password);
 
-        String url = "https://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/register";
+        String url = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/register";
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, jsonBody,
                 new Response.Listener<JSONObject>() {
