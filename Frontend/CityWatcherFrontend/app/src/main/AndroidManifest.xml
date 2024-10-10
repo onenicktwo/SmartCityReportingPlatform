@@ -30,6 +30,10 @@
         <activity android:name=".LoginActivity">
         </activity>
         <activity android:name=".MainActivity"></activity>
+        <activity android:name=".AdminViewActivity"></activity>
+        <activity android:name=".EditUserActivity"></activity>
+        <activity android:name=".DeleteUserActivity"></activity>
+
 
 
 

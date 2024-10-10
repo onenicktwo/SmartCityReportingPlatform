@@ -17,18 +17,13 @@
     </TextView>
 
 
-    <Button android:id="@+id/btnJsonArrRequest"
+    <Button android:id="@+id/btnAdminView"
         android:layout_width="200dp"
         android:layout_height="80dp"
         android:layout_marginBottom="20dp"
         android:layout_gravity="center"
-        android:text="See Issue List" />
+        android:text="Go to Admin View" />
 
-    <Button android:id="@+id/btnImageRequest"
-        android:layout_width="200dp"
-        android:layout_height="80dp"
-        android:layout_marginBottom="20dp"
-        android:layout_gravity="center"
-        android:text="Create an Issue" />
+
 
 </androidx.appcompat.widget.LinearLayoutCompat>

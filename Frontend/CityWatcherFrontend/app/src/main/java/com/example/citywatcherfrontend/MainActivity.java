@@ -1,30 +1,39 @@
 package com.example.citywatcherfrontend;
 
-import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 public class MainActivity extends NavbarActivity implements View.OnClickListener {
 
-    private Button strBtn, jsonObjBtn, jsonArrBtn, imgBtn;
+    private Button btnAdminView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        btnAdminView = findViewById(R.id.btnAdminView);
+        btnAdminView.setOnClickListener(this);
 
+        btnAdminView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Navigate to AdminViewActivity
+                Intent mainIntent = new Intent(MainActivity.this, AdminViewActivity.class);
+                startActivity(mainIntent);
+            }
+        });
 
-        /* button click listeners */
 
     }
 
     @Override
-    public void onClick(View v) {
-        int id = v.getId();
+    public void onClick(View view) {
 
     }
 }

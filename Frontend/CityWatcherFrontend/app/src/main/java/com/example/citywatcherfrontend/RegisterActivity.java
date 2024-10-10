@@ -100,7 +100,7 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
-                headers.put("Content-Type", "application/json"); // Set the content type
+                headers.put("Content-Type", "application/json");
                 return headers;
             }
         };
