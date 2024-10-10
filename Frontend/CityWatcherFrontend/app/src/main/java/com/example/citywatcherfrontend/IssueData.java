@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class IssueData {
+     private int id;
      private String title;
      private String category;
      private String description;
@@ -91,5 +92,13 @@ public class IssueData {
 
     public void setReporter_id(int reporter_id) {
         this.reporter_id = reporter_id;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

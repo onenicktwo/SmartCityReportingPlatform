@@ -19,6 +19,9 @@
             android:name=".IssueDetailsActivity"
             android:exported="false" />
         <activity
+            android:name=".UpdateIssueActivity"
+            android:exported="false" />
+        <activity
             android:name=".ViewIssuesActivity"
             android:exported="false" />
         <activity

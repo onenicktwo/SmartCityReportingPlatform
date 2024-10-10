@@ -14,7 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class CityWatcherActivity extends AppCompatActivity {
 
-    protected int userId;
+    protected int userId = 3;
 
     // Initialize activity variables
     protected ActionBar toolbar;

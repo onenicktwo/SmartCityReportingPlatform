@@ -73,6 +73,7 @@ public class ViewIssuesActivity extends CityWatcherActivity {
                             @Override
                             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                                 Intent intent = new Intent(ViewIssuesActivity.this, IssueDetailsActivity.class);
+                                intent.putExtra("id", issueArrayList.get(i).getId());
                                 intent.putExtra("title", issueArrayList.get(i).getTitle());
                                 intent.putExtra("category", issueArrayList.get(i).getCategory());
                                 intent.putExtra("latitude", issueArrayList.get(i).getLatitude());

@@ -41,10 +41,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="10dp"
         android:text="Comments"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/issueDetailsDescription" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonEditIssue" />
 
     <TextView
         android:id="@+id/issueDetailsDescription"
@@ -95,4 +95,25 @@
         android:text="Category"
         app:layout_constraintStart_toEndOf="@+id/issueDetailsImage"
         app:layout_constraintTop_toBottomOf="@+id/issueDetailsTitle" />
+
+    <Button
+        android:id="@+id/buttonEditIssue"
+        android:layout_width="111dp"
+        android:layout_height="41dp"
+        android:layout_marginStart="72dp"
+        android:layout_marginTop="10dp"
+        android:text="EDIT"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/issueDetailsDescription" />
+
+    <Button
+        android:id="@+id/buttonDeleteIssue"
+        android:layout_width="111dp"
+        android:layout_height="41dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="72dp"
+        android:text="DELETE"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/issueDetailsDescription" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
