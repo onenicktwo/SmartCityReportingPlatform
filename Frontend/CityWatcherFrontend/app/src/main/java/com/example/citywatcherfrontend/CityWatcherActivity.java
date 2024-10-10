@@ -42,7 +42,6 @@ public class CityWatcherActivity extends AppCompatActivity {
         // TODO Uncomment Intents and remove Toast calls after activities have been made
         int itemId = item.getItemId();
         if (itemId == R.id.navbar_menu_createIssue) {
-            Toast.makeText(this, "Creating Issue", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(this, CreateIssueActivity.class);
             startActivity(intent);
 

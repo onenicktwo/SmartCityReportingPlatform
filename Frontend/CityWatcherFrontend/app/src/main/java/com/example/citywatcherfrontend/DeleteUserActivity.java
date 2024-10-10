@@ -10,7 +10,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 
-public class DeleteUserActivity extends NavbarActivity {
+public class DeleteUserActivity extends CityWatcherActivity {
 
     private EditText etUserId;
     private Button btnConfirmDelete;
