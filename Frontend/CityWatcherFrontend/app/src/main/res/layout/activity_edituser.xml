@@ -16,6 +16,12 @@
         android:padding="16dp" />
 
     <EditText
+    android:id="@+id/etUserId"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:hint="UserID to edit" />
+
+    <EditText
         android:id="@+id/etEditUsername"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -33,10 +39,23 @@
         android:layout_height="wrap_content"
         android:hint="Password" />
 
+    <EditText
+        android:id="@+id/etUserRole"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Role" />
+
     <Button
         android:id="@+id/btnSaveChanges"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Save Changes"
+        android:layout_marginTop="16dp" />
+
+    <Button
+        android:id="@+id/btnFetchUser"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Enter UserID to fetch"
         android:layout_marginTop="16dp" />
 </LinearLayout>
