@@ -1,8 +1,5 @@
 package com.example.citywatcherfrontend;
 
-import static com.example.citywatcherfrontend.IssueStatus.REPORTED;
-import static com.example.citywatcherfrontend.IssueStatus.UNDER_REVIEW;
-
 import android.content.Context;
 import android.graphics.Color;
 import android.view.LayoutInflater;
@@ -17,15 +14,15 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 
-public class IssueListAdapter extends ArrayAdapter<Issue> {
-    public IssueListAdapter(@NonNull Context context, ArrayList<Issue> issueArrayList) {
+public class IssueListAdapter extends ArrayAdapter<IssueData> {
+    public IssueListAdapter(@NonNull Context context, ArrayList<IssueData> issueArrayList) {
         super(context, R.layout.list_item_issue, issueArrayList);
     }
 
     @NonNull
     @Override
     public View getView(int position, @Nullable View view, @NonNull ViewGroup parent) {
-        Issue issue = getItem(position);
+        IssueData issue = getItem(position);
 
         if (view == null) {
             view = LayoutInflater.from(getContext()).inflate(R.layout.list_item_issue, parent, false);
@@ -41,11 +38,11 @@ public class IssueListAdapter extends ArrayAdapter<Issue> {
         issueTitle.setText(issue.getTitle());
         issueLocation.setText("Location");
 
-        IssueStatus status = issue.getStatus();
-        if (status == REPORTED) {
+        String status = issue.getStatus();
+        if (status.equals("REPORTED")) {
             issueStatus.setText("Reported");
             issueStatus.setTextColor(Color.RED);
-        } else if (status == UNDER_REVIEW) {
+        } else if (status.equals("UNDER_REVIEW")) {
             issueStatus.setText("Under Review");
             issueStatus.setTextColor(Color.YELLOW);
         } else {

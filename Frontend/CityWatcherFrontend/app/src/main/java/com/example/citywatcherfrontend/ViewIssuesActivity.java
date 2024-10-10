@@ -9,7 +9,7 @@ import android.widget.AdapterView;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.example.citywatcherfrontend.databinding.ActivityViewIssuesBinding;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,62 +22,67 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class ViewIssuesActivity extends NavbarActivity {
+public class ViewIssuesActivity extends CityWatcherActivity {
 
-    User user = new User();
+    private int userId = 3;
     private String URL;
 
 
-    ActivityViewIssuesBinding binding;
-    IssueListAdapter issueListAdapter;
-    JSONArray requestResponse;
-    ArrayList<Issue> issueArrayList = new ArrayList<>();
-    ObjectMapper mapper = new ObjectMapper();
+    private ActivityViewIssuesBinding binding;
+    private IssueListAdapter issueListAdapter;
+    public JSONArray requestResponse;
+    private ArrayList<IssueData> issueArrayList = new ArrayList<>();
+    private ObjectMapper mapper = new ObjectMapper();
 
-    Issue issue;
+    IssueData issue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        URL = "https://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/" + user.getId() + "/issues";
+        URL = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/" + userId + "/issues";
 
         binding = ActivityViewIssuesBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         makeGetIssuesReq();
-
-        for (int i = 0; i < requestResponse.length(); i++) {
-            try {
-                String jsonString = requestResponse.get(i).toString();
-                issueArrayList.add(mapper.readValue(jsonString, Issue.class));
-            } catch (JSONException | JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        issueListAdapter = new IssueListAdapter(ViewIssuesActivity.this, issueArrayList);
-        binding.listissues.setAdapter(issueListAdapter);
-        binding.listissues.setClickable(true);
-        binding.listissues.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Intent intent = new Intent(ViewIssuesActivity.this, IssueDetailsActivity.class);
-                startActivity(intent);
-            }
-        });
     }
 
     private void makeGetIssuesReq() {
-        StringRequest jsonStringReq = new StringRequest(
+        JsonArrayRequest jsonStringReq = new JsonArrayRequest(
                 URL + "/search",
-                new Response.Listener<String>() {
+                new Response.Listener<JSONArray>() {
+
                     @Override
-                    public void onResponse(String response){
-                        Log.d("Volley Response", response);
-                        try {
-                            requestResponse = new JSONArray(response);
-                        } catch (JSONException e) {
-                            throw new RuntimeException(e);
+                    public void onResponse(JSONArray response){
+                        Log.d("Volley Response", "Issues retrieved");
+
+                        for (int i = 0; i < response.length(); i++) {
+                            try {
+                                String jsonString = response.get(i).toString();
+                                Log.d("JSON", jsonString);
+                                issue = mapper.readValue(jsonString, IssueData.class);
+                                issueArrayList.add(issue);
+                            } catch (JSONException | JsonProcessingException e) {
+                                throw new RuntimeException(e);
+                            }
                         }
+
+                        issueListAdapter = new IssueListAdapter(ViewIssuesActivity.this, issueArrayList);
+                        binding.listissues.setAdapter(issueListAdapter);
+                        binding.listissues.setClickable(true);
+                        binding.listissues.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                                Intent intent = new Intent(ViewIssuesActivity.this, IssueDetailsActivity.class);
+                                intent.putExtra("title", issueArrayList.get(i).getTitle());
+                                intent.putExtra("category", issueArrayList.get(i).getCategory());
+                                intent.putExtra("latitude", issueArrayList.get(i).getLatitude());
+                                intent.putExtra("longitude", issueArrayList.get(i).getLongitude());
+                                intent.putExtra("status", issueArrayList.get(i).getStatus());
+                                intent.putExtra("description", issueArrayList.get(i).getDescription());
+
+                                startActivity(intent);
+                            }
+                        });
                     }
                 },
                 new Response.ErrorListener() {
@@ -91,7 +96,7 @@ public class ViewIssuesActivity extends NavbarActivity {
             public Map<String, String> getHeaders() throws AuthFailureError {
                 HashMap<String, String> headers = new HashMap<String, String>();
 //                headers.put("Authorization", "Bearer YOUR_ACCESS_TOKEN");
-//                headers.put("Content-Type", "application/json");
+                headers.put("Content-Type", "application/json");
                 return headers;
             }
 

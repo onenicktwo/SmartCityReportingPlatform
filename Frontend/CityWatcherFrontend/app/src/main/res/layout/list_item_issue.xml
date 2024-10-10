@@ -15,6 +15,7 @@
 
                 <ImageView
                     android:id="@+id/issueViewImage"
+                    android:icon="@drawable/baseline_warning_24"
                     android:layout_width="80dp"
                     android:layout_height="80dp"
                     android:layout_marginStart="20dp"
@@ -31,7 +32,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="@color/black"
-                        android:textSize="20sp"
+                        android:textSize="15sp"
                         android:textStyle="bold"/>
 
                     <TextView
@@ -49,7 +50,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/black"
-                android:textSize="16sp"
+                android:textSize="12sp"
+                android:shadowColor="#000000"
+                android:shadowDx="0.0"
+                android:shadowDy="0.0"
+                android:shadowRadius="5.0"
                 android:layout_alignParentEnd="true"/>
 
 

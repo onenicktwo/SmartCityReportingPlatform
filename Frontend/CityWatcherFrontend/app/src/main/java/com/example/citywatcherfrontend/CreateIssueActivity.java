@@ -6,17 +6,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONException;
@@ -25,9 +18,9 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CreateIssueActivity extends NavbarActivity {
+public class CreateIssueActivity extends CityWatcherActivity {
 
-    private User user = new User();
+
     private String URL;
 
     // Initialize activity variables
@@ -42,7 +35,7 @@ public class CreateIssueActivity extends NavbarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        URL = "https://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/3/issues";
+        URL = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/" + userId + "/issues";
 
         setContentView(R.layout.activity_create_issue);
         toolbar.setSubtitle("Create Issue");
@@ -52,28 +45,29 @@ public class CreateIssueActivity extends NavbarActivity {
         editIssueDescription = findViewById(R.id.editIssueDescription);
         buttonSubmitIssue = findViewById(R.id.buttonSubmitIssue);
 
+        // Submit listener
         buttonSubmitIssue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (!editIssueName.getText().toString().isEmpty() && !editIssueType.getText().toString().isEmpty() && !editIssueDescription.getText().toString().isEmpty()) {
                     try {
-                        // requestParams.put("reporter", null);
                         requestParams.put("title", editIssueName.getText().toString());
-                        requestParams.put("category", editIssueType.getText().toString());
-                        requestParams.put("status", 0);
-                        // requestParams.put("imagePath", null);
                         requestParams.put("description", editIssueDescription.getText().toString());
-                        // requestParams.put("latitude", null);
-                        // requestParams.put("longitude", null);
-                        makeCreateIssueReq();
+                        requestParams.put("category", editIssueType.getText().toString());
+                        requestParams.put("status", "REPORTED");
+                        requestParams.put("latitude", 0);
+                        requestParams.put("longitude", 0);
+                        requestParams.put("imagePath", "");
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
+                    makeCreateIssueReq();
                 }
             }
         });
     }
 
+    // POST Request to create an issue
     private void makeCreateIssueReq() {
         JsonObjectRequest jsonObjReq = new JsonObjectRequest(
                 Request.Method.POST,
@@ -95,7 +89,7 @@ public class CreateIssueActivity extends NavbarActivity {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 HashMap<String, String> headers = new HashMap<String, String>();
-                headers.put("Content-Type", "application/json");
+                // headers.put("Content-Type", "application/json");
                 return headers;
             }
 

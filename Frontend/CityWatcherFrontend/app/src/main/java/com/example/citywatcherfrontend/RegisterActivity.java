@@ -28,7 +28,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-public class RegisterActivity extends AppCompatActivity {
+public class RegisterActivity extends CityWatcherActivity {
     private EditText etUsername, etEmail, etPassword;
     private Button btnRegister;
     private TextView textView2;
@@ -78,7 +78,7 @@ public class RegisterActivity extends AppCompatActivity {
         jsonBody.put("email", email);
         jsonBody.put("password", password);
 
-        String url = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/register";
+        String url = "https://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/register";
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, jsonBody,
                 new Response.Listener<JSONObject>() {

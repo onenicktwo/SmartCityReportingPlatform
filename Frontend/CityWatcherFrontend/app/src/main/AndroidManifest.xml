@@ -41,7 +41,7 @@
 
 
         <activity
-            android:name=".NavbarActivity"
+            android:name=".CityWatcherActivity"
             android:exported="false" />
         <activity
             android:name=".CreateIssueActivity"
