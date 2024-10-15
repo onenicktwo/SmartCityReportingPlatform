@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 
 
-public class CityWatcherActivity extends AppCompatActivity {
+public abstract class CityWatcherActivity extends AppCompatActivity {
 
     protected int userId = 3;
 
@@ -69,4 +69,5 @@ public class CityWatcherActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
 }

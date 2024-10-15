@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.w3c.dom.Comment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,9 +25,7 @@ import java.util.Map;
 
 public class ViewIssuesActivity extends CityWatcherActivity {
 
-    private int userId = 3;
     private String URL;
-
 
     private ActivityViewIssuesBinding binding;
     private IssueListAdapter issueListAdapter;
@@ -35,6 +34,7 @@ public class ViewIssuesActivity extends CityWatcherActivity {
     private ObjectMapper mapper = new ObjectMapper();
 
     IssueData issue;
+    CommentData comment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +58,6 @@ public class ViewIssuesActivity extends CityWatcherActivity {
                         for (int i = 0; i < response.length(); i++) {
                             try {
                                 String jsonString = response.get(i).toString();
-                                Log.d("JSON", jsonString);
                                 issue = mapper.readValue(jsonString, IssueData.class);
                                 issueArrayList.add(issue);
                             } catch (JSONException | JsonProcessingException e) {

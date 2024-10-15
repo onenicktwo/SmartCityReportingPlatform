@@ -1,6 +1,7 @@
 package com.example.citywatcherfrontend;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 
@@ -16,7 +17,6 @@ public class IssueData {
      private double longitude;
      private int assigned_official_id;
      private int reporter_id;
-     private ArrayList<CommentData> comments;
 
 
     public IssueData() {
