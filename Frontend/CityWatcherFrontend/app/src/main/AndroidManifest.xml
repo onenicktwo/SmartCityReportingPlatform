@@ -42,6 +42,7 @@
         <activity android:name=".AdminViewActivity"></activity>
         <activity android:name=".EditUserActivity"></activity>
         <activity android:name=".DeleteUserActivity"></activity>
+        <activity android:name=".EditCommentActivity"></activity>
 
 
 

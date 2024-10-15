@@ -15,6 +15,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -23,6 +24,7 @@ import java.util.Map;
 public class IssueDetailsActivity extends CityWatcherActivity {
 
     private int issueId;
+    private int commentId;
     private String URL;
 
     // Initialize activity variables
@@ -32,8 +34,10 @@ public class IssueDetailsActivity extends CityWatcherActivity {
     private TextView issueDetailsLocation;
     private TextView issueDetailsStatus;
     private TextView issueDetailsDescription;
+    private TextView issueDetailsComment;
     private Button buttonEditIssue;
     private Button buttonDeleteIssue;
+    private Button buttonEditComment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,8 +54,10 @@ public class IssueDetailsActivity extends CityWatcherActivity {
         issueDetailsLocation = findViewById(R.id.issueDetailsLocation);
         issueDetailsStatus = findViewById(R.id.issueDetailsStatus);
         issueDetailsDescription = findViewById(R.id.issueDetailsDescription);
+        issueDetailsComment = findViewById(R.id.issueDetailsComment);
         buttonEditIssue = findViewById(R.id.buttonEditIssue);
         buttonDeleteIssue = findViewById(R.id.buttonDeleteIssue);
+        buttonEditComment = findViewById(R.id.buttonEditComment);
 
         // TODO Set image
         issueDetailsTitle.setText(bundle.getString("title"));
@@ -76,6 +82,8 @@ public class IssueDetailsActivity extends CityWatcherActivity {
 
         issueDetailsDescription.setText(bundle.getString("description"));
 
+        fetchDetailIssue(issueId);
+
         // TODO Set buttons for admin view
         // TODO Comments
 
@@ -84,6 +92,19 @@ public class IssueDetailsActivity extends CityWatcherActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(IssueDetailsActivity.this, UpdateIssueActivity.class);
                 intent.putExtra("id", issueId);
+                startActivity(intent);
+            }
+        });
+
+        buttonEditComment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(IssueDetailsActivity.this, EditCommentActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putInt("userID", userId);
+                bundle.putInt("issueID", issueId);
+                bundle.putInt("commentID", commentId);
+                intent.putExtras(bundle);
                 startActivity(intent);
             }
         });
@@ -123,6 +144,7 @@ public class IssueDetailsActivity extends CityWatcherActivity {
                     }
                 };
 
+
                 // Adding request to request queue
                 VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonObjReq);
                 Intent intent = new Intent(IssueDetailsActivity.this, ViewIssuesActivity.class);
@@ -130,4 +152,40 @@ public class IssueDetailsActivity extends CityWatcherActivity {
             }
         });
     }
+
+    private void fetchDetailIssue(int issueId) {
+        String requestUrl = URL + "/" + issueId;
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+                Request.Method.GET, requestUrl, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            JSONArray commentsArray = response.getJSONArray("comments");
+                            if (commentsArray.length() > 0) {
+                                JSONObject comment = commentsArray.getJSONObject(0);
+                                String commentContent = comment.getString("content");
+                                issueDetailsComment.setText(commentContent);
+                                commentId = comment.getInt("id");
+
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Log.e("IssueDetails", "Error parsing JSON response", e);
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("IssueDetails", "Error fetching issue details", error);
+                    }
+                }
+        );
+
+        // Add request to Volley queue
+        VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonObjectRequest);
+    }
+
 }
