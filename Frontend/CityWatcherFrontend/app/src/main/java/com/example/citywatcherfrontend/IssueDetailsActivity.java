@@ -24,6 +24,7 @@ import java.util.Map;
 public class IssueDetailsActivity extends CityWatcherActivity {
 
     private int issueId;
+    private int commentId;
     private String URL;
 
     // Initialize activity variables
@@ -99,8 +100,11 @@ public class IssueDetailsActivity extends CityWatcherActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(IssueDetailsActivity.this, EditCommentActivity.class);
-                intent.putExtra("userID", userId);
-                intent.putExtra("issueID", issueId);
+                Bundle bundle = new Bundle();
+                bundle.putInt("userID", userId);
+                bundle.putInt("issueID", issueId);
+                bundle.putInt("commentID", commentId);
+                intent.putExtras(bundle);
                 startActivity(intent);
             }
         });
@@ -163,6 +167,8 @@ public class IssueDetailsActivity extends CityWatcherActivity {
                                 JSONObject comment = commentsArray.getJSONObject(0);
                                 String commentContent = comment.getString("content");
                                 issueDetailsComment.setText(commentContent);
+                                commentId = comment.getInt("id");
+
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
