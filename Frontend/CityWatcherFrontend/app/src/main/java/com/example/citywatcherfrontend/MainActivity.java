@@ -20,6 +20,9 @@ public class MainActivity extends CityWatcherActivity implements View.OnClickLis
         btnAdminView = findViewById(R.id.btnAdminView);
         btnAdminView.setOnClickListener(this);
 
+
+
+
         btnAdminView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

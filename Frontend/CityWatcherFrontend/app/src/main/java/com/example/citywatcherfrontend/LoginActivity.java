@@ -28,6 +28,7 @@ Author @Sam Hostetter
 public class LoginActivity extends CityWatcherActivity {
     private EditText etUsername, etPassword;
     private Button btnLogin;
+    private int userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +77,7 @@ public class LoginActivity extends CityWatcherActivity {
                                 JSONObject user = usersArray.getJSONObject(i);
                                 if (user.getString("username").equals(username) && user.getString("password").equals(password)) {
                                     loginSuccessful = true;
+                                    userId = user.getInt("id");
                                     break;
                                 }
 
