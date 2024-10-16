@@ -42,6 +42,7 @@ public class IssueDetailsActivity extends CityWatcherActivity {
     private JSONObject requestParams = new JSONObject();
 
     private CommentData comment;
+    private Button buttonEditComment;
 
 
     // Initialize activity variables
@@ -83,6 +84,7 @@ public class IssueDetailsActivity extends CityWatcherActivity {
         addComment = findViewById(R.id.editAddComment);
         buttonAddComment = findViewById(R.id.buttonAddComment);
         listComments = findViewById(R.id.listComments);
+        buttonEditComment = findViewById(R.id.buttonEditComment);
 
         makeGetCommentsReq();
 
