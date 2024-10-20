@@ -1,5 +1,6 @@
 package org.citywatcher.service;
 
+import org.citywatcher.controller.WebSocketController;
 import org.citywatcher.model.Comment;
 import org.citywatcher.model.Issue;
 import org.citywatcher.model.User;
@@ -18,14 +19,17 @@ public class CommentsServiceImpl implements CommentsService {
     private final CommentsRepository commentRepository;
     private final IssueRepository issueRepository;
     private final UserRepository userRepository;
+    private final WebSocketController webSocketController;
 
     @Autowired
     public CommentsServiceImpl(CommentsRepository commentRepository,
                                IssueRepository issueRepository,
-                               UserRepository userRepository) {
+                               UserRepository userRepository,
+                               WebSocketController webSocketController) {
         this.commentRepository = commentRepository;
         this.issueRepository = issueRepository;
         this.userRepository = userRepository;
+        this.webSocketController = webSocketController;
     }
 
     @Override

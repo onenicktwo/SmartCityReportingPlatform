@@ -1,5 +1,6 @@
 package org.citywatcher.service;
 
+import org.citywatcher.controller.WebSocketController;
 import org.citywatcher.model.Issue;
 import org.citywatcher.model.IssueStatus;
 import org.citywatcher.model.User;
@@ -21,11 +22,13 @@ public class IssueServiceImpl implements IssueService {
 
     private final IssueRepository issueRepository;
     private final UserRepository userRepository;
+    private final WebSocketController webSocketController;
 
     @Autowired
-    public IssueServiceImpl(IssueRepository issueRepository, UserRepository userRepository) {
+    public IssueServiceImpl(IssueRepository issueRepository, UserRepository userRepository, WebSocketController webSocketController) {
         this.issueRepository = issueRepository;
         this.userRepository = userRepository;
+        this.webSocketController = webSocketController;
     }
 
     @Override
