@@ -45,7 +45,14 @@ public class IssueServiceImpl implements IssueService {
 
         issue.setReportedDate(new Date());
         issue.setLastUpdatedDate(new Date());
-        return issueRepository.save(issue);
+        Issue savedIssue = issueRepository.save(issue);
+
+        // If the issue is immediately assigned, send assignment notification
+        if (savedIssue.getAssignedOfficial() != null) {
+            webSocketController.sendAssignmentNotification(savedIssue);
+        }
+
+        return savedIssue;
     }
 
     @Override
@@ -70,6 +77,12 @@ public class IssueServiceImpl implements IssueService {
             User reporter = userRepository.findById(userId)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid reporter ID"));
 
+            boolean statusChanged = !existingIssue.getStatus().equals(issueDetails.getStatus());
+            boolean isRelevantStatus = issueDetails.getStatus() == IssueStatus.UNDER_REVIEW
+                    || issueDetails.getStatus() == IssueStatus.COMPLETED;
+            User previousAssignedOfficial = existingIssue.getAssignedOfficial();
+            User newAssignedOfficial = issueDetails.getAssignedOfficial();
+
             existingIssue.setTitle(issueDetails.getTitle());
             existingIssue.setDescription(issueDetails.getDescription());
             existingIssue.setCategory(issueDetails.getCategory());
@@ -88,7 +101,16 @@ public class IssueServiceImpl implements IssueService {
             }
 
             existingIssue.setLastUpdatedDate(new Date());
-            return issueRepository.save(existingIssue);
+            Issue updatedIssue = issueRepository.save(existingIssue);
+
+            if (statusChanged && isRelevantStatus) {
+                webSocketController.sendIssueStatusUpdate(updatedIssue);
+            }
+            if (newAssignedOfficial != null && !newAssignedOfficial.equals(previousAssignedOfficial)) {
+                webSocketController.sendAssignmentNotification(updatedIssue);
+            }
+
+            return updatedIssue;
         }
         return null;
     }
