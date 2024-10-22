@@ -1,12 +1,12 @@
 package org.citywatcher.service;
 
-import org.citywatcher.controller.WebSocketController;
 import org.citywatcher.model.Comment;
 import org.citywatcher.model.Issue;
 import org.citywatcher.model.User;
 import org.citywatcher.repository.CommentsRepository;
 import org.citywatcher.repository.IssueRepository;
 import org.citywatcher.repository.UserRepository;
+import org.citywatcher.websocket.IssueWebSocketServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,17 +19,17 @@ public class CommentsServiceImpl implements CommentsService {
     private final CommentsRepository commentRepository;
     private final IssueRepository issueRepository;
     private final UserRepository userRepository;
-    private final WebSocketController webSocketController;
+    private final IssueWebSocketServer issueWebSocketServer;
 
     @Autowired
     public CommentsServiceImpl(CommentsRepository commentRepository,
                                IssueRepository issueRepository,
                                UserRepository userRepository,
-                               WebSocketController webSocketController) {
+                               IssueWebSocketServer webSocketController) {
         this.commentRepository = commentRepository;
         this.issueRepository = issueRepository;
         this.userRepository = userRepository;
-        this.webSocketController = webSocketController;
+        this.issueWebSocketServer = webSocketController;
     }
 
     @Override

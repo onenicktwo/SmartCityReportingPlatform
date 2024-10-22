@@ -1,11 +1,13 @@
 package org.citywatcher.service;
 
-import org.citywatcher.controller.WebSocketController;
 import org.citywatcher.model.Issue;
 import org.citywatcher.model.IssueStatus;
 import org.citywatcher.model.User;
 import org.citywatcher.repository.IssueRepository;
 import org.citywatcher.repository.UserRepository;
+import org.citywatcher.websocket.IssueWebSocketServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -15,20 +17,20 @@ import javax.persistence.criteria.Expression;
 import java.awt.*;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class IssueServiceImpl implements IssueService {
 
     private final IssueRepository issueRepository;
     private final UserRepository userRepository;
-    private final WebSocketController webSocketController;
+    private final IssueWebSocketServer issueWebSocketServer;
+    private static final Logger logger = LoggerFactory.getLogger(IssueServiceImpl.class);
 
     @Autowired
-    public IssueServiceImpl(IssueRepository issueRepository, UserRepository userRepository, WebSocketController webSocketController) {
+    public IssueServiceImpl(IssueRepository issueRepository, UserRepository userRepository, IssueWebSocketServer webSocketController) {
         this.issueRepository = issueRepository;
         this.userRepository = userRepository;
-        this.webSocketController = webSocketController;
+        this.issueWebSocketServer = webSocketController;
     }
 
     @Override
@@ -47,9 +49,12 @@ public class IssueServiceImpl implements IssueService {
         issue.setLastUpdatedDate(new Date());
         Issue savedIssue = issueRepository.save(issue);
 
-        // If the issue is immediately assigned, send assignment notification
-        if (savedIssue.getAssignedOfficial() != null) {
-            webSocketController.sendAssignmentNotification(savedIssue);
+        try {
+            if (savedIssue.getAssignedOfficial() != null) {
+                issueWebSocketServer.sendAssignmentNotification(savedIssue);
+            }
+        } catch (Exception e) {
+            logger.error("Failed to send WebSocket notification for issue create: " + e.getMessage(), e);
         }
 
         return savedIssue;
@@ -103,11 +108,17 @@ public class IssueServiceImpl implements IssueService {
             existingIssue.setLastUpdatedDate(new Date());
             Issue updatedIssue = issueRepository.save(existingIssue);
 
-            if (statusChanged && isRelevantStatus) {
-                webSocketController.sendIssueStatusUpdate(updatedIssue);
-            }
-            if (newAssignedOfficial != null && !newAssignedOfficial.equals(previousAssignedOfficial)) {
-                webSocketController.sendAssignmentNotification(updatedIssue);
+            try {
+                if (statusChanged && isRelevantStatus) {
+                    issueWebSocketServer.sendIssueStatusUpdate(updatedIssue);
+                }
+                if (newAssignedOfficial != null) {
+                    if (previousAssignedOfficial == null || previousAssignedOfficial.getUsername().equals(newAssignedOfficial.getUsername())) {
+                        issueWebSocketServer.sendAssignmentNotification(updatedIssue);
+                    }
+                }
+            } catch (Exception e) {
+                logger.error("Failed to send WebSocket notification for issue update: " + e.getMessage(), e);
             }
 
             return updatedIssue;
