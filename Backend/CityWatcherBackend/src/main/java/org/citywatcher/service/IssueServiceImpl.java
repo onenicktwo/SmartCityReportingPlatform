@@ -5,6 +5,9 @@ import org.citywatcher.model.IssueStatus;
 import org.citywatcher.model.User;
 import org.citywatcher.repository.IssueRepository;
 import org.citywatcher.repository.UserRepository;
+import org.citywatcher.websocket.IssueWebSocketServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -14,18 +17,20 @@ import javax.persistence.criteria.Expression;
 import java.awt.*;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class IssueServiceImpl implements IssueService {
 
     private final IssueRepository issueRepository;
     private final UserRepository userRepository;
+    private final IssueWebSocketServer issueWebSocketServer;
+    private static final Logger logger = LoggerFactory.getLogger(IssueServiceImpl.class);
 
     @Autowired
-    public IssueServiceImpl(IssueRepository issueRepository, UserRepository userRepository) {
+    public IssueServiceImpl(IssueRepository issueRepository, UserRepository userRepository, IssueWebSocketServer webSocketController) {
         this.issueRepository = issueRepository;
         this.userRepository = userRepository;
+        this.issueWebSocketServer = webSocketController;
     }
 
     @Override
@@ -42,7 +47,17 @@ public class IssueServiceImpl implements IssueService {
 
         issue.setReportedDate(new Date());
         issue.setLastUpdatedDate(new Date());
-        return issueRepository.save(issue);
+        Issue savedIssue = issueRepository.save(issue);
+
+        try {
+            if (savedIssue.getAssignedOfficial() != null) {
+                issueWebSocketServer.sendAssignmentNotification(savedIssue);
+            }
+        } catch (Exception e) {
+            logger.error("Failed to send WebSocket notification for issue create: " + e.getMessage(), e);
+        }
+
+        return savedIssue;
     }
 
     @Override
@@ -67,6 +82,12 @@ public class IssueServiceImpl implements IssueService {
             User reporter = userRepository.findById(userId)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid reporter ID"));
 
+            boolean statusChanged = !existingIssue.getStatus().equals(issueDetails.getStatus());
+            boolean isRelevantStatus = issueDetails.getStatus() == IssueStatus.UNDER_REVIEW
+                    || issueDetails.getStatus() == IssueStatus.COMPLETED;
+            User previousAssignedOfficial = existingIssue.getAssignedOfficial();
+            User newAssignedOfficial = issueDetails.getAssignedOfficial();
+
             existingIssue.setTitle(issueDetails.getTitle());
             existingIssue.setDescription(issueDetails.getDescription());
             existingIssue.setCategory(issueDetails.getCategory());
@@ -85,7 +106,22 @@ public class IssueServiceImpl implements IssueService {
             }
 
             existingIssue.setLastUpdatedDate(new Date());
-            return issueRepository.save(existingIssue);
+            Issue updatedIssue = issueRepository.save(existingIssue);
+
+            try {
+                if (statusChanged && isRelevantStatus) {
+                    issueWebSocketServer.sendIssueStatusUpdate(updatedIssue);
+                }
+                if (newAssignedOfficial != null) {
+                    if (previousAssignedOfficial == null || previousAssignedOfficial.getUsername().equals(newAssignedOfficial.getUsername())) {
+                        issueWebSocketServer.sendAssignmentNotification(updatedIssue);
+                    }
+                }
+            } catch (Exception e) {
+                logger.error("Failed to send WebSocket notification for issue update: " + e.getMessage(), e);
+            }
+
+            return updatedIssue;
         }
         return null;
     }
