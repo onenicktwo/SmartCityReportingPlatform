@@ -78,13 +78,11 @@ public class IssueDetailsActivity extends CityWatcherActivity {
         issueDetailsLocation = findViewById(R.id.issueDetailsLocation);
         issueDetailsStatus = findViewById(R.id.issueDetailsStatus);
         issueDetailsDescription = findViewById(R.id.issueDetailsDescription);
-        issueDetailsComment = findViewById(R.id.issueDetailsComment);
         buttonEditIssue = findViewById(R.id.buttonEditIssue);
         buttonDeleteIssue = findViewById(R.id.buttonDeleteIssue);
         addComment = findViewById(R.id.editAddComment);
         buttonAddComment = findViewById(R.id.buttonAddComment);
         listComments = findViewById(R.id.listComments);
-        buttonEditComment = findViewById(R.id.buttonEditComment);
 
         makeGetCommentsReq();
 
@@ -120,19 +118,6 @@ public class IssueDetailsActivity extends CityWatcherActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(IssueDetailsActivity.this, UpdateIssueActivity.class);
                 intent.putExtra("id", issueId);
-                startActivity(intent);
-            }
-        });
-
-        buttonEditComment.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(IssueDetailsActivity.this, EditCommentActivity.class);
-                Bundle bundle = new Bundle();
-                bundle.putInt("userID", userId);
-                bundle.putInt("issueID", issueId);
-                bundle.putInt("commentID", commentId);
-                intent.putExtras(bundle);
                 startActivity(intent);
             }
         });
@@ -282,6 +267,17 @@ public class IssueDetailsActivity extends CityWatcherActivity {
         VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonObjReq);
         Intent intent = new Intent(IssueDetailsActivity.this, ViewIssuesActivity.class);
         startActivity(intent);
+    };
+
+    public void editComment(int i){
+            Intent intent = new Intent(IssueDetailsActivity.this, EditCommentActivity.class);
+            Bundle bundle = new Bundle();
+            CommentData comment = commentArrayList.get(i);
+            bundle.putInt("userID", comment.getUserId());
+            bundle.putInt("issueID", comment.getIssueId());
+            bundle.putInt("commentID", comment.getId());
+            intent.putExtras(bundle);
+            startActivity(intent);
     };
 
     public void makeDeleteCommentReq(int i) {

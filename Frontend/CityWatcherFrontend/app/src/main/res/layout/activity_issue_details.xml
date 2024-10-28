@@ -47,16 +47,6 @@
         app:layout_constraintTop_toBottomOf="@+id/issueDetailsDescriptionLabel" />
 
     <TextView
-        android:id="@+id/issueDetailsComment"
-        android:layout_width="370dp"
-        android:layout_height="141dp"
-        android:layout_marginTop="316dp"
-        android:text="Comment Body"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/issueDetailsDescriptionLabel" />
-
-    <TextView
         android:id="@+id/issueDetailsReporter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -163,15 +153,5 @@
         android:text="ADD COMMENT"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editAddComment" />
-
-    <Button
-        android:id="@+id/buttonEditComment"
-        android:layout_width="111dp"
-        android:layout_height="41dp"
-        android:layout_marginStart="40dp"
-        android:layout_marginTop="204dp"
-        android:text="Edit Comment"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonDeleteIssue" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

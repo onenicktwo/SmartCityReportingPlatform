@@ -50,6 +50,7 @@ public class CommentListAdapter extends ArrayAdapter<CommentData> {
         TextView date = view.findViewById(R.id.commentDate);
         TextView content = view.findViewById(R.id.commentContent);
         Button buttonDeleteComment = view.findViewById(R.id.buttonDeleteComment);
+        Button buttonEditComment = view.findViewById(R.id.buttonEditComment);
 
         // commenter.setText(comment.getCommenter());
         date.setText(comment.getDate().toString());
@@ -59,6 +60,13 @@ public class CommentListAdapter extends ArrayAdapter<CommentData> {
             @Override
             public void onClick(View view) {
                 ((IssueDetailsActivity)mContext).makeDeleteCommentReq(position);
+            }
+        });
+
+        buttonEditComment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ((IssueDetailsActivity)mContext).editComment(position);
             }
         });
 

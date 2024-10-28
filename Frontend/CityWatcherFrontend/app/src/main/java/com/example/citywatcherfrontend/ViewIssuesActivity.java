@@ -6,6 +6,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
 import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -13,17 +17,31 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.example.citywatcherfrontend.databinding.ActivityViewIssuesBinding;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.w3c.dom.Comment;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 
-public class ViewIssuesActivity extends CityWatcherActivity {
+public class ViewIssuesActivity extends CityWatcherActivity implements OnMapReadyCallback {
 
     private String URL;
 
@@ -36,6 +54,9 @@ public class ViewIssuesActivity extends CityWatcherActivity {
     IssueData issue;
     CommentData comment;
 
+    private SupportMapFragment mapFragment;
+    private MarkerOptions markerOptions;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,10 +64,16 @@ public class ViewIssuesActivity extends CityWatcherActivity {
 
         binding = ActivityViewIssuesBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        makeGetIssuesReq();
+
+        mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
+
+        // makeGetIssuesReqList();
+        makeGetIssuesReqMap();
+
+        mapFragment.getMapAsync((OnMapReadyCallback) this);
     }
 
-    private void makeGetIssuesReq() {
+    private void makeGetIssuesReqMap() {
         JsonArrayRequest jsonStringReq = new JsonArrayRequest(
                 URL + "/search",
                 new Response.Listener<JSONArray>() {
@@ -64,25 +91,6 @@ public class ViewIssuesActivity extends CityWatcherActivity {
                                 throw new RuntimeException(e);
                             }
                         }
-
-                        issueListAdapter = new IssueListAdapter(ViewIssuesActivity.this, issueArrayList);
-                        binding.listissues.setAdapter(issueListAdapter);
-                        binding.listissues.setClickable(true);
-                        binding.listissues.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                            @Override
-                            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                                Intent intent = new Intent(ViewIssuesActivity.this, IssueDetailsActivity.class);
-                                intent.putExtra("id", issueArrayList.get(i).getId());
-                                intent.putExtra("title", issueArrayList.get(i).getTitle());
-                                intent.putExtra("category", issueArrayList.get(i).getCategory());
-                                intent.putExtra("latitude", issueArrayList.get(i).getLatitude());
-                                intent.putExtra("longitude", issueArrayList.get(i).getLongitude());
-                                intent.putExtra("status", issueArrayList.get(i).getStatus());
-                                intent.putExtra("description", issueArrayList.get(i).getDescription());
-
-                                startActivity(intent);
-                            }
-                        });
                     }
                 },
                 new Response.ErrorListener() {
@@ -111,5 +119,49 @@ public class ViewIssuesActivity extends CityWatcherActivity {
 
         // Adding request to request queue
         VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonStringReq);
+    }
+
+    @Override
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        LatLng camerraLatLng = new LatLng(42.0308, -93.6319);
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(camerraLatLng, 12f));
+
+        HashMap<Marker, Integer> markerMap = new HashMap<Marker, Integer>();
+
+        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(@NonNull Marker marker) {
+                int i = markerMap.get(marker);
+
+                Intent intent = new Intent(ViewIssuesActivity.this, IssueDetailsActivity.class);
+
+                intent.putExtra("id", issueArrayList.get(i).getId());
+                intent.putExtra("title", issueArrayList.get(i).getTitle());
+                intent.putExtra("category", issueArrayList.get(i).getCategory());
+                intent.putExtra("latitude", issueArrayList.get(i).getLatitude());
+                intent.putExtra("longitude", issueArrayList.get(i).getLongitude());
+                intent.putExtra("status", issueArrayList.get(i).getStatus());
+                intent.putExtra("description", issueArrayList.get(i).getDescription());
+
+                startActivity(intent);
+                return false;
+            }
+        });
+
+        for (int issueIndex = 0; issueIndex < issueArrayList.size(); issueIndex++) {
+            IssueData issue = issueArrayList.get(issueIndex);
+            LatLng latlng = new LatLng(issue.getLatitude(), issue.getLongitude());
+            markerOptions = new MarkerOptions();
+            markerOptions.position(latlng);
+            if (issue.getStatus().equals("UNDER_REVIEW")) {
+                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
+            } else if (issue.getStatus().equals("COMPLETED")) {
+                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+            } else {
+                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+            }
+            markerMap.put(googleMap.addMarker(markerOptions), issueIndex);
+        }
+
     }
 }

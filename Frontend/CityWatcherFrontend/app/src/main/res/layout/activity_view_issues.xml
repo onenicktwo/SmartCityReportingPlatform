@@ -7,6 +7,19 @@
     android:layout_height="match_parent"
     tools:context=".ViewIssuesActivity">
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ViewIssuesActivity">
+
+        <androidx.fragment.app.FragmentContainerView
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:id="@+id/map_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </FrameLayout>
+
     <ListView
         android:id="@+id/listissues"
         android:layout_width="391dp"
@@ -19,5 +32,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:listitem="@layout/list_item_issue"/>
+        tools:listitem="@layout/list_item_issue" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
