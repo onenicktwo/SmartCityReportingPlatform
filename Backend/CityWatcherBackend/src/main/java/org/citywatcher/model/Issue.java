@@ -53,6 +53,9 @@ public class Issue {
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastUpdatedDate;
 
+    @Column(nullable = false)
+    private String address;
+
     @Column(name = "image_path")
     private String imagePath;
 
@@ -162,6 +165,14 @@ public class Issue {
 
     public void setComments(List<Comment> comments) {
         this.comments = comments;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     @PrePersist

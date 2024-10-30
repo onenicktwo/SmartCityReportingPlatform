@@ -67,13 +67,14 @@ public class IssueController {
             @RequestParam(required = false) String category,
             @RequestParam(required = false) IssueStatus status,
             @RequestParam(required = false) String title,
+            @RequestParam(required = false) String address,
             @RequestParam(required = false) Double latitude,
             @RequestParam(required = false) Double longitude,
             @RequestParam(required = false) Double radius,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        List<Issue> issues = issueService.searchIssues(category, status, title, latitude, longitude, radius, page, size);
+        List<Issue> issues = issueService.searchIssues(category, status, title, address, latitude, longitude, radius, page, size);
         return ResponseEntity.ok(issues);
     }
 }

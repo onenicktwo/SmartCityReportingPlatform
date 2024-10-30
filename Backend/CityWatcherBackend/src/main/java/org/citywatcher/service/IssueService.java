@@ -12,6 +12,6 @@ public interface IssueService {
     Issue updateIssue(Long userId, Long issueId, Issue issue);
     boolean deleteIssue(Long userId, Long issueId);
     List<Issue> searchIssues(String category, IssueStatus status, String title,
-                             Double latitude, Double longitude, Double radius,
-                             int page, int size);
+                             String address, Double latitude, Double longitude,
+                             Double radius, int page, int size);
 }

@@ -14,6 +14,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Predicate;
 import java.awt.*;
 import java.util.Date;
 import java.util.List;
@@ -94,6 +95,7 @@ public class IssueServiceImpl implements IssueService {
             existingIssue.setStatus(issueDetails.getStatus());
             existingIssue.setLatitude(issueDetails.getLatitude());
             existingIssue.setLongitude(issueDetails.getLongitude());
+            existingIssue.setAddress((issueDetails.getAddress()));
             existingIssue.setImagePath(issueDetails.getImagePath());
             existingIssue.setReporter(reporter);
 
@@ -137,33 +139,32 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public List<Issue> searchIssues(String category, IssueStatus status, String title,
-                                    Double latitude, Double longitude, Double radius,
-                                    int page, int size) {
-        Specification<Issue> spec = Specification.where(null);
+    public List<Issue> searchIssues(String category, IssueStatus status, String title, String address, Double latitude, Double longitude, Double radius, int page, int size) {
+        Specification<Issue> spec = (root, query, criteriaBuilder) -> {
+            Predicate predicate = criteriaBuilder.conjunction();
 
-        if (category != null && !category.isEmpty()) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("category"), category));
-        }
+            if (category != null) {
+                predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("category"), category));
+            }
+            if (status != null) {
+                predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("status"), status));
+            }
+            if (title != null) {
+                predicate = criteriaBuilder.and(predicate, criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), "%" + title.toLowerCase() + "%"));
+            }
+            if (address != null) {
+                predicate = criteriaBuilder.and(predicate, criteriaBuilder.like(criteriaBuilder.lower(root.get("address")), "%" + address.toLowerCase() + "%"));
+            }
+            if (latitude != null && longitude != null && radius != null) {
+                Expression<Double> distance = criteriaBuilder.function("ST_Distance_Sphere", Double.class,
+                        criteriaBuilder.function("ST_MakePoint", Point.class, root.get("longitude"), root.get("latitude")),
+                        criteriaBuilder.function("ST_MakePoint", Point.class, criteriaBuilder.literal(longitude), criteriaBuilder.literal(latitude)));
+                predicate = criteriaBuilder.and(predicate, criteriaBuilder.le(distance, radius));
+            }
 
-        if (status != null) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
-        }
+            return predicate;
+        };
 
-        if (title != null && !title.isEmpty()) {
-            spec = spec.and((root, query, cb) -> cb.like(cb.lower(root.get("title")), "%" + title.toLowerCase() + "%"));
-        }
-
-        if (latitude != null && longitude != null && radius != null) {
-            spec = spec.and((root, query, cb) -> {
-                Expression<Double> distance = cb.function("ST_Distance_Sphere", Double.class,
-                        cb.function("POINT", Point.class, root.get("longitude"), root.get("latitude")),
-                        cb.function("POINT", Point.class, cb.literal(longitude), cb.literal(latitude)));
-                return cb.lessThanOrEqualTo(distance, radius);
-            });
-        }
-
-        PageRequest pageRequest = PageRequest.of(page, size);
-        return issueRepository.findAll(spec, pageRequest).getContent();
+        return issueRepository.findAll(spec, PageRequest.of(page, size)).getContent();
     }
 }
