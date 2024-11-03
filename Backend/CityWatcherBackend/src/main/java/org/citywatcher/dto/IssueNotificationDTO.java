@@ -11,6 +11,7 @@ public class IssueNotificationDTO {
     private IssueStatus status;
     private String notificationType; // Can be "UPDATE", "ASSIGNMENT", etc.
     private String assignedOfficialUsername; // Only populated for assignments
+    private String comment;
 
     public IssueNotificationDTO(Issue issue, String notificationType) {
         this.issueId = issue.getId();
@@ -22,6 +23,14 @@ public class IssueNotificationDTO {
         if (issue.getAssignedOfficial() != null) {
             this.assignedOfficialUsername = issue.getAssignedOfficial().getUsername();
         }
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     public Long getIssueId() {
