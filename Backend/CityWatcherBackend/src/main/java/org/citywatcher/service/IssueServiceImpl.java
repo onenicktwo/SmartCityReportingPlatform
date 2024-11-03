@@ -3,6 +3,7 @@ package org.citywatcher.service;
 import org.citywatcher.model.Issue;
 import org.citywatcher.model.IssueStatus;
 import org.citywatcher.model.User;
+import org.citywatcher.model.UserRole;
 import org.citywatcher.repository.IssueRepository;
 import org.citywatcher.repository.UserRepository;
 import org.citywatcher.websocket.IssueWebSocketServer;
@@ -136,6 +137,90 @@ public class IssueServiceImpl implements IssueService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public Issue addVolunteer(Long userId, Long issueId, Long volunteerId) {
+        User requester = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+
+        if (requester.getRole() != UserRole.ADMIN && requester.getRole() != UserRole.CITY_OFFICIAL) {
+            throw new IllegalArgumentException("Only administrators and city officials can assign volunteers");
+        }
+
+        Issue existingIssue = (issueRepository.findById(issueId).isPresent()) ? issueRepository.findById(issueId).get() : null;
+        if (existingIssue == null) {
+            throw new IllegalArgumentException("Issue not found");
+        }
+
+        User volunteer = userRepository.findById(volunteerId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid volunteer ID"));
+
+        if (volunteer.getRole() != UserRole.VOLUNTEER) {
+            throw new IllegalArgumentException("User is not a volunteer");
+        }
+
+        // Check if volunteer is already assigned
+        if (existingIssue.getVolunteers().stream()
+                .anyMatch(v -> v.getId().equals(volunteerId))) {
+            throw new IllegalArgumentException("Volunteer already assigned to this issue");
+        }
+
+        existingIssue.getVolunteers().add(volunteer);
+        existingIssue.setLastUpdatedDate(new Date());
+        Issue updatedIssue = issueRepository.save(existingIssue);
+
+        return updatedIssue;
+    }
+
+    @Override
+    public Issue removeVolunteer(Long userId, Long issueId, Long volunteerId) {
+        User requester = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+
+        if (requester.getRole() != UserRole.ADMIN && requester.getRole() != UserRole.CITY_OFFICIAL) {
+            throw new IllegalArgumentException("Only administrators and city officials can assign volunteers");
+        }
+
+        Issue existingIssue = (issueRepository.findById(issueId).isPresent()) ? issueRepository.findById(issueId).get() : null;
+        if (existingIssue == null) {
+            throw new IllegalArgumentException("Issue not found");
+        }
+
+        User volunteer = userRepository.findById(volunteerId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid volunteer ID"));
+
+        boolean removed = existingIssue.getVolunteers().removeIf(v -> v.getId().equals(volunteerId));
+        if (!removed) {
+            throw new IllegalArgumentException("Volunteer not assigned to this issue");
+        }
+
+        existingIssue.setLastUpdatedDate(new Date());
+        Issue updatedIssue = issueRepository.save(existingIssue);
+
+        return updatedIssue;
+    }
+
+    @Override
+    public List<Issue> getIssuesByVolunteer(Long volunteerId) {
+        User volunteer = userRepository.findById(volunteerId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid volunteer ID"));
+
+        if (volunteer.getRole() != UserRole.VOLUNTEER) {
+            throw new IllegalArgumentException("User is not a volunteer");
+        }
+
+        return issueRepository.findByVolunteersContaining(volunteer);
+    }
+
+    @Override
+    public List<User> getVolunteersForIssue(Long issueId) {
+        Issue issue = (issueRepository.findById(issueId).isPresent()) ? issueRepository.findById(issueId).get() : null;
+        if (issue == null) {
+            throw new IllegalArgumentException("Issue not found");
+        }
+
+        return issue.getVolunteers();
     }
 
     @Override

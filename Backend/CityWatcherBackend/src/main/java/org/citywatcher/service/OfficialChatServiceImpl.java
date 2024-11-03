@@ -8,11 +8,13 @@ import org.citywatcher.repository.CommentsRepository;
 import org.citywatcher.repository.IssueRepository;
 import org.citywatcher.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
 
-public class OfficialChatServiceImpl {
+@Service
+public class OfficialChatServiceImpl implements OfficialChatService{
     private final CommentsRepository commentRepository;
     private final IssueRepository issueRepository;
     private final UserRepository userRepository;

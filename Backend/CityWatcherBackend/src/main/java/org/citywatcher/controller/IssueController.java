@@ -2,6 +2,7 @@ package org.citywatcher.controller;
 
 import org.citywatcher.model.Issue;
 import org.citywatcher.model.IssueStatus;
+import org.citywatcher.model.User;
 import org.citywatcher.service.IssueService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -59,6 +60,54 @@ public class IssueController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PostMapping("/{issueId}/volunteers/{volunteerId}")
+    public ResponseEntity<Issue> addVolunteer(
+            @PathVariable Long userId,
+            @PathVariable Long issueId,
+            @PathVariable Long volunteerId) {
+        try {
+            Issue updatedIssue = issueService.addVolunteer(userId, issueId, volunteerId);
+            return new ResponseEntity<>(updatedIssue, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @DeleteMapping("/{issueId}/volunteers/{volunteerId}")
+    public ResponseEntity<Issue> removeVolunteer(
+            @PathVariable Long userId,
+            @PathVariable Long issueId,
+            @PathVariable Long volunteerId) {
+        try {
+            Issue updatedIssue = issueService.removeVolunteer(userId, issueId, volunteerId);
+            return new ResponseEntity<>(updatedIssue, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/volunteer/{volunteerId}")
+    public ResponseEntity<List<Issue>> getIssuesByVolunteer(
+            @PathVariable Long volunteerId) {
+        try {
+            List<Issue> issues = issueService.getIssuesByVolunteer(volunteerId);
+            return new ResponseEntity<>(issues, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/{issueId}/volunteers")
+    public ResponseEntity<List<User>> getVolunteersForIssue(
+            @PathVariable Long issueId) {
+        try {
+            List<User> volunteers = issueService.getVolunteersForIssue(issueId);
+            return new ResponseEntity<>(volunteers, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
