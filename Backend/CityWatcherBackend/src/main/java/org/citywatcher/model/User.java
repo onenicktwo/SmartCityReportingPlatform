@@ -1,6 +1,9 @@
 package org.citywatcher.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -8,6 +11,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,13 +30,14 @@ public class User {
     @Column(nullable = false)
     private UserRole role;
 
-    @JsonManagedReference(value = "issue-reporter")
     @OneToMany(mappedBy = "reporter")
     private List<Issue> reportedIssues = new ArrayList<>();
 
-    @JsonManagedReference(value = "issue-assignedOfficial")
     @OneToMany(mappedBy = "assignedOfficial")
     private List<Issue> assignedIssues = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "volunteers")
+    private List<Issue> volunteerIssues = new ArrayList<>();
 
     public User() {
         this.id = null;
@@ -96,4 +101,11 @@ public class User {
         this.role = role;
     }
 
+    public List<Issue> getVolunteerIssues() {
+        return volunteerIssues;
+    }
+
+    public void setVolunteerIssues(List<Issue> volunteerIssues) {
+        this.volunteerIssues = volunteerIssues;
+    }
 }

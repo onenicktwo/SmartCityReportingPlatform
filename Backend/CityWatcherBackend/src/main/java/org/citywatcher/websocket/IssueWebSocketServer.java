@@ -4,9 +4,11 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.citywatcher.dto.IssueNotificationDTO;
 import org.citywatcher.model.Issue;
 import org.citywatcher.model.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.Map;
@@ -17,75 +19,82 @@ import java.util.ArrayList;
 @ServerEndpoint("/ws/issues/{username}")
 @Component
 public class IssueWebSocketServer {
+    private static WebSocketManager webSocketManager;
 
-    private static Map<Session, String> sessionUsernameMap = new ConcurrentHashMap<>();
-    private static Map<String, Session> usernameSessionMap = new ConcurrentHashMap<>();
+    @Autowired
+    public void setWebSocketManager(WebSocketManager manager) {
+        IssueWebSocketServer.webSocketManager = manager;
+    }
 
     @OnOpen
     public void onOpen(Session session, @PathParam("username") String username) {
-        sessionUsernameMap.put(session, username);
-        usernameSessionMap.put(username, session);
+        webSocketManager.addSession(username, session);
         System.out.println("New WebSocket connection: " + username);
     }
 
     @OnClose
     public void onClose(Session session) {
-        String username = sessionUsernameMap.get(session);
-        sessionUsernameMap.remove(session);
-        usernameSessionMap.remove(username);
-        System.out.println("WebSocket connection closed: " + username);
+        webSocketManager.removeSession(session);
+        System.out.println("WebSocket connection closed.");
     }
 
     @OnError
     public void onError(Session session, Throwable throwable) {
-        String username = sessionUsernameMap.get(session);
+        String username = webSocketManager.getUsernameBySession(session);
         System.out.println("WebSocket error for " + username + ": " + throwable.getMessage());
     }
 
     @OnMessage
     public void onMessage(String message, Session session) {
-        String username = sessionUsernameMap.get(session);
+        String username = webSocketManager.getUsernameBySession(session);
         System.out.println("Received message from " + username + ": " + message);
     }
 
     public void sendIssueStatusUpdate(Issue updatedIssue) {
         IssueNotificationDTO notificationDTO = new IssueNotificationDTO(updatedIssue, "UPDATE");
+        String jsonMessage = webSocketManager.convertToJson(notificationDTO);
+
         // Send to the reporter
-        sendToUser(updatedIssue.getReporter().getUsername(), notificationDTO);
+        webSocketManager.sendToUser(updatedIssue.getReporter().getUsername(), jsonMessage);
 
         // Send to the assigned official
         if (updatedIssue.getAssignedOfficial() != null) {
-            sendToUser(updatedIssue.getAssignedOfficial().getUsername(), notificationDTO);
+            webSocketManager.sendToUser(updatedIssue.getAssignedOfficial().getUsername(), jsonMessage);
         }
 
         // Send to subscribed users
         List<User> subscribedUsers = getSubscribedUsers(updatedIssue);
         for (User user : subscribedUsers) {
-            sendToUser(user.getUsername(), notificationDTO);
+            webSocketManager.sendToUser(user.getUsername(), jsonMessage);
         }
     }
 
     public void sendAssignmentNotification(Issue assignedIssue) {
         if (assignedIssue.getAssignedOfficial() != null) {
             IssueNotificationDTO notificationDTO = new IssueNotificationDTO(assignedIssue, "ASSIGNMENT");
-            sendToUser(assignedIssue.getAssignedOfficial().getUsername(), notificationDTO);
+            String jsonMessage = webSocketManager.convertToJson(notificationDTO);
+            webSocketManager.sendToUser(assignedIssue.getAssignedOfficial().getUsername(), jsonMessage);
         }
     }
 
-    private void sendToUser(String username, Object payload) {
-        Session session = usernameSessionMap.get(username);
-        if (session != null && session.isOpen()) {
-            try {
-                session.getBasicRemote().sendText(convertToJson(payload));
-            } catch (IOException e) {
-                System.out.println("Error sending message to " + username + ": " + e.getMessage());
-            }
-        }
-    }
+    public void sendCommentNotification(Issue issue, String comment) {
+        IssueNotificationDTO notificationDTO = new IssueNotificationDTO(issue, "COMMENT");
+        notificationDTO.setComment(comment);
+        String jsonMessage = webSocketManager.convertToJson(notificationDTO);
 
-    private String convertToJson(Object object) {
-        // Implement JSON conversion here. Use libraries like Jackson or Gson.
-        return object.toString();
+        // Send to the reporter
+        webSocketManager.sendToUser(issue.getReporter().getUsername(), jsonMessage);
+
+        // Send to the assigned official
+        if (issue.getAssignedOfficial() != null) {
+            webSocketManager.sendToUser(issue.getAssignedOfficial().getUsername(), jsonMessage);
+        }
+
+        // Send to subscribed users
+        List<User> subscribedUsers = getSubscribedUsers(issue);
+        for (User user : subscribedUsers) {
+            webSocketManager.sendToUser(user.getUsername(), jsonMessage);
+        }
     }
 
     private List<User> getSubscribedUsers(Issue issue) {
@@ -93,43 +102,10 @@ public class IssueWebSocketServer {
         return new ArrayList<User>();
     }
 
-    public void broadcast(String message) {
-        sessionUsernameMap.forEach((session, username) -> {
-            try {
-                session.getBasicRemote().sendText(message);
-            } catch (IOException e) {
-                System.out.println("Error broadcasting message to " + username + ": " + e.getMessage());
-            }
-        });
-    }
-
     public void broadcastToSubscribers(Issue issue, String message) {
         List<User> subscribers = getSubscribedUsers(issue);
         for (User subscriber : subscribers) {
-            sendToUser(subscriber.getUsername(), message);
-        }
-    }
-
-    public boolean isUserConnected(String username) {
-        return usernameSessionMap.containsKey(username);
-    }
-
-    public int getConnectedUsersCount() {
-        return usernameSessionMap.size();
-    }
-
-    public List<String> getConnectedUsernames() {
-        return new ArrayList<>(usernameSessionMap.keySet());
-    }
-
-    public void disconnectUser(String username) {
-        Session session = usernameSessionMap.get(username);
-        if (session != null) {
-            try {
-                session.close();
-            } catch (IOException e) {
-                System.out.println("Error disconnecting user " + username + ": " + e.getMessage());
-            }
+            webSocketManager.sendToUser(subscriber.getUsername(), message);
         }
     }
 }

@@ -7,6 +7,8 @@ import org.citywatcher.repository.CommentsRepository;
 import org.citywatcher.repository.IssueRepository;
 import org.citywatcher.repository.UserRepository;
 import org.citywatcher.websocket.IssueWebSocketServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,7 @@ public class CommentsServiceImpl implements CommentsService {
     private final IssueRepository issueRepository;
     private final UserRepository userRepository;
     private final IssueWebSocketServer issueWebSocketServer;
+    private static final Logger logger = LoggerFactory.getLogger(CommentsServiceImpl.class);
 
     @Autowired
     public CommentsServiceImpl(CommentsRepository commentRepository,
@@ -41,7 +44,16 @@ public class CommentsServiceImpl implements CommentsService {
 
         comment.setUser(user);
         comment.setIssue(issue);
-        return commentRepository.save(comment);
+        Comment savedComment = commentRepository.save(comment);
+
+        // Notify relevant users via WebSocket
+        try {
+            issueWebSocketServer.sendCommentNotification(issue, savedComment.getContent());
+        } catch (Exception e) {
+            logger.error("Failed to send WebSocket notification for new comment: " + e.getMessage(), e);
+        }
+
+        return savedComment;
     }
 
     @Override

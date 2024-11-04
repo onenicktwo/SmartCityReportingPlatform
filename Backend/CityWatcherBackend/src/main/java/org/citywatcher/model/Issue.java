@@ -1,7 +1,9 @@
 package org.citywatcher.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -10,21 +12,28 @@ import java.util.List;
 
 @Entity
 @Table(name = "issues")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Issue {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JsonBackReference(value = "issue-reporter")
     @ManyToOne
     @JoinColumn(name = "reporter_id", nullable = false)
     private User reporter;
 
-    @JsonBackReference(value = "issue-assignedOfficial")
     @ManyToOne
     @JoinColumn(name = "assigned_official_id")
     private User assignedOfficial;
+
+    @ManyToMany
+    @JoinTable(
+            name = "issue_volunteers",
+            joinColumns = @JoinColumn(name = "issue_id"),
+            inverseJoinColumns = @JoinColumn(name = "volunteer_id")
+    )
+    private List<User> volunteers = new ArrayList<>();
 
     @Column(nullable = false)
     private String category;
@@ -173,6 +182,25 @@ public class Issue {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public List<User> getVolunteers() {
+        return volunteers;
+    }
+
+    public void setVolunteers(List<User> volunteers) {
+        this.volunteers = volunteers;
+    }
+
+    // Add convenience methods
+    public void addVolunteer(User volunteer) {
+        volunteers.add(volunteer);
+        volunteer.getVolunteerIssues().add(this);
+    }
+
+    public void removeVolunteer(User volunteer) {
+        volunteers.remove(volunteer);
+        volunteer.getVolunteerIssues().remove(this);
     }
 
     @PrePersist
