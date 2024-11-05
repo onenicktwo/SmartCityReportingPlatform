@@ -62,11 +62,13 @@ public class IssueWebSocketServer {
             webSocketManager.sendToUser(updatedIssue.getAssignedOfficial().getUsername(), jsonMessage);
         }
 
-        // Send to subscribed users
-        List<User> subscribedUsers = getSubscribedUsers(updatedIssue);
-        for (User user : subscribedUsers) {
+        List<User> volunteers = updatedIssue.getVolunteers();
+        for(User user : volunteers) {
             webSocketManager.sendToUser(user.getUsername(), jsonMessage);
         }
+
+        // Send to subscribed users
+        broadcastToSubscribers(updatedIssue, jsonMessage);
     }
 
     public void sendAssignmentNotification(Issue assignedIssue) {
@@ -88,6 +90,12 @@ public class IssueWebSocketServer {
         // Send to the assigned official
         if (issue.getAssignedOfficial() != null) {
             webSocketManager.sendToUser(issue.getAssignedOfficial().getUsername(), jsonMessage);
+        }
+
+        //Send to the volunteers
+        List<User> volunteers = issue.getVolunteers();
+        for(User user : volunteers) {
+            webSocketManager.sendToUser(user.getUsername(), jsonMessage);
         }
 
         // Send to subscribed users

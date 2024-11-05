@@ -1,6 +1,10 @@
 package org.citywatcher.websocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.citywatcher.model.UserRole;
+import org.citywatcher.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.Session;
@@ -11,9 +15,16 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class WebSocketManager {
 
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    public static ObjectMapper objectMapper = new ObjectMapper();
     private final Map<Session, String> sessionUsernameMap = new ConcurrentHashMap<>();
     private final Map<String, Session> usernameSessionMap = new ConcurrentHashMap<>();
+
+    static {
+        objectMapper.registerModule(new JavaTimeModule());
+    }
+
+    @Autowired
+    private UserRepository userRepository;
 
     public void addSession(String username, Session session) {
         sessionUsernameMap.put(session, username);
@@ -64,6 +75,24 @@ public class WebSocketManager {
         sessionUsernameMap.forEach((session, username) -> {
             try {
                 session.getBasicRemote().sendText(message);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public void broadcastToOfficials(String message) {
+        usernameSessionMap.forEach((username, session) -> {
+            try {
+                userRepository.findByUsername(username).ifPresent(user -> {
+                    if (user.getRole() == UserRole.CITY_OFFICIAL || user.getRole() == UserRole.ADMIN) {
+                        try {
+                            session.getBasicRemote().sendText(message);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
             } catch (Exception e) {
                 e.printStackTrace();
             }

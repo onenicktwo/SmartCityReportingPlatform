@@ -1,11 +1,11 @@
 package org.citywatcher.service;
 
-import org.citywatcher.model.Comment;
-
+import org.citywatcher.model.Message;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface OfficialChatService {
-    Comment sendMessage(Long userId, Long issueId, Comment message);
-    List<Comment> getOfficialMessages(Long userId, Long issueId);
+    Message sendMessage(Long userId, Message message);
+    List<Message> getMessages(LocalDateTime since, int limit);
     void deleteMessage(Long userId, Long messageId);
 }

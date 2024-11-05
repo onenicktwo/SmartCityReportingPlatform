@@ -1,6 +1,6 @@
 package org.citywatcher.controller;
 
-import org.citywatcher.model.Comment;
+import org.citywatcher.model.Message;
 import org.citywatcher.service.OfficialChatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -21,27 +22,25 @@ public class OfficialChatController {
         this.officialChatService = officialChatService;
     }
 
-    @PostMapping("/users/{userId}/issues/{issueId}/messages")
-    public ResponseEntity<Comment> sendMessage(
-            @PathVariable Long userId,
-            @PathVariable Long issueId,
-            @RequestBody Comment message) {
-        message.setInternalNote(true);
-        Comment sentMessage = officialChatService.sendMessage(userId, issueId, message);
+    @PostMapping("/messages")
+    public ResponseEntity<Message> sendMessage(
+            @RequestParam Long userId,
+            @RequestBody Message message) {
+        Message sentMessage = officialChatService.sendMessage(userId, message);
         return new ResponseEntity<>(sentMessage, HttpStatus.CREATED);
     }
 
-    @GetMapping("/users/{userId}/issues/{issueId}/messages")
-    public ResponseEntity<List<Comment>> getOfficialMessages(
-            @PathVariable Long userId,
-            @PathVariable Long issueId) {
-        List<Comment> messages = officialChatService.getOfficialMessages(userId, issueId);
+    @GetMapping("/messages")
+    public ResponseEntity<List<Message>> getMessages(
+            @RequestParam(required = false) LocalDateTime since,
+            @RequestParam(defaultValue = "50") int limit) {
+        List<Message> messages = officialChatService.getMessages(since, limit);
         return new ResponseEntity<>(messages, HttpStatus.OK);
     }
 
-    @DeleteMapping("/users/{userId}/messages/{messageId}")
+    @DeleteMapping("/messages/{messageId}")
     public ResponseEntity<Void> deleteMessage(
-            @PathVariable Long userId,
+            @RequestParam Long userId,
             @PathVariable Long messageId) {
         try {
             officialChatService.deleteMessage(userId, messageId);
