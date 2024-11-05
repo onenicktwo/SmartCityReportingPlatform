@@ -1,75 +1,68 @@
 package org.citywatcher.service;
 
-import org.citywatcher.model.Comment;
-import org.citywatcher.model.Issue;
-import org.citywatcher.model.User;
-import org.citywatcher.model.UserRole;
+import org.citywatcher.model.*;
 import org.citywatcher.repository.CommentsRepository;
 import org.citywatcher.repository.IssueRepository;
+import org.citywatcher.repository.MessageRepository;
 import org.citywatcher.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-public class OfficialChatServiceImpl implements OfficialChatService{
-    private final CommentsRepository commentRepository;
-    private final IssueRepository issueRepository;
+public class OfficialChatServiceImpl implements OfficialChatService {
+    private final MessageRepository messageRepository;
     private final UserRepository userRepository;
 
     @Autowired
     public OfficialChatServiceImpl(
-            CommentsRepository commentRepository,
-            IssueRepository issueRepository,
+            MessageRepository messageRepository,
             UserRepository userRepository) {
-        this.commentRepository = commentRepository;
-        this.issueRepository = issueRepository;
+        this.messageRepository = messageRepository;
         this.userRepository = userRepository;
     }
 
-    public Comment sendMessage(Long userId, Long issueId, Comment message) {
+    @Override
+    public Message sendMessage(Long userId, Message message) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
         validateOfficialAccess(user);
 
-        Issue issue = issueRepository.findById(issueId)
-                .orElseThrow(() -> new EntityNotFoundException("Issue not found"));
+        message.setSenderId(userId);
+        message.setTimestamp(LocalDateTime.now());
 
-        message.setUser(user);
-        message.setIssue(issue);
-        message.setInternalNote(true);
-
-        return commentRepository.save(message);
+        return messageRepository.save(message);
     }
 
-    public List<Comment> getOfficialMessages(Long userId, Long issueId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-        validateOfficialAccess(user);
-
-        return commentRepository.findByIssueIdAndIsInternalNoteTrueOrderByTimestampDesc(issueId);
+    @Override
+    public List<Message> getMessages(LocalDateTime since, int limit) {
+        Pageable pageable = PageRequest.of(0, limit);
+        if (since != null) {
+            return messageRepository.findByTimestampGreaterThanOrderByTimestampDesc(since, pageable);
+        }
+        return messageRepository.findAllByOrderByTimestampDesc(pageable);
     }
 
+    @Override
     public void deleteMessage(Long userId, Long messageId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
         validateOfficialAccess(user);
 
-        Comment message = commentRepository.findById(messageId)
+        Message message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new EntityNotFoundException("Message not found"));
 
-        if (!message.isInternalNote()) {
-            throw new IllegalStateException("Cannot delete non-internal messages through official chat");
-        }
-
         if (user.getRole() != UserRole.ADMIN &&
-                !message.getUser().getId().equals(user.getId())) {
+                !message.getSenderId().equals(userId)) {
             throw new IllegalStateException("You can only delete your own messages");
         }
 
-        commentRepository.delete(message);
+        messageRepository.delete(message);
     }
 
     private void validateOfficialAccess(User user) {
