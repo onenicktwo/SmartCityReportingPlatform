@@ -1,11 +1,11 @@
 package com.example.citywatcherfrontend;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -24,16 +24,10 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class CreateIssueActivity extends CityWatcherActivity {
-
-    private final String MAPS_KEY = "AIzaSyBWM0V9EhmOR0jCz7NYo9xDcmOW6Ni-trc";
-
     private String URL;
 
     // Initialize activity variables
@@ -45,6 +39,7 @@ public class CreateIssueActivity extends CityWatcherActivity {
     private Button buttonSubmitIssue;
     private JSONObject requestParams = new JSONObject();
 
+    private String formattedAddress;
     private LatLng latlng;
 
 
@@ -74,37 +69,35 @@ public class CreateIssueActivity extends CityWatcherActivity {
 
                         @Override
                         public void run() {
+                            final String[] address = {editIssueLocation.getText().toString().replace(" ", "+")};
+                            String stringUrl = "https://maps.googleapis.com/maps/api/geocode/json?address=" + address[0] + "&key=" + MAPS_KEY;
                             try {
-                                String address = editIssueLocation.getText().toString().replace(" ", "+");
-                                String stringUrl = "https://maps.googleapis.com/maps/api/geocode/json?address=" + address + "&key=" + MAPS_KEY;
-                                HTTPRequestHandler httpHandler = new HTTPRequestHandler();
-                                response = httpHandler.getDataFromURL(stringUrl);
-
-                                handler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-
-                                        JSONObject jsonObject = null;
-                                        try {
-                                            if (!response.isEmpty()) {
-                                                jsonObject = new JSONObject(response);
-                                                String lat = jsonObject.getJSONArray("results").getJSONObject(0).getJSONObject("geometry").getJSONObject("location").get("lat").toString();
-                                                String lng = jsonObject.getJSONArray("results").getJSONObject(0).getJSONObject("geometry").getJSONObject("location").get("lng").toString();
-                                                latlng = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
-
-                                                putIssueParams();
-                                                makeCreateIssueReq();
-                                            } else {
-                                                Toast.makeText(CreateIssueActivity.this, "Invalid address", Toast.LENGTH_LONG).show();
-                                            }
-                                        } catch (JSONException e) {
-                                            throw new RuntimeException(e);
-                                        }
-                                    }
-                                });
-                            } catch (JSONException | IOException e) {
+                                response = CityWatcherController.getInstance().getDataFromURL(stringUrl);
+                            } catch (IOException | JSONException e) {
                                 throw new RuntimeException(e);
                             }
+
+                            handler.post(new Runnable() {
+                                @Override
+                                public void run() {
+
+                                    JSONObject jsonObject = null;
+                                    try {
+                                        if (!response.isEmpty()) {
+                                            Pair<String, LatLng> locationData = CityWatcherController.getInstance().convertDataToLocation(response);
+                                            formattedAddress = locationData.first;
+                                            latlng = locationData.second;
+
+                                            putIssueParams();
+                                            makeCreateIssueReq();
+                                        } else {
+                                            Toast.makeText(CreateIssueActivity.this, "Invalid address", Toast.LENGTH_LONG).show();
+                                        }
+                                    } catch (JSONException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                            });
                         }
                     });
                 }
@@ -158,6 +151,7 @@ public class CreateIssueActivity extends CityWatcherActivity {
             requestParams.put("description", editIssueDescription.getText().toString());
             requestParams.put("latitude", latlng.latitude);
             requestParams.put("longitude", latlng.longitude);
+            requestParams.put("address", formattedAddress);
             requestParams.put("category", editIssueType.getText().toString());
             requestParams.put("status", "REPORTED");
             requestParams.put("imagePath", "");

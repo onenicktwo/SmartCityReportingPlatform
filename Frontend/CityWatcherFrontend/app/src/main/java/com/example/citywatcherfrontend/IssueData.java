@@ -4,11 +4,10 @@ package com.example.citywatcherfrontend;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.ArrayList;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class IssueData {
      private int id;
+     private UserInfo reporter = new UserInfo();
      private String title;
      private String category;
      private String description;
@@ -16,12 +15,8 @@ public class IssueData {
      private String imagePath;
      private double latitude;
      private double longitude;
+     private String address;
      private int assigned_official_id;
-     private int reporter_id;
-
-
-    public IssueData() {
-    }
 
     public String getTitle() {
         return title;
@@ -87,12 +82,12 @@ public class IssueData {
         this.assigned_official_id = assigned_official_id;
     }
 
-    public int getReporter_id() {
-        return reporter_id;
+    public UserInfo getReporter() {
+        return reporter;
     }
 
-    public void setReporter_id(int reporter_id) {
-        this.reporter_id = reporter_id;
+    public void setReporter(UserInfo reporter) {
+        this.reporter = reporter;
     }
 
     public int getId() {
@@ -101,5 +96,13 @@ public class IssueData {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }

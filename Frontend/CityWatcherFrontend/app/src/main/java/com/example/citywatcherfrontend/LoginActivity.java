@@ -1,7 +1,5 @@
 package com.example.citywatcherfrontend;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -28,7 +26,6 @@ Author @Sam Hostetter
 public class LoginActivity extends CityWatcherActivity {
     private EditText etUsername, etPassword;
     private Button btnLogin;
-    private int userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,20 +67,24 @@ public class LoginActivity extends CityWatcherActivity {
                     public void onResponse(String response) {
                         try {
                             JSONArray usersArray = new JSONArray(response);
-                            boolean loginSuccessful = false;
 
                             // Loop through users and check if the username and password match
                             for (int i = 0; i < usersArray.length(); i++) {
                                 JSONObject user = usersArray.getJSONObject(i);
                                 if (user.getString("username").equals(username) && user.getString("password").equals(password)) {
-                                    loginSuccessful = true;
-                                    userId = user.getInt("id");
+                                    CityWatcherController.getInstance().setLoggedIn(true);
+                                    CityWatcherController.getInstance().setUserId(user.getInt("id"));
                                     break;
                                 }
 
                             }
 
-                            if (loginSuccessful) {
+                            if (CityWatcherController.getInstance().isLoggedIn()) {
+                                serverURL = "http://coms-3090-026.class.las.iastate.edu:8080/ws/issues/" + CityWatcherController.getInstance().getUserId();
+                                WebSocketManager.getInstance().connectWebSocket(serverURL);
+                                WebSocketManager.getInstance().setWebSocketListener(LoginActivity.this);
+                                CityWatcherController.getInstance().setConnected(true);
+
                                 Toast.makeText(LoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
                                 Intent homeIntent = new Intent(LoginActivity.this, MainActivity.class);
                                 startActivity(homeIntent);

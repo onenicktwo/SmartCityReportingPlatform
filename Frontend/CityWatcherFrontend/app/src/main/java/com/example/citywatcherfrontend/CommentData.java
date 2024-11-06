@@ -8,11 +8,9 @@ import java.util.Date;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CommentData {
     private int id;
-    @JsonProperty("user_id")
-    private int userId;
     @JsonProperty("issue_id")
     private int issueId;
-    private String commenter;
+    private UserInfo commenter;
     private String content;
     @JsonProperty("timestamp")
     private Date date;
@@ -30,19 +28,11 @@ public class CommentData {
         this.id = id;
     }
 
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-
-    public String getCommenter() {
+    public UserInfo getCommenter() {
         return commenter;
     }
 
-    public void setCommenter(String commenter) {
+    public void setCommenter(UserInfo commenter) {
         this.commenter = commenter;
     }
 

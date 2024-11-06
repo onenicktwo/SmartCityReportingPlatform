@@ -32,6 +32,7 @@ import java.util.Map;
 public class IssueDetailsActivity extends CityWatcherActivity {
 
     private int issueId;
+    private int reporterId;
     private int commentId;
     private String URL;
 
@@ -70,6 +71,7 @@ public class IssueDetailsActivity extends CityWatcherActivity {
 
         URL = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/" + userId + "/issues";
         issueId = bundle.getInt("id");
+        reporterId = bundle.getInt("reporter");
 
         issueDetailsImage = findViewById(R.id.issueDetailsImage);
         issueDetailsCategory = findViewById(R.id.issueDetailsCategory);
@@ -90,9 +92,9 @@ public class IssueDetailsActivity extends CityWatcherActivity {
         issueDetailsTitle.setText(bundle.getString("title"));
         issueDetailsCategory.setText(bundle.getString("category"));
         // TODO Set reporter
-        issueDetailsReporter.setText("Reporter");
+        issueDetailsReporter.setText(bundle.getString("reporter"));
         // TODO Set location
-        issueDetailsLocation.setText("Location");
+        issueDetailsLocation.setText(bundle.getString("address"));
 
 
         String status = bundle.getString("status");
@@ -108,8 +110,17 @@ public class IssueDetailsActivity extends CityWatcherActivity {
         }
 
         issueDetailsDescription.setText(bundle.getString("description"));
+        issueDetailsLocation.setText(bundle.getString("address"));
 
-        fetchDetailIssue(issueId);
+        if (loggedIn) {
+            if (CityWatcherController.getInstance().getUserId() != reporterId) {
+                buttonEditIssue.setVisibility(View.GONE);
+                buttonDeleteIssue.setVisibility(View.GONE);
+            }
+        } else {
+            addComment.setVisibility(View.GONE);
+            buttonAddComment.setVisibility(View.GONE);
+        }
 
         // TODO Set buttons for admin view
 
@@ -273,7 +284,7 @@ public class IssueDetailsActivity extends CityWatcherActivity {
             Intent intent = new Intent(IssueDetailsActivity.this, EditCommentActivity.class);
             Bundle bundle = new Bundle();
             CommentData comment = commentArrayList.get(i);
-            bundle.putInt("userID", comment.getUserId());
+            bundle.putInt("userID", comment.getCommenter().getId());
             bundle.putInt("issueID", comment.getIssueId());
             bundle.putInt("commentID", comment.getId());
             intent.putExtras(bundle);
@@ -317,41 +328,6 @@ public class IssueDetailsActivity extends CityWatcherActivity {
         VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonObjReq);
         Intent intent = new Intent(IssueDetailsActivity.this, ViewIssuesActivity.class);
         startActivity(intent);
-    }
-
-    private void fetchDetailIssue(int issueId) {
-        String requestUrl = URL + "/" + issueId;
-
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
-                Request.Method.GET, requestUrl, null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            JSONArray commentsArray = response.getJSONArray("comments");
-                            if (commentsArray.length() > 0) {
-                                JSONObject comment = commentsArray.getJSONObject(0);
-                                String commentContent = comment.getString("content");
-                                issueDetailsComment.setText(commentContent);
-                                commentId = comment.getInt("id");
-
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            Log.e("IssueDetails", "Error parsing JSON response", e);
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("IssueDetails", "Error fetching issue details", error);
-                    }
-                }
-        );
-
-        // Add request to Volley queue
-        VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonObjectRequest);
     }
 
 }
