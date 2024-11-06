@@ -16,7 +16,7 @@
     <EditText
         android:layout_height="50dp"
         android:layout_width="match_parent"
-        android:text="http://coms-3090-026.class.las.iastate.edu:8080/"
+        android:text="http://coms-3090-026.class.las.iastate.edu:8080/ws/official-chat/"
         android:textSize="20dp"
         android:id="@+id/serverEdt" />
     <EditText
