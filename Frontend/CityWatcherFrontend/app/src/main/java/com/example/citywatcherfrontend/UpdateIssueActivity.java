@@ -2,22 +2,30 @@ package com.example.citywatcherfrontend;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class UpdateIssueActivity extends CityWatcherActivity {
 
@@ -27,9 +35,10 @@ public class UpdateIssueActivity extends CityWatcherActivity {
 
     // Initialize activity variables
     // TODO Allow options for users to upload an image and select a location
-    private EditText editIssueName;
-    private EditText editIssueType;
-    private EditText editIssueDescription;
+    private EditText updateIssueName;
+    private EditText updateIssueType;
+    private EditText updateIssueStatus;
+    private EditText updateIssueDescription;
     private Button buttonSubmitIssue;
     private JSONObject requestParams = new JSONObject();
 
@@ -43,35 +52,40 @@ public class UpdateIssueActivity extends CityWatcherActivity {
         issueId = bundle.getInt("id");
         URL = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/" + userId + "/issues/" + issueId;
 
-        editIssueName = findViewById(R.id.editIssueName);
-        editIssueType = findViewById(R.id.editIssueType);
-        editIssueDescription = findViewById(R.id.editIssueDescription);
+        updateIssueName = findViewById(R.id.updateIssueName);
+        updateIssueType = findViewById(R.id.updateIssueType);
+        updateIssueStatus = findViewById(R.id.updateIssueStatus);
+        updateIssueDescription = findViewById(R.id.updateIssueDescription);
         buttonSubmitIssue = findViewById(R.id.buttonSubmitIssue);
 
         // Submit listener
         buttonSubmitIssue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!editIssueName.getText().toString().isEmpty() && !editIssueType.getText().toString().isEmpty() && !editIssueDescription.getText().toString().isEmpty()) {
                     try {
-                        requestParams.put("title", editIssueName.getText().toString());
-                        requestParams.put("description", editIssueDescription.getText().toString());
-                        requestParams.put("category", editIssueType.getText().toString());
-                        requestParams.put("status", "REPORTED");
-                        requestParams.put("latitude", 0);
-                        requestParams.put("longitude", 0);
-                        requestParams.put("imagePath", "");
-                    } catch (JSONException e) {
+                        if (!updateIssueName.getText().toString().isEmpty())  {
+                            requestParams.put("title", updateIssueName.getText().toString());
+                        }
+                        if (!updateIssueType.getText().toString().isEmpty()) {
+                            requestParams.put("category", updateIssueType.getText().toString());
+                        }
+                        if (!updateIssueDescription.getText().toString().isEmpty()) {
+                            requestParams.put("description", updateIssueDescription.getText().toString());
+                        }
+                        if (!updateIssueStatus.getText().toString().isEmpty()) {
+                            requestParams.put("status", updateIssueStatus.getText().toString());
+                        }
+                    } catch (NullPointerException | JSONException e) {
                         throw new RuntimeException(e);
                     }
-                    makeCreateIssueReq();
+                    makeUpdateIssueReq();
                 }
             }
-        });
+        );
     }
 
-    // POST Request to create an issue
-    private void makeCreateIssueReq() {
+    // POST Request to Update an issue
+    private void makeUpdateIssueReq() {
         JsonObjectRequest jsonObjReq = new JsonObjectRequest(
                 Request.Method.PUT,
                 URL,

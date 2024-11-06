@@ -17,7 +17,7 @@
 
     <TextView
         android:id="@+id/issueDetailsTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
@@ -48,7 +48,7 @@
 
     <TextView
         android:id="@+id/issueDetailsReporter"
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="1dp"
@@ -58,7 +58,7 @@
 
     <TextView
         android:id="@+id/issueDetailsLocation"
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="5dp"

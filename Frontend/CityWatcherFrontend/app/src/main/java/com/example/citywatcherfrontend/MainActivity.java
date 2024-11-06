@@ -17,6 +17,10 @@ public class MainActivity extends CityWatcherActivity implements View.OnClickLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        String serverURL = "ws://10.0.2.2:8080/ws/issues/" + userId;
+
+
+
         btnAdminView = findViewById(R.id.btnAdminView);
         btnAdminView.setOnClickListener(this);
 

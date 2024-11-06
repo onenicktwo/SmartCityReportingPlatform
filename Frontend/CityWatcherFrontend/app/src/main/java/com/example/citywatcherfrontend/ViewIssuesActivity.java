@@ -1,14 +1,17 @@
 package com.example.citywatcherfrontend;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
@@ -17,10 +20,8 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.example.citywatcherfrontend.databinding.ActivityViewIssuesBinding;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -30,15 +31,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.w3c.dom.Comment;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 
 
 public class ViewIssuesActivity extends CityWatcherActivity implements OnMapReadyCallback {
@@ -57,6 +53,16 @@ public class ViewIssuesActivity extends CityWatcherActivity implements OnMapRead
     private SupportMapFragment mapFragment;
     private MarkerOptions markerOptions;
 
+    private ConstraintLayout issuePopupContainer;
+    private ImageView issuePopupImage;
+    private TextView issuePopupTitle;
+    private TextView issuePopupCategory;
+    private TextView issuePopupReporter;
+    private TextView issuePopupLocation;
+    private TextView issuePopupStatus;
+    private Button buttonIssuePopupDetails;
+    private ImageButton buttonIssuePopupExit;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,11 +71,28 @@ public class ViewIssuesActivity extends CityWatcherActivity implements OnMapRead
         binding = ActivityViewIssuesBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
+        issuePopupContainer = findViewById(R.id.viewIssuesPopupContainer);
+        issuePopupImage = findViewById(R.id.viewIssuesPopUpImage);
+        issuePopupTitle = findViewById(R.id.viewIssuesPopupTitle);
+        issuePopupCategory = findViewById(R.id.viewIssuesPopupCategory);
+        issuePopupReporter = findViewById(R.id.viewIssuesPopupReporter);
+        issuePopupLocation = findViewById(R.id.viewIssuesPopupLocation);
+        issuePopupStatus = findViewById(R.id.viewIssuesPopupStatus);
+        buttonIssuePopupDetails = findViewById(R.id.buttonViewIssuesPopupDetails);
+        buttonIssuePopupExit = findViewById(R.id.buttonViewIssuesPopupExit);
 
-        // makeGetIssuesReqList();
+        issuePopupContainer.setVisibility(View.GONE);
+
+        buttonIssuePopupExit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                issuePopupContainer.setVisibility(View.GONE);
+            }
+        });
+
         makeGetIssuesReqMap();
-
         mapFragment.getMapAsync((OnMapReadyCallback) this);
     }
 
@@ -85,6 +108,7 @@ public class ViewIssuesActivity extends CityWatcherActivity implements OnMapRead
                         for (int i = 0; i < response.length(); i++) {
                             try {
                                 String jsonString = response.get(i).toString();
+                                System.out.println(jsonString);
                                 issue = mapper.readValue(jsonString, IssueData.class);
                                 issueArrayList.add(issue);
                             } catch (JSONException | JsonProcessingException e) {
@@ -131,19 +155,45 @@ public class ViewIssuesActivity extends CityWatcherActivity implements OnMapRead
         googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(@NonNull Marker marker) {
+                issuePopupContainer.setVisibility(View.VISIBLE);
+
                 int i = markerMap.get(marker);
 
-                Intent intent = new Intent(ViewIssuesActivity.this, IssueDetailsActivity.class);
+                // issueImage.setImageResource();
+                // issuePopupReporter.setText(issueArrayList.get(i))
+                issuePopupTitle.setText(issueArrayList.get(i).getTitle());
+                issuePopupCategory.setText(issueArrayList.get(i).getCategory());
+                issuePopupLocation.setText(issueArrayList.get(i).getAddress());
 
-                intent.putExtra("id", issueArrayList.get(i).getId());
-                intent.putExtra("title", issueArrayList.get(i).getTitle());
-                intent.putExtra("category", issueArrayList.get(i).getCategory());
-                intent.putExtra("latitude", issueArrayList.get(i).getLatitude());
-                intent.putExtra("longitude", issueArrayList.get(i).getLongitude());
-                intent.putExtra("status", issueArrayList.get(i).getStatus());
-                intent.putExtra("description", issueArrayList.get(i).getDescription());
+                String status = issueArrayList.get(i).getStatus();
+                if (status.equals("REPORTED")) {
+                    issuePopupStatus.setText("Reported");
+                    issuePopupStatus.setTextColor(Color.RED);
+                } else if (status.equals("UNDER_REVIEW")) {
+                    issuePopupStatus.setText("Under Review");
+                    issuePopupStatus.setTextColor(Color.YELLOW);
+                } else {
+                    issuePopupStatus.setText("Completed");
+                    issuePopupStatus.setTextColor(Color.GREEN);
+                }
 
-                startActivity(intent);
+                buttonIssuePopupDetails.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(ViewIssuesActivity.this, IssueDetailsActivity.class);
+
+                        intent.putExtra("id", issueArrayList.get(i).getId());
+                        intent.putExtra("reporter", issueArrayList.get(i).getReporter().getUsername());
+                        intent.putExtra("title", issueArrayList.get(i).getTitle());
+                        intent.putExtra("category", issueArrayList.get(i).getCategory());
+                        intent.putExtra("address", issueArrayList.get(i).getAddress());
+                        intent.putExtra("status", issueArrayList.get(i).getStatus());
+                        intent.putExtra("description", issueArrayList.get(i).getDescription());
+
+                        startActivity(intent);
+
+                    }
+                });
                 return false;
             }
         });
