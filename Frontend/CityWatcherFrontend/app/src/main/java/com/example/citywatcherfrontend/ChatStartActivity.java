@@ -1,18 +1,20 @@
 package com.example.citywatcherfrontend;
 
-import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 
+
+
 import org.java_websocket.handshake.ServerHandshake;
+
 
 
 public class ChatStartActivity extends CityWatcherActivity implements WebSocketListener {
     private Button connectBtn;
-    private EditText serverEtx, usernameEtx;
+    private EditText serverEtx, usernameEtx, useridEtx;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +25,7 @@ public class ChatStartActivity extends CityWatcherActivity implements WebSocketL
         connectBtn = (Button) findViewById(R.id.connectBtn);
         serverEtx = (EditText) findViewById(R.id.serverEdt);
         usernameEtx = (EditText) findViewById(R.id.unameEdt);
+        useridEtx = (EditText) findViewById(R.id.uidEdt);
 
         /* connect button listener */
         connectBtn.setOnClickListener(view -> {
@@ -32,8 +35,10 @@ public class ChatStartActivity extends CityWatcherActivity implements WebSocketL
             WebSocketManager.getInstance().connectWebSocket(serverUrl);
             WebSocketManager.getInstance().setWebSocketListener(ChatStartActivity.this);
 
-            // got to chat activity
+            String userID = useridEtx.getText().toString();
+
             Intent intent = new Intent(this, CityOfficalAdminChatroom.class);
+            intent.putExtra("USER_ID", userID);
             startActivity(intent);
         });
     }
@@ -51,6 +56,9 @@ public class ChatStartActivity extends CityWatcherActivity implements WebSocketL
     @Override
     public void onWebSocketError(Exception ex) {}
 }
+
+
+
 
 
 

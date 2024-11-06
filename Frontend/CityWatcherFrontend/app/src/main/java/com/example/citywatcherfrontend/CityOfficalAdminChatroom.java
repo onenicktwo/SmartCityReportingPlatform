@@ -8,7 +8,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.example.citywatcherfrontend.CityWatcherActivity;
+import com.example.citywatcherfrontend.R;
+import com.example.citywatcherfrontend.WebSocketListener;
+import com.example.citywatcherfrontend.WebSocketManager;
+
 import org.java_websocket.handshake.ServerHandshake;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 public class CityOfficalAdminChatroom extends CityWatcherActivity implements WebSocketListener {
@@ -22,6 +29,8 @@ public class CityOfficalAdminChatroom extends CityWatcherActivity implements Web
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cityadminchatoom);
 
+        String userID = getIntent().getStringExtra("USER_ID");
+
         /* initialize UI elements */
         sendBtn = (Button) findViewById(R.id.sendBtn);
         msgEtx = (EditText) findViewById(R.id.msgEdt);
@@ -33,12 +42,20 @@ public class CityOfficalAdminChatroom extends CityWatcherActivity implements Web
         /* send button listener */
         sendBtn.setOnClickListener(v -> {
             try {
-                // send message
-                WebSocketManager.getInstance().sendMessage(msgEtx.getText().toString());
-            } catch (Exception e) {
-                Log.d("ExceptionSendMessage:", e.getMessage().toString());
+                // Create the JSON message to send
+                JSONObject jsonMessage = new JSONObject();
+                jsonMessage.put("senderId", userID);
+                jsonMessage.put("content", msgEtx.getText().toString());
+
+                // Send JSON message through WebSocket
+                WebSocketManager.getInstance().sendMessage(jsonMessage.toString());
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Log.d("ExceptionSendMessage", e.getMessage());
             }
         });
+
     }
 
 
