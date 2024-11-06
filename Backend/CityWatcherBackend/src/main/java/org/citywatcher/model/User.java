@@ -11,7 +11,6 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,12 +30,15 @@ public class User {
     private UserRole role;
 
     @OneToMany(mappedBy = "reporter")
+    @JsonIgnore
     private List<Issue> reportedIssues = new ArrayList<>();
 
     @OneToMany(mappedBy = "assignedOfficial")
+    @JsonIgnore
     private List<Issue> assignedIssues = new ArrayList<>();
 
     @ManyToMany(mappedBy = "volunteers")
+    @JsonIgnore
     private List<Issue> volunteerIssues = new ArrayList<>();
 
     public User() {
