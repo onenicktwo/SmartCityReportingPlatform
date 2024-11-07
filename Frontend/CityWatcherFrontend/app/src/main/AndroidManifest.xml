@@ -43,6 +43,9 @@
         <activity android:name=".EditUserActivity"></activity>
         <activity android:name=".DeleteUserActivity"></activity>
         <activity android:name=".EditCommentActivity"></activity>
+        <activity android:name=".CityOfficalAdminChatroom"></activity>
+        <activity android:name=".ChatStartActivity"></activity>
+
 
 
 

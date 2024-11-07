@@ -21,8 +21,8 @@
         android:id="@+id/editUserButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Edit User"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="16dp"
+        android:text="Edit User" />
 
     <Button
         android:id="@+id/deleteUserButton"
@@ -30,6 +30,12 @@
         android:layout_height="wrap_content"
         android:text="Delete User"
         android:layout_marginTop="16dp" />
+
+    <Button
+        android:id="@+id/chatButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Chatroom" />
 
 
 </LinearLayout>
