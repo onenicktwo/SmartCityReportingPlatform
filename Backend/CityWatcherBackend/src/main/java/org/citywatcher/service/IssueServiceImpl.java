@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -39,6 +40,40 @@ public class IssueServiceImpl implements IssueService {
     public Issue createIssue(Long userId, Issue issue) {
         User reporter = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid reporter ID"));
+
+        if (issue.getTitle() == null || issue.getTitle().trim().isEmpty()) {
+            issue.setTitle("Untitled");
+        }
+        if (issue.getDescription() == null || issue.getDescription().trim().isEmpty()) {
+            issue.setDescription("");
+        }
+        if (issue.getLatitude() == null || issue.getLongitude() == null) {
+            throw new IllegalArgumentException("Location coordinates are required");
+        }
+        if (issue.getAddress() == null || issue.getAddress().trim().isEmpty()) {
+            throw new IllegalArgumentException("Address is required");
+        }
+
+        if (issue.getStatus() == null) {
+            issue.setStatus(IssueStatus.REPORTED);
+        }
+
+        if (issue.getCategory() == null) {
+            issue.setCategory("Other");
+        }
+
+        if (issue.getImagePath() == null) {
+            issue.setImagePath("");
+        }
+
+        if (issue.getVolunteers() == null) {
+            issue.setVolunteers(new ArrayList<>());
+        }
+
+        if (issue.getComments() == null) {
+            issue.setComments(new ArrayList<>());
+        }
+
         issue.setReporter(reporter);
 
         if (issue.getAssignedOfficial() != null) {
@@ -47,8 +82,10 @@ public class IssueServiceImpl implements IssueService {
             issue.setAssignedOfficial(assignedOfficial);
         }
 
-        issue.setReportedDate(new Date());
-        issue.setLastUpdatedDate(new Date());
+        Date currentTime = new Date();
+        issue.setReportedDate(currentTime);
+        issue.setLastUpdatedDate(currentTime);
+
         Issue savedIssue = issueRepository.save(issue);
 
         try {
@@ -81,31 +118,46 @@ public class IssueServiceImpl implements IssueService {
     public Issue updateIssue(Long userId, Long issueId, Issue issueDetails) {
         Issue existingIssue = getIssueById(userId, issueId);
         if (existingIssue != null) {
+            // Dont update reporter
             User reporter = userRepository.findById(userId)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid reporter ID"));
 
-            boolean statusChanged = !existingIssue.getStatus().equals(issueDetails.getStatus());
-            boolean isRelevantStatus = issueDetails.getStatus() == IssueStatus.UNDER_REVIEW
-                    || issueDetails.getStatus() == IssueStatus.COMPLETED;
+            boolean statusChanged = issueDetails.getStatus() != null &&
+                    !existingIssue.getStatus().equals(issueDetails.getStatus());
+            boolean isRelevantStatus = issueDetails.getStatus() != null &&
+                    (issueDetails.getStatus() == IssueStatus.UNDER_REVIEW
+                            || issueDetails.getStatus() == IssueStatus.COMPLETED);
             User previousAssignedOfficial = existingIssue.getAssignedOfficial();
-            User newAssignedOfficial = issueDetails.getAssignedOfficial();
 
-            existingIssue.setTitle(issueDetails.getTitle());
-            existingIssue.setDescription(issueDetails.getDescription());
-            existingIssue.setCategory(issueDetails.getCategory());
-            existingIssue.setStatus(issueDetails.getStatus());
-            existingIssue.setLatitude(issueDetails.getLatitude());
-            existingIssue.setLongitude(issueDetails.getLongitude());
-            existingIssue.setAddress((issueDetails.getAddress()));
-            existingIssue.setImagePath(issueDetails.getImagePath());
-            existingIssue.setReporter(reporter);
+            if (issueDetails.getTitle() != null) {
+                existingIssue.setTitle(issueDetails.getTitle());
+            }
+            if (issueDetails.getDescription() != null) {
+                existingIssue.setDescription(issueDetails.getDescription());
+            }
+            if (issueDetails.getCategory() != null) {
+                existingIssue.setCategory(issueDetails.getCategory());
+            }
+            if (issueDetails.getStatus() != null) {
+                existingIssue.setStatus(issueDetails.getStatus());
+            }
+            if (issueDetails.getLatitude() != null) {
+                existingIssue.setLatitude(issueDetails.getLatitude());
+            }
+            if (issueDetails.getLongitude() != null) {
+                existingIssue.setLongitude(issueDetails.getLongitude());
+            }
+            if (issueDetails.getAddress() != null) {
+                existingIssue.setAddress(issueDetails.getAddress());
+            }
+            if (issueDetails.getImagePath() != null) {
+                existingIssue.setImagePath(issueDetails.getImagePath());
+            }
 
             if (issueDetails.getAssignedOfficial() != null) {
                 User assignedOfficial = userRepository.findById(issueDetails.getAssignedOfficial().getId())
                         .orElseThrow(() -> new IllegalArgumentException("Invalid assigned official ID"));
                 existingIssue.setAssignedOfficial(assignedOfficial);
-            } else {
-                existingIssue.setAssignedOfficial(null);
             }
 
             existingIssue.setLastUpdatedDate(new Date());
@@ -115,8 +167,11 @@ public class IssueServiceImpl implements IssueService {
                 if (statusChanged && isRelevantStatus) {
                     issueWebSocketServer.sendIssueStatusUpdate(updatedIssue);
                 }
+
+                User newAssignedOfficial = updatedIssue.getAssignedOfficial();
                 if (newAssignedOfficial != null) {
-                    if (previousAssignedOfficial == null || previousAssignedOfficial.getUsername().equals(newAssignedOfficial.getUsername())) {
+                    if (previousAssignedOfficial == null ||
+                            !previousAssignedOfficial.getUsername().equals(newAssignedOfficial.getUsername())) {
                         issueWebSocketServer.sendAssignmentNotification(updatedIssue);
                     }
                 }
