@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends CityWatcherActivity implements View.OnClickListener {
 
-    private Button btnAdminView;
+    private Button btnAdminView, btnCitizenView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,7 +22,9 @@ public class MainActivity extends CityWatcherActivity implements View.OnClickLis
 
 
         btnAdminView = findViewById(R.id.btnAdminView);
+        btnCitizenView = findViewById(R.id.btnCitizenView);
         btnAdminView.setOnClickListener(this);
+        btnCitizenView.setOnClickListener(this);
 
 
 
@@ -35,6 +37,15 @@ public class MainActivity extends CityWatcherActivity implements View.OnClickLis
                 startActivity(mainIntent);
             }
         });
+        btnCitizenView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Navigate to CitizenViewActivity
+                Intent mainIntent = new Intent(MainActivity.this, CitizenViewActivity.class);
+                startActivity(mainIntent);
+            }
+        });
+
 
 
     }
