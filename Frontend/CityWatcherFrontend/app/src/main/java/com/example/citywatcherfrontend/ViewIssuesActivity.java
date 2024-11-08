@@ -160,7 +160,7 @@ public class ViewIssuesActivity extends CityWatcherActivity implements OnMapRead
                 int i = markerMap.get(marker);
 
                 // issueImage.setImageResource();
-                // issuePopupReporter.setText(issueArrayList.get(i))
+                issuePopupReporter.setText(issueArrayList.get(i).getReporter().getUsername());
                 issuePopupTitle.setText(issueArrayList.get(i).getTitle());
                 issuePopupCategory.setText(issueArrayList.get(i).getCategory());
                 issuePopupLocation.setText(issueArrayList.get(i).getAddress());
@@ -183,7 +183,7 @@ public class ViewIssuesActivity extends CityWatcherActivity implements OnMapRead
                         Intent intent = new Intent(ViewIssuesActivity.this, IssueDetailsActivity.class);
 
                         intent.putExtra("id", issueArrayList.get(i).getId());
-                        intent.putExtra("reporter", issueArrayList.get(i).getReporter().getUsername());
+                        intent.putExtra("reporter", issueArrayList.get(i).getReporter().getId());
                         intent.putExtra("title", issueArrayList.get(i).getTitle());
                         intent.putExtra("category", issueArrayList.get(i).getCategory());
                         intent.putExtra("address", issueArrayList.get(i).getAddress());

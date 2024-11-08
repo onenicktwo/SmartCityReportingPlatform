@@ -17,8 +17,10 @@ public class CityWatcherController {
     private static CityWatcherController instance;
 
     private int userId;
+    private String username;
     private boolean loggedIn;
     private boolean connected;
+
 
     public static CityWatcherController getInstance() {
         if (instance == null) {
@@ -39,6 +41,14 @@ public class CityWatcherController {
 
     public void setUserId(int userId) {
         this.userId = userId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public void setLoggedIn(boolean loggedIn) {
@@ -89,4 +99,6 @@ public class CityWatcherController {
 
         return new Pair<String, LatLng>(formattedAddress, latlng);
     }
+
+
 }
