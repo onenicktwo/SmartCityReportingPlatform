@@ -50,8 +50,8 @@ public class AdminViewActivity extends CityWatcherActivity {
         volunteerApplyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent mainIntent = new Intent(AdminViewActivity.this, VolunteerApplyActivity.class);
-                startActivity(mainIntent);
+                //Intent mainIntent = new Intent(AdminViewActivity.this, VolunteerApplyActivity.class);
+                //startActivity(mainIntent);
 
 
             }
