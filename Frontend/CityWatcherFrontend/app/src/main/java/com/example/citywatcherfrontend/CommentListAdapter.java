@@ -52,7 +52,7 @@ public class CommentListAdapter extends ArrayAdapter<CommentData> {
         Button buttonDeleteComment = view.findViewById(R.id.buttonDeleteComment);
         Button buttonEditComment = view.findViewById(R.id.buttonEditComment);
 
-        // commenter.setText(comment.getCommenter());
+        // commenter.setText(comment.getCommenter().getUsername());
         date.setText(comment.getDate().toString());
         content.setText(comment.getContent());
 

@@ -118,6 +118,8 @@ public class IssueDetailsActivity extends CityWatcherActivity {
                 buttonDeleteIssue.setVisibility(View.GONE);
             }
         } else {
+            buttonEditIssue.setVisibility(View.GONE);
+            buttonDeleteIssue.setVisibility(View.GONE);
             addComment.setVisibility(View.GONE);
             buttonAddComment.setVisibility(View.GONE);
         }

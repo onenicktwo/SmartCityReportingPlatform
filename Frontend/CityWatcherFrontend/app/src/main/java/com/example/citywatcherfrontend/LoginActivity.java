@@ -74,13 +74,14 @@ public class LoginActivity extends CityWatcherActivity {
                                 if (user.getString("username").equals(username) && user.getString("password").equals(password)) {
                                     CityWatcherController.getInstance().setLoggedIn(true);
                                     CityWatcherController.getInstance().setUserId(user.getInt("id"));
+                                    CityWatcherController.getInstance().setUsername(user.get("username").toString());
                                     break;
                                 }
 
                             }
 
                             if (CityWatcherController.getInstance().isLoggedIn()) {
-                                serverURL = "http://coms-3090-026.class.las.iastate.edu:8080/ws/issues/" + CityWatcherController.getInstance().getUserId();
+                                serverURL = "ws://coms-3090-026.class.las.iastate.edu:8080/ws/issues/" + CityWatcherController.getInstance().getUsername();
                                 WebSocketManager.getInstance().connectWebSocket(serverURL);
                                 WebSocketManager.getInstance().setWebSocketListener(LoginActivity.this);
                                 CityWatcherController.getInstance().setConnected(true);
