@@ -9,7 +9,7 @@ import android.widget.Toast;
 
 public class AdminViewActivity extends CityWatcherActivity {
 
-    private Button editUserButton, deleteUserButton, chatButton;
+    private Button editUserButton, deleteUserButton, chatButton, volunteerApplyButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,6 +19,7 @@ public class AdminViewActivity extends CityWatcherActivity {
         editUserButton = findViewById(R.id.editUserButton);
         deleteUserButton = findViewById(R.id.deleteUserButton);
         chatButton = findViewById(R.id.chatButton);
+        volunteerApplyButton = findViewById(R.id.volunteerApplyButton);
 
 
         editUserButton.setOnClickListener(new View.OnClickListener() {
@@ -46,7 +47,16 @@ public class AdminViewActivity extends CityWatcherActivity {
                 startActivity(chatIntent);
             }
         });
+        volunteerApplyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Intent mainIntent = new Intent(AdminViewActivity.this, VolunteerApplyActivity.class);
+                //startActivity(mainIntent);
 
 
+            }
+        });
     }
 }
+
+

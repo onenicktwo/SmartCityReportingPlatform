@@ -45,6 +45,9 @@
         <activity android:name=".EditCommentActivity"></activity>
         <activity android:name=".CityOfficalAdminChatroom"></activity>
         <activity android:name=".ChatStartActivity"></activity>
+        <activity android:name=".VolunteerApplyActivity"></activity>
+        <activity android:name=".CitizenViewActivity"></activity>
+
 
 
 

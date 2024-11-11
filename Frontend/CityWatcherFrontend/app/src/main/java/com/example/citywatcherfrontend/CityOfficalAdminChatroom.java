@@ -29,7 +29,7 @@ public class CityOfficalAdminChatroom extends CityWatcherActivity implements Web
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cityadminchatoom);
 
-        String userID = getIntent().getStringExtra("USER_ID");
+        int userID = CityWatcherController.getInstance().getUserId();
 
         /* initialize UI elements */
         sendBtn = (Button) findViewById(R.id.sendBtn);

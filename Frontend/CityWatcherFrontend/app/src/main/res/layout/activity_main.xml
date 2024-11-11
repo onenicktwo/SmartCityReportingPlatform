@@ -24,6 +24,13 @@
         android:layout_gravity="center"
         android:text="Go to Admin View" />
 
+    <Button android:id="@+id/btnCitizenView"
+        android:layout_width="200dp"
+        android:layout_height="80dp"
+        android:layout_marginBottom="20dp"
+        android:layout_gravity="center"
+        android:text="Go to Citizen View" />
+
 
 
 </androidx.appcompat.widget.LinearLayoutCompat>
