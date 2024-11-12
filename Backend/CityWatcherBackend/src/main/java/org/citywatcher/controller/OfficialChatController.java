@@ -1,5 +1,11 @@
 package org.citywatcher.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.citywatcher.model.Message;
 import org.citywatcher.service.OfficialChatService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/citywatcher/official-chat")
+@Tag(name = "Official Chat", description = "APIs for official chat management")
 public class OfficialChatController {
 
     private final OfficialChatService officialChatService;
@@ -22,6 +29,14 @@ public class OfficialChatController {
         this.officialChatService = officialChatService;
     }
 
+    @Operation(summary = "Send a message as an official user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Message sent successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Message.class))),
+            @ApiResponse(responseCode = "404", description = "User not found", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Invalid message data", content = @Content),
+            @ApiResponse(responseCode = "403", description = "User is not authorized", content = @Content)
+    })
     @PostMapping("/messages")
     public ResponseEntity<Message> sendMessage(
             @RequestParam Long userId,
@@ -30,6 +45,12 @@ public class OfficialChatController {
         return new ResponseEntity<>(sentMessage, HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Get official chat messages")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Messages retrieved successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Message.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request parameters", content = @Content)
+    })
     @GetMapping("/messages")
     public ResponseEntity<List<Message>> getMessages(
             @RequestParam(required = false) LocalDateTime since,
@@ -38,6 +59,12 @@ public class OfficialChatController {
         return new ResponseEntity<>(messages, HttpStatus.OK);
     }
 
+    @Operation(summary = "Delete a message")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Message deleted successfully", content = @Content),
+            @ApiResponse(responseCode = "404", description = "User or message not found", content = @Content),
+            @ApiResponse(responseCode = "403", description = "User is not authorized to delete the message", content = @Content)
+    })
     @DeleteMapping("/messages/{messageId}")
     public ResponseEntity<Void> deleteMessage(
             @RequestParam Long userId,
