@@ -27,7 +27,7 @@ public class CommentController {
         this.commentService = commentService;
     }
 
-    @Operation(summary = "Create a new comment and send message on websocket for connected users")
+    @Operation(summary = "Create a new comment", description = "After creating a new comment, a notification will be sent for users logged in")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Comment created successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = Comment.class))),

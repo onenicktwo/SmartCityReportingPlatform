@@ -28,7 +28,7 @@ public class IssueController {
         this.issueService = issueService;
     }
 
-    @Operation(summary = "Create a new issue and send a notification if an official is assigned")
+    @Operation(summary = "Create a new issue", description = "After creating a new issue, a notification will be sent to an official (if there is one assigned)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Issue created successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = Issue.class))),
@@ -67,7 +67,7 @@ public class IssueController {
         return new ResponseEntity<>(issues, HttpStatus.OK);
     }
 
-    @Operation(summary = "Edit an existing issue and send a notification if it's status is changed or a new official is added")
+    @Operation(summary = "Edit/Update an existing issue", description = "After editing an issue, if it's status is changed a notification will be sent to each person connected to it. If the official is changed out, the new official will get a notification")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Issue updated successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = Issue.class))),
@@ -173,7 +173,7 @@ public class IssueController {
         }
     }
 
-    @Operation(summary = "Search issues by various criteria")
+    @Operation(summary = "Search issues by various criteria", description = "Categories include category, issue status, title, address, latitude, longitude, and radius of search")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Issues retrieved successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = List.class))),

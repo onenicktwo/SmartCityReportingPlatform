@@ -29,7 +29,7 @@ public class OfficialChatController {
         this.officialChatService = officialChatService;
     }
 
-    @Operation(summary = "Send a message to the chat as an official/admin user")
+    @Operation(summary = "Send a message", description = "Official/admin user can post a message to the chat")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Message sent successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = Message.class))),
