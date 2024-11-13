@@ -1,5 +1,11 @@
 package org.citywatcher.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.citywatcher.model.Comment;
 import org.citywatcher.service.CommentsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/citywatcher/users/{userId}/issues/{issueId}/comments")
+@Tag(name = "Comments Management", description = "APIs for managing comments on issues")
 public class CommentController {
 
     private final CommentsService commentService;
@@ -20,6 +27,12 @@ public class CommentController {
         this.commentService = commentService;
     }
 
+    @Operation(summary = "Create a new comment and send message on websocket for connected users")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Comment created successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Comment.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content)
+    })
     @PostMapping
     public ResponseEntity<Comment> createComment(
             @PathVariable Long userId,
@@ -33,6 +46,12 @@ public class CommentController {
         }
     }
 
+    @Operation(summary = "Get a comment by it's ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Comment found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Comment.class))),
+            @ApiResponse(responseCode = "404", description = "Comment not found", content = @Content)
+    })
     @GetMapping("/{commentId}")
     public ResponseEntity<Comment> getCommentById(
             @PathVariable Long userId,
@@ -46,6 +65,12 @@ public class CommentController {
         }
     }
 
+    @Operation(summary = "Get all comments on an issue")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of comments retrieved successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Comment.class))),
+            @ApiResponse(responseCode = "404", description = "Issue not found", content = @Content)
+    })
     @GetMapping
     public ResponseEntity<List<Comment>> getCommentsByIssue(
             @PathVariable Long userId,
@@ -54,6 +79,13 @@ public class CommentController {
         return new ResponseEntity<>(comments, HttpStatus.OK);
     }
 
+    @Operation(summary = "Edit/Update an existing comment")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Comment updated successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Comment.class))),
+            @ApiResponse(responseCode = "404", description = "Comment, issue, or user not found", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content)
+    })
     @PutMapping("/{commentId}")
     public ResponseEntity<Comment> updateComment(
             @PathVariable Long userId,
@@ -72,6 +104,12 @@ public class CommentController {
         }
     }
 
+    @Operation(summary = "Delete a comment")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Comment deleted successfully", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Comment, issue, or user not found", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content)
+    })
     @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> deleteComment(
             @PathVariable Long userId,

@@ -1,5 +1,11 @@
 package org.citywatcher.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.citywatcher.model.Issue;
 import org.citywatcher.model.IssueStatus;
 import org.citywatcher.model.User;
@@ -12,6 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/citywatcher/users/{userId}/issues")
+@Tag(name = "Issue Management", description = "APIs for official issue management")
 public class IssueController {
 
     private final IssueService issueService;
@@ -21,12 +28,24 @@ public class IssueController {
         this.issueService = issueService;
     }
 
+    @Operation(summary = "Create a new issue and send a notification if an official is assigned")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Issue created successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Issue.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid issue data", content = @Content)
+    })
     @PostMapping
     public ResponseEntity<Issue> createIssue(@PathVariable Long userId, @RequestBody Issue issue) {
         Issue createdIssue = issueService.createIssue(userId, issue);
         return new ResponseEntity<>(createdIssue, HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Get issue by it's ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Issue found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Issue.class))),
+            @ApiResponse(responseCode = "404", description = "Issue not found", content = @Content)
+    })
     @GetMapping("/{issueId}")
     public ResponseEntity<Issue> getIssueById(@PathVariable Long userId, @PathVariable Long issueId) {
         Issue issue = issueService.getIssueById(userId, issueId);
@@ -37,12 +56,24 @@ public class IssueController {
         }
     }
 
+    @Operation(summary = "Get all issues reported by a user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of issues found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Issue.class)))
+    })
     @GetMapping
     public ResponseEntity<List<Issue>> getIssuesByUser(@PathVariable Long userId) {
         List<Issue> issues = issueService.getIssuesByUser(userId);
         return new ResponseEntity<>(issues, HttpStatus.OK);
     }
 
+    @Operation(summary = "Edit an existing issue and send a notification if it's status is changed or a new official is added")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Issue updated successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Issue.class))),
+            @ApiResponse(responseCode = "404", description = "Issue not found", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Invalid issue data", content = @Content)
+    })
     @PutMapping("/{issueId}")
     public ResponseEntity<Issue> updateIssue(@PathVariable Long userId, @PathVariable Long issueId, @RequestBody Issue issue) {
         Issue updatedIssue = issueService.updateIssue(userId, issueId, issue);
@@ -53,6 +84,11 @@ public class IssueController {
         }
     }
 
+    @Operation(summary = "Delete an issue")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Issue deleted successfully", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Issue not found", content = @Content)
+    })
     @DeleteMapping("/{issueId}")
     public ResponseEntity<Void> deleteIssue(@PathVariable Long userId, @PathVariable Long issueId) {
         boolean deleted = issueService.deleteIssue(userId, issueId);
@@ -63,6 +99,13 @@ public class IssueController {
         }
     }
 
+    @Operation(summary = "Official/Admin assign a volunteer to an issue")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Volunteer assigned successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Issue.class))),
+            @ApiResponse(responseCode = "404", description = "Issue or volunteer not found", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content)
+    })
     @PostMapping("/{issueId}/volunteers/{volunteerId}")
     public ResponseEntity<Issue> addVolunteer(
             @PathVariable Long userId,
@@ -76,6 +119,13 @@ public class IssueController {
         }
     }
 
+    @Operation(summary = "Official/Admin remove a volunteer from an issue")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Volunteer removed successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Issue.class))),
+            @ApiResponse(responseCode = "404", description = "Issue or volunteer not found", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content)
+    })
     @DeleteMapping("/{issueId}/volunteers/{volunteerId}")
     public ResponseEntity<Issue> removeVolunteer(
             @PathVariable Long userId,
@@ -89,6 +139,12 @@ public class IssueController {
         }
     }
 
+    @Operation(summary = "Get all issues assigned to a volunteer")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Issues retrieved successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = List.class))),
+            @ApiResponse(responseCode = "404", description = "Volunteer not found", content = @Content)
+    })
     @GetMapping("/volunteer/{volunteerId}")
     public ResponseEntity<List<Issue>> getIssuesByVolunteer(
             @PathVariable Long volunteerId) {
@@ -100,6 +156,12 @@ public class IssueController {
         }
     }
 
+    @Operation(summary = "Get all volunteers assigned to an issue")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Volunteers retrieved successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = List.class))),
+            @ApiResponse(responseCode = "404", description = "Issue not found", content = @Content)
+    })
     @GetMapping("/{issueId}/volunteers")
     public ResponseEntity<List<User>> getVolunteersForIssue(
             @PathVariable Long issueId) {
@@ -111,6 +173,12 @@ public class IssueController {
         }
     }
 
+    @Operation(summary = "Search issues by various criteria")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Issues retrieved successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = List.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid search criteria", content = @Content)
+    })
     @GetMapping("/search")
     public ResponseEntity<List<Issue>> searchIssues(
             @RequestParam(required = false) String category,
