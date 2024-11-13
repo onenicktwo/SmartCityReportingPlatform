@@ -66,7 +66,7 @@ public class UserController {
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
-    @Operation(summary = "Update an existing user by ID")
+    @Operation(summary = "Edit an existing user by ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User updated successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))),

@@ -27,7 +27,7 @@ public class CommentController {
         this.commentService = commentService;
     }
 
-    @Operation(summary = "Create a new comment")
+    @Operation(summary = "Create a new comment and send message on websocket for connected users")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Comment created successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = Comment.class))),
@@ -46,7 +46,7 @@ public class CommentController {
         }
     }
 
-    @Operation(summary = "Get a comment by ID")
+    @Operation(summary = "Get a comment by it's ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Comment found",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = Comment.class))),
@@ -65,7 +65,7 @@ public class CommentController {
         }
     }
 
-    @Operation(summary = "Get all comments for an issue")
+    @Operation(summary = "Get all comments on an issue")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of comments retrieved successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = Comment.class))),
@@ -79,7 +79,7 @@ public class CommentController {
         return new ResponseEntity<>(comments, HttpStatus.OK);
     }
 
-    @Operation(summary = "Update an existing comment")
+    @Operation(summary = "Edit/Update an existing comment")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Comment updated successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = Comment.class))),

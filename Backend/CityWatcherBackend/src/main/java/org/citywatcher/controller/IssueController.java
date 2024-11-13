@@ -28,7 +28,7 @@ public class IssueController {
         this.issueService = issueService;
     }
 
-    @Operation(summary = "Create a new issue")
+    @Operation(summary = "Create a new issue and send a notification if an official is assigned")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Issue created successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = Issue.class))),
@@ -40,7 +40,7 @@ public class IssueController {
         return new ResponseEntity<>(createdIssue, HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Get issue by ID")
+    @Operation(summary = "Get issue by it's ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Issue found",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = Issue.class))),
@@ -67,7 +67,7 @@ public class IssueController {
         return new ResponseEntity<>(issues, HttpStatus.OK);
     }
 
-    @Operation(summary = "Update an existing issue")
+    @Operation(summary = "Edit an existing issue and send a notification if it's status is changed or a new official is added")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Issue updated successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = Issue.class))),
@@ -99,7 +99,7 @@ public class IssueController {
         }
     }
 
-    @Operation(summary = "Assign a volunteer to an issue")
+    @Operation(summary = "Official/Admin assign a volunteer to an issue")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Volunteer assigned successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = Issue.class))),
@@ -119,7 +119,7 @@ public class IssueController {
         }
     }
 
-    @Operation(summary = "Remove a volunteer from an issue")
+    @Operation(summary = "Official/Admin remove a volunteer from an issue")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Volunteer removed successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = Issue.class))),

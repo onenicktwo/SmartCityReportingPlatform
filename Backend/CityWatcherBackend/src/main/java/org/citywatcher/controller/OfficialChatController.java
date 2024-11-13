@@ -29,7 +29,7 @@ public class OfficialChatController {
         this.officialChatService = officialChatService;
     }
 
-    @Operation(summary = "Send a message as an official user")
+    @Operation(summary = "Send a message to the chat as an official/admin user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Message sent successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = Message.class))),
@@ -45,7 +45,7 @@ public class OfficialChatController {
         return new ResponseEntity<>(sentMessage, HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Get official chat messages")
+    @Operation(summary = "Get official/admin chat messages")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Messages retrieved successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = Message.class))),
@@ -59,7 +59,7 @@ public class OfficialChatController {
         return new ResponseEntity<>(messages, HttpStatus.OK);
     }
 
-    @Operation(summary = "Delete a message")
+    @Operation(summary = "Delete a chat message")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Message deleted successfully", content = @Content),
             @ApiResponse(responseCode = "404", description = "User or message not found", content = @Content),
