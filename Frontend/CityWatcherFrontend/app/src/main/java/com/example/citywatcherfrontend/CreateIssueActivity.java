@@ -27,6 +27,9 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+/**
+ * An activity class for creating an issue; The user provides the name, category, location, and description for an issue.
+ */
 public class CreateIssueActivity extends CityWatcherActivity {
     private String URL;
 
@@ -84,7 +87,7 @@ public class CreateIssueActivity extends CityWatcherActivity {
                                     JSONObject jsonObject = null;
                                     try {
                                         if (!response.isEmpty()) {
-                                            Pair<String, LatLng> locationData = CityWatcherController.getInstance().convertDataToLocation(response);
+                                            Pair<String, LatLng> locationData = CityWatcherController.getInstance().convertGeocodingDataToLocation(response);
                                             formattedAddress = locationData.first;
                                             latlng = locationData.second;
 
@@ -105,7 +108,9 @@ public class CreateIssueActivity extends CityWatcherActivity {
         });
     }
 
-    // POST Request to create an issue
+    /**
+     * Sends a POST Volley request to the IssueController in the backend to create an issue.
+     */
     private void makeCreateIssueReq() {
         JsonObjectRequest jsonObjReq = new JsonObjectRequest(
                 Request.Method.POST,
@@ -145,6 +150,9 @@ public class CreateIssueActivity extends CityWatcherActivity {
         startActivity(intent);
     }
 
+    /**
+     * Sets the request parameters that will be used for the POST request to create an issue.
+     */
     private void putIssueParams() {
         try {
             requestParams.put("title", editIssueName.getText().toString());
