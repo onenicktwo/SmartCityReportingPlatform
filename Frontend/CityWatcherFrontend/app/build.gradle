@@ -42,7 +42,6 @@ dependencies {
     implementation libs.volley
     implementation libs.ui.graphics.android
     implementation 'org.java-websocket:Java-WebSocket:1.5.2'
-    implementation files('C:\\Users\\cyanf\\AppData\\Local\\Android\\Sdk\\platforms\\android-35\\android.jar')
 
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
