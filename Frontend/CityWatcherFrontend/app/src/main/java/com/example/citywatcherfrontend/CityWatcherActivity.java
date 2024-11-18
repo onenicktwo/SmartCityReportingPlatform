@@ -15,6 +15,7 @@ import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+
 /**
  * Abstract activity class that includes a navigation bar and has WebSocket functionality.
  */
