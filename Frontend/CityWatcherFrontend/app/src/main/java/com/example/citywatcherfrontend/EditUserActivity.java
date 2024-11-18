@@ -20,6 +20,7 @@ public class EditUserActivity extends AppCompatActivity {
     @Override
     /**
      * Creates the Edit User view from the layout
+     * @Author Sam Hostetter
      */
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

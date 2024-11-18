@@ -14,6 +14,7 @@ public class AdminViewActivity extends CityWatcherActivity {
     @Override
     /**
      * Creates the Admin view from the layout
+     * @author Sam Hostetter
      */
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

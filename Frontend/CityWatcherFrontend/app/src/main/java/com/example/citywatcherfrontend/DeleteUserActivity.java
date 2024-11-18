@@ -19,6 +19,7 @@ public class DeleteUserActivity extends CityWatcherActivity {
     @Override
     /**
      * Creates the Delete User view from the layout
+     * @author Sam Hostetter
      */
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
