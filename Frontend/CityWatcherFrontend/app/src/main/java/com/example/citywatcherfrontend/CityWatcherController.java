@@ -13,6 +13,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+/**
+ * Singleton class used to store and retrieve user and location information used across CityWatcher activities.
+ */
 public class CityWatcherController {
     private static CityWatcherController instance;
 
@@ -21,7 +24,9 @@ public class CityWatcherController {
     private boolean loggedIn;
     private boolean connected;
 
-
+    /**
+     * @return The instance of CityWatcherController
+     */
     public static CityWatcherController getInstance() {
         if (instance == null) {
             instance = new CityWatcherController();
@@ -63,6 +68,14 @@ public class CityWatcherController {
         this.connected = connected;
     }
 
+    /**
+     * Connects and retrieves a response from a URL connection.
+     *
+     * @param stringUrl The URL to receive a response from
+     * @return The response on a successful connection to the URL and null otherwise
+     * @throws IOException
+     * @throws JSONException
+     */
     public String getDataFromURL(String stringUrl) throws IOException, JSONException {
         URL url = new URL(stringUrl);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -90,7 +103,14 @@ public class CityWatcherController {
         return null;
     }
 
-    public Pair<String, LatLng> convertDataToLocation (String data) throws JSONException {
+    /**
+     * Parses through JSON data retrieved from a Geocoding URL connection and returns the formatted address as a String object and the latitude and longitude as a LatLng object.
+     *
+     * @param data JSON data retrieved from a Geocoding URL connection
+     * @return The formatted address and LatLng of the location specified in the Geocoding data
+     * @throws JSONException
+     */
+    public Pair<String, LatLng> convertGeocodingDataToLocation(String data) throws JSONException {
         JSONObject jsonObject = new JSONObject(data);
         String lat = jsonObject.getJSONArray("results").getJSONObject(0).getJSONObject("geometry").getJSONObject("location").get("lat").toString();
         String lng = jsonObject.getJSONArray("results").getJSONObject(0).getJSONObject("geometry").getJSONObject("location").get("lng").toString();
