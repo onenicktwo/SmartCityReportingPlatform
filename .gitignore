@@ -6,8 +6,8 @@
 .gradle/
 build/
 
-# Local configuration file (sdk path, etc)
-local.properties
+# # Local configuration file (sdk path, etc)
+# local.properties
 
 # Log/OS Files
 *.log
@@ -56,6 +56,7 @@ gen-external-apklibs
 
 # Package Files #
 *.jar
+!Frontend/CityWatcherFrontend/gradle/wrapper/*.jar
 *.war
 *.nar
 *.ear
