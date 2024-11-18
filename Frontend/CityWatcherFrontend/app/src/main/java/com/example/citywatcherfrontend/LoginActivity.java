@@ -19,9 +19,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-/*
-Author @Sam Hostetter
- */
+
 
 public class LoginActivity extends CityWatcherActivity {
     private EditText etUsername, etPassword;
@@ -56,6 +54,13 @@ public class LoginActivity extends CityWatcherActivity {
 
     }
 
+    /**
+     * Logs in the user by sending a GET request to the server.
+     * @author Sam Hostetter
+     * @param username Username from etUsername
+     * @param password Password from etPassword
+     *
+     */
     private void loginUser(String username, String password) {
 
         String url = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/";

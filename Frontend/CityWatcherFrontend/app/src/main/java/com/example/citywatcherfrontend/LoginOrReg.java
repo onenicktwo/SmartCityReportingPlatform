@@ -12,6 +12,9 @@ import android.widget.Button;
 public class LoginOrReg extends CityWatcherActivity {
 
     @Override
+    /**
+     * Creates the login or register activity.
+     */
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.loginorreg_activity);

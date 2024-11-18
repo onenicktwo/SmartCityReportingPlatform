@@ -18,6 +18,9 @@ public class EditUserActivity extends AppCompatActivity {
     private Button btnFetchUser, btnSaveChanges;
 
     @Override
+    /**
+     * Creates the Edit User view from the layout
+     */
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edituser);
@@ -56,6 +59,11 @@ public class EditUserActivity extends AppCompatActivity {
             }
         });
     }
+    /**
+     * Fetches user details by sending a GET request to the server.
+     * @author Sam Hostetter
+     * @param userId User ID to fetch for
+     */
 
     private void fetchUserDetails(long userId) {
         String url = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/" + userId;
@@ -76,6 +84,11 @@ public class EditUserActivity extends AppCompatActivity {
         Volley.newRequestQueue(this).add(request);
     }
 
+    /**
+     * Saves user changes by sending a PUT request to the server.
+     * @author Sam Hostetter
+     * @throws JSONException
+     */
     private void saveUserChanges() throws JSONException {
         String userIdStr = etUserId.getText().toString();
         String newUsername = etEditUsername.getText().toString();

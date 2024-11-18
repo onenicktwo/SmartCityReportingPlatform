@@ -45,6 +45,12 @@ public class VolunteerApplyActivity extends CityWatcherActivity {
         });
     }
 
+    /**
+     * Submits an application for volunteering by sending a PUT request to the server.
+     * @param name Name of the volunteer
+     * @param email Email of the volunteer
+     * @param reason Reason for applying
+     */
     private void submitApplication(String name, String email, String reason) {
         int userId = CityWatcherController.getInstance().getUserId();
         String url = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/" + userId;

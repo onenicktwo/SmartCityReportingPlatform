@@ -12,6 +12,9 @@ public class AdminViewActivity extends CityWatcherActivity {
     private Button editUserButton, deleteUserButton, chatButton, volunteerApplyButton;
 
     @Override
+    /**
+     * Creates the Admin view from the layout
+     */
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_adminview);

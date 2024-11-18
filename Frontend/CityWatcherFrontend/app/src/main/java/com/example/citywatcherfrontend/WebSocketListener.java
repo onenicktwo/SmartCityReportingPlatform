@@ -9,6 +9,7 @@ import org.java_websocket.handshake.ServerHandshake;
  */
 public interface WebSocketListener {
 
+
     /**
      * Called when the WebSocket connection is successfully opened.
      *
