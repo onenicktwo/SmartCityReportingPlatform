@@ -15,8 +15,6 @@ import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-//
-
 public abstract class CityWatcherActivity extends AppCompatActivity implements WebSocketListener {
 
     protected final String MAPS_KEY = "AIzaSyBWM0V9EhmOR0jCz7NYo9xDcmOW6Ni-trc";
