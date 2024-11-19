@@ -11,6 +11,7 @@ public class AdminViewActivity extends CityWatcherActivity {
 
     private Button editUserButton, deleteUserButton, chatButton, volunteerApplyButton;
 
+
     @Override
     /**
      * Creates the Admin view from the layout
