@@ -29,6 +29,9 @@ public class User {
     @Column(nullable = false)
     private UserRole role;
 
+    @Column(name = "profile_image_path")
+    private String profileImagePath;
+
     @OneToMany(mappedBy = "reporter")
     @JsonIgnore
     private List<Issue> reportedIssues = new ArrayList<>();
@@ -109,5 +112,13 @@ public class User {
 
     public void setVolunteerIssues(List<Issue> volunteerIssues) {
         this.volunteerIssues = volunteerIssues;
+    }
+
+    public String getProfileImagePath() {
+        return profileImagePath;
+    }
+
+    public void setProfileImagePath(String profileImagePath) {
+        this.profileImagePath = profileImagePath;
     }
 }
