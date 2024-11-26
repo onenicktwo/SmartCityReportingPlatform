@@ -20,6 +20,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     public FileStorageServiceImpl() {
         try {
             Files.createDirectories(rootLocation.resolve("issues"));
+            Files.createDirectories(rootLocation.resolve("profile"));
         } catch (IOException e) {
             throw new RuntimeException("Could not initialize storage", e);
         }
@@ -33,6 +34,19 @@ public class FileStorageServiceImpl implements FileStorageService {
 
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
             return "issues/" + fileName;
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to store file", e);
+        }
+    }
+
+    @Override
+    public String saveProfileImage(String username, MultipartFile file) {
+        try {
+            String fileName = "profile_" + username + "_" + System.currentTimeMillis() + getFileExtension(file.getOriginalFilename());
+            Path filePath = rootLocation.resolve("profile").resolve(fileName);
+
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            return "profile/" + fileName;
         } catch (IOException e) {
             throw new RuntimeException("Failed to store file", e);
         }

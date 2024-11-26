@@ -208,14 +208,19 @@ public class IssueController {
         return ResponseEntity.ok(issues);
     }
 
-    @GetMapping("/images/{filename:.+}")
-    public ResponseEntity<Resource> getIssueImage(@PathVariable String filename) {
+    @GetMapping("/{issueId}/image")
+    public ResponseEntity<Resource> getIssueImage(@PathVariable Long userId, @PathVariable Long issueId) {
         try {
-            Resource file = fileStorageService.loadFileAsResource("issues/" + filename);
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getFilename() + "\"")
-                    .contentType(MediaType.IMAGE_JPEG)
-                    .body(file);
+            ResponseEntity<Issue> issue = getIssueById(userId, issueId);
+            if (issue.getBody() != null) {
+                Resource file = fileStorageService.loadFileAsResource(issue.getBody().getImagePath());
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getFilename() + "\"")
+                        .contentType(MediaType.IMAGE_JPEG)
+                        .body(file);
+            } else {
+                return ResponseEntity.status(issue.getStatusCode()).build();
+            }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
