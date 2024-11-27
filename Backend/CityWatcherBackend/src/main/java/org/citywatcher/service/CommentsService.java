@@ -1,7 +1,6 @@
 package org.citywatcher.service;
 
 import org.citywatcher.model.Comment;
-import org.citywatcher.model.Issue;
 
 import java.util.List;
 
