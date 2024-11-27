@@ -1,0 +1,202 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > FileStorageServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.citywatcher.service</a>
+</div>
+
+<h1>Coverage Summary for Class: FileStorageServiceImpl (org.citywatcher.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FileStorageServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/32)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package org.citywatcher.service;
+&nbsp;
+&nbsp;import org.springframework.core.io.Resource;
+&nbsp;import org.springframework.core.io.UrlResource;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.web.multipart.MultipartFile;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.net.MalformedURLException;
+&nbsp;import java.nio.file.Files;
+&nbsp;import java.nio.file.Path;
+&nbsp;import java.nio.file.Paths;
+&nbsp;import java.nio.file.StandardCopyOption;
+&nbsp;
+&nbsp;@Service
+&nbsp;public class FileStorageServiceImpl implements FileStorageService {
+&nbsp;
+<b class="nc">&nbsp;    private final Path rootLocation = Paths.get(&quot;uploads&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;    public FileStorageServiceImpl() {</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            Files.createDirectories(rootLocation.resolve(&quot;issues&quot;));</b>
+<b class="nc">&nbsp;            Files.createDirectories(rootLocation.resolve(&quot;profile&quot;));</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            throw new RuntimeException(&quot;Could not initialize storage&quot;, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String saveIssueImage(Long userId, MultipartFile file) {
+&nbsp;        try {
+<b class="nc">&nbsp;            String fileName = &quot;issue_&quot; + userId + &quot;_&quot; + System.currentTimeMillis() + getFileExtension(file.getOriginalFilename());</b>
+<b class="nc">&nbsp;            Path filePath = rootLocation.resolve(&quot;issues&quot;).resolve(fileName);</b>
+&nbsp;
+<b class="nc">&nbsp;            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);</b>
+<b class="nc">&nbsp;            return &quot;issues/&quot; + fileName;</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            throw new RuntimeException(&quot;Failed to store file&quot;, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String saveProfileImage(String username, MultipartFile file) {
+&nbsp;        try {
+<b class="nc">&nbsp;            String fileName = &quot;profile_&quot; + username + &quot;_&quot; + System.currentTimeMillis() + getFileExtension(file.getOriginalFilename());</b>
+<b class="nc">&nbsp;            Path filePath = rootLocation.resolve(&quot;profile&quot;).resolve(fileName);</b>
+&nbsp;
+<b class="nc">&nbsp;            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);</b>
+<b class="nc">&nbsp;            return &quot;profile/&quot; + fileName;</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            throw new RuntimeException(&quot;Failed to store file&quot;, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Resource loadFileAsResource(String filePath) {
+&nbsp;        try {
+<b class="nc">&nbsp;            Path file = rootLocation.resolve(filePath);</b>
+<b class="nc">&nbsp;            Resource resource = new UrlResource(file.toUri());</b>
+<b class="nc">&nbsp;            if (resource.exists() || resource.isReadable()) {</b>
+<b class="nc">&nbsp;                return resource;</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                throw new RuntimeException(&quot;File not found: &quot; + filePath);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (MalformedURLException e) {</b>
+<b class="nc">&nbsp;            throw new RuntimeException(&quot;Error loading file: &quot; + filePath, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void deleteFile(String filePath) {
+&nbsp;        try {
+<b class="nc">&nbsp;            Path file = rootLocation.resolve(filePath);</b>
+<b class="nc">&nbsp;            Files.deleteIfExists(file);</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            throw new RuntimeException(&quot;Failed to delete file: &quot; + filePath, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private String getFileExtension(String fileName) {
+<b class="nc">&nbsp;        if (fileName == null || fileName.lastIndexOf(&#39;.&#39;) == -1) {</b>
+<b class="nc">&nbsp;            return &quot;&quot;;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return fileName.substring(fileName.lastIndexOf(&#39;.&#39;));</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-11-27 14:57</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,232 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > IssueWebSocketServer</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.citywatcher.websocket</a>
+</div>
+
+<h1>Coverage Summary for Class: IssueWebSocketServer (org.citywatcher.websocket)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">IssueWebSocketServer</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/39)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package org.citywatcher.websocket;
+&nbsp;
+&nbsp;import javax.websocket.*;
+&nbsp;import javax.websocket.server.PathParam;
+&nbsp;import javax.websocket.server.ServerEndpoint;
+&nbsp;
+&nbsp;import org.citywatcher.dto.IssueNotificationDTO;
+&nbsp;import org.citywatcher.model.Issue;
+&nbsp;import org.citywatcher.model.User;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.ArrayList;
+&nbsp;
+&nbsp;@ServerEndpoint(&quot;/ws/issues/{username}&quot;)
+&nbsp;@Component
+<b class="nc">&nbsp;public class IssueWebSocketServer {</b>
+&nbsp;    private static WebSocketManager webSocketManager;
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    public void setWebSocketManager(WebSocketManager manager) {
+<b class="nc">&nbsp;        IssueWebSocketServer.webSocketManager = manager;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @OnOpen
+&nbsp;    public void onOpen(Session session, @PathParam(&quot;username&quot;) String username) {
+<b class="nc">&nbsp;        webSocketManager.addSession(username, session);</b>
+<b class="nc">&nbsp;        System.out.println(&quot;New WebSocket connection: &quot; + username);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @OnClose
+&nbsp;    public void onClose(Session session) {
+<b class="nc">&nbsp;        webSocketManager.removeSession(session);</b>
+<b class="nc">&nbsp;        System.out.println(&quot;WebSocket connection closed.&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @OnError
+&nbsp;    public void onError(Session session, Throwable throwable) {
+<b class="nc">&nbsp;        String username = webSocketManager.getUsernameBySession(session);</b>
+<b class="nc">&nbsp;        System.out.println(&quot;WebSocket error for &quot; + username + &quot;: &quot; + throwable.getMessage());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @OnMessage
+&nbsp;    public void onMessage(String message, Session session) {
+<b class="nc">&nbsp;        String username = webSocketManager.getUsernameBySession(session);</b>
+<b class="nc">&nbsp;        System.out.println(&quot;Received message from &quot; + username + &quot;: &quot; + message);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void sendIssueStatusUpdate(Issue updatedIssue) {
+<b class="nc">&nbsp;        IssueNotificationDTO notificationDTO = new IssueNotificationDTO(updatedIssue, &quot;UPDATE&quot;);</b>
+<b class="nc">&nbsp;        String jsonMessage = webSocketManager.convertToJson(notificationDTO);</b>
+&nbsp;
+&nbsp;        // Send to the reporter
+<b class="nc">&nbsp;        webSocketManager.sendToUser(updatedIssue.getReporter().getUsername(), jsonMessage);</b>
+&nbsp;
+&nbsp;        // Send to the assigned official
+<b class="nc">&nbsp;        if (updatedIssue.getAssignedOfficial() != null) {</b>
+<b class="nc">&nbsp;            webSocketManager.sendToUser(updatedIssue.getAssignedOfficial().getUsername(), jsonMessage);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        List&lt;User&gt; volunteers = updatedIssue.getVolunteers();</b>
+<b class="nc">&nbsp;        for(User user : volunteers) {</b>
+<b class="nc">&nbsp;            webSocketManager.sendToUser(user.getUsername(), jsonMessage);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // Send to subscribed users
+<b class="nc">&nbsp;        broadcastToSubscribers(updatedIssue, jsonMessage);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void sendAssignmentNotification(Issue assignedIssue) {
+<b class="nc">&nbsp;        if (assignedIssue.getAssignedOfficial() != null) {</b>
+<b class="nc">&nbsp;            IssueNotificationDTO notificationDTO = new IssueNotificationDTO(assignedIssue, &quot;ASSIGNMENT&quot;);</b>
+<b class="nc">&nbsp;            String jsonMessage = webSocketManager.convertToJson(notificationDTO);</b>
+<b class="nc">&nbsp;            webSocketManager.sendToUser(assignedIssue.getAssignedOfficial().getUsername(), jsonMessage);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    public void sendCommentNotification(Issue issue, String comment) {
+<b class="nc">&nbsp;        IssueNotificationDTO notificationDTO = new IssueNotificationDTO(issue, &quot;COMMENT&quot;);</b>
+<b class="nc">&nbsp;        notificationDTO.setComment(comment);</b>
+<b class="nc">&nbsp;        String jsonMessage = webSocketManager.convertToJson(notificationDTO);</b>
+&nbsp;
+&nbsp;        // Send to the reporter
+<b class="nc">&nbsp;        webSocketManager.sendToUser(issue.getReporter().getUsername(), jsonMessage);</b>
+&nbsp;
+&nbsp;        // Send to the assigned official
+<b class="nc">&nbsp;        if (issue.getAssignedOfficial() != null) {</b>
+<b class="nc">&nbsp;            webSocketManager.sendToUser(issue.getAssignedOfficial().getUsername(), jsonMessage);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        //Send to the volunteers
+<b class="nc">&nbsp;        List&lt;User&gt; volunteers = issue.getVolunteers();</b>
+<b class="nc">&nbsp;        for(User user : volunteers) {</b>
+<b class="nc">&nbsp;            webSocketManager.sendToUser(user.getUsername(), jsonMessage);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // Send to subscribed users
+<b class="nc">&nbsp;        List&lt;User&gt; subscribedUsers = getSubscribedUsers(issue);</b>
+<b class="nc">&nbsp;        for (User user : subscribedUsers) {</b>
+<b class="nc">&nbsp;            webSocketManager.sendToUser(user.getUsername(), jsonMessage);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private List&lt;User&gt; getSubscribedUsers(Issue issue) {
+&nbsp;        // Implement logic to get users subscribed to this issue
+<b class="nc">&nbsp;        return new ArrayList&lt;User&gt;();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void broadcastToSubscribers(Issue issue, String message) {
+<b class="nc">&nbsp;        List&lt;User&gt; subscribers = getSubscribedUsers(issue);</b>
+<b class="nc">&nbsp;        for (User subscriber : subscribers) {</b>
+<b class="nc">&nbsp;            webSocketManager.sendToUser(subscriber.getUsername(), message);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-11-27 14:57</div>
+</div>
+</body>
+</html>
