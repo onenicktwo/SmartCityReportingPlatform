@@ -1,0 +1,241 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > CommentController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.citywatcher.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: CommentController (org.citywatcher.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CommentController</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/22)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package org.citywatcher.controller;
+&nbsp;
+&nbsp;import io.swagger.v3.oas.annotations.Operation;
+&nbsp;import io.swagger.v3.oas.annotations.media.Content;
+&nbsp;import io.swagger.v3.oas.annotations.media.Schema;
+&nbsp;import io.swagger.v3.oas.annotations.responses.ApiResponse;
+&nbsp;import io.swagger.v3.oas.annotations.responses.ApiResponses;
+&nbsp;import io.swagger.v3.oas.annotations.tags.Tag;
+&nbsp;import org.citywatcher.model.Comment;
+&nbsp;import org.citywatcher.service.CommentsService;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;/citywatcher/users/{userId}/issues/{issueId}/comments&quot;)
+&nbsp;@Tag(name = &quot;Comments Management&quot;, description = &quot;APIs for managing comments on issues&quot;)
+&nbsp;public class CommentController {
+&nbsp;
+&nbsp;    private final CommentsService commentService;
+&nbsp;
+&nbsp;    @Autowired
+<b class="nc">&nbsp;    public CommentController(CommentsService commentService) {</b>
+<b class="nc">&nbsp;        this.commentService = commentService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Create a new comment&quot;, description = &quot;After creating a new comment, a notification will be sent for users logged in&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;            @ApiResponse(responseCode = &quot;201&quot;, description = &quot;Comment created successfully&quot;,
+&nbsp;                    content = @Content(mediaType = &quot;application/json&quot;, schema = @Schema(implementation = Comment.class))),
+&nbsp;            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid input data&quot;, content = @Content)
+&nbsp;    })
+&nbsp;    @PostMapping
+&nbsp;    public ResponseEntity&lt;Comment&gt; createComment(
+&nbsp;            @PathVariable Long userId,
+&nbsp;            @PathVariable Long issueId,
+&nbsp;            @RequestBody Comment comment) {
+&nbsp;        try {
+<b class="nc">&nbsp;            Comment createdComment = commentService.createComment(userId, issueId, comment);</b>
+<b class="nc">&nbsp;            return new ResponseEntity&lt;&gt;(createdComment, HttpStatus.CREATED);</b>
+<b class="nc">&nbsp;        } catch (IllegalArgumentException e) {</b>
+<b class="nc">&nbsp;            return new ResponseEntity&lt;&gt;(HttpStatus.BAD_REQUEST);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Get a comment by it&#39;s ID&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Comment found&quot;,
+&nbsp;                    content = @Content(mediaType = &quot;application/json&quot;, schema = @Schema(implementation = Comment.class))),
+&nbsp;            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Comment not found&quot;, content = @Content)
+&nbsp;    })
+&nbsp;    @GetMapping(&quot;/{commentId}&quot;)
+&nbsp;    public ResponseEntity&lt;Comment&gt; getCommentById(
+&nbsp;            @PathVariable Long userId,
+&nbsp;            @PathVariable Long issueId,
+&nbsp;            @PathVariable Long commentId) {
+<b class="nc">&nbsp;        Comment comment = commentService.getCommentById(commentId);</b>
+<b class="nc">&nbsp;        if (comment != null &amp;&amp; comment.getUser().getId().equals(userId) &amp;&amp; comment.getIssue().getId().equals(issueId)) {</b>
+<b class="nc">&nbsp;            return new ResponseEntity&lt;&gt;(comment, HttpStatus.OK);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return new ResponseEntity&lt;&gt;(HttpStatus.NOT_FOUND);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Get all comments on an issue&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;List of comments retrieved successfully&quot;,
+&nbsp;                    content = @Content(mediaType = &quot;application/json&quot;, schema = @Schema(implementation = Comment.class))),
+&nbsp;            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Issue not found&quot;, content = @Content)
+&nbsp;    })
+&nbsp;    @GetMapping
+&nbsp;    public ResponseEntity&lt;List&lt;Comment&gt;&gt; getCommentsByIssue(
+&nbsp;            @PathVariable Long userId,
+&nbsp;            @PathVariable Long issueId) {
+<b class="nc">&nbsp;        List&lt;Comment&gt; comments = commentService.getCommentsByIssue(issueId);</b>
+<b class="nc">&nbsp;        return new ResponseEntity&lt;&gt;(comments, HttpStatus.OK);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Edit/Update an existing comment&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Comment updated successfully&quot;,
+&nbsp;                    content = @Content(mediaType = &quot;application/json&quot;, schema = @Schema(implementation = Comment.class))),
+&nbsp;            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Comment, issue, or user not found&quot;, content = @Content),
+&nbsp;            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid input data&quot;, content = @Content)
+&nbsp;    })
+&nbsp;    @PutMapping(&quot;/{commentId}&quot;)
+&nbsp;    public ResponseEntity&lt;Comment&gt; updateComment(
+&nbsp;            @PathVariable Long userId,
+&nbsp;            @PathVariable Long issueId,
+&nbsp;            @PathVariable Long commentId,
+&nbsp;            @RequestBody Comment comment) {
+&nbsp;        try {
+<b class="nc">&nbsp;            Comment updatedComment = commentService.updateComment(commentId, userId, issueId, comment);</b>
+<b class="nc">&nbsp;            if (updatedComment != null) {</b>
+<b class="nc">&nbsp;                return new ResponseEntity&lt;&gt;(updatedComment, HttpStatus.OK);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                return new ResponseEntity&lt;&gt;(HttpStatus.NOT_FOUND);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (IllegalArgumentException e) {</b>
+<b class="nc">&nbsp;            return new ResponseEntity&lt;&gt;(HttpStatus.BAD_REQUEST);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Delete a comment&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;            @ApiResponse(responseCode = &quot;204&quot;, description = &quot;Comment deleted successfully&quot;, content = @Content),
+&nbsp;            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Comment, issue, or user not found&quot;, content = @Content),
+&nbsp;            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid request data&quot;, content = @Content)
+&nbsp;    })
+&nbsp;    @DeleteMapping(&quot;/{commentId}&quot;)
+&nbsp;    public ResponseEntity&lt;Void&gt; deleteComment(
+&nbsp;            @PathVariable Long userId,
+&nbsp;            @PathVariable Long issueId,
+&nbsp;            @PathVariable Long commentId) {
+<b class="nc">&nbsp;        boolean deleted = commentService.deleteComment(commentId, userId, issueId);</b>
+<b class="nc">&nbsp;        if (deleted) {</b>
+<b class="nc">&nbsp;            return new ResponseEntity&lt;&gt;(HttpStatus.NO_CONTENT);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return new ResponseEntity&lt;&gt;(HttpStatus.NOT_FOUND);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-11-27 14:57</div>
+</div>
+</body>
+</html>
