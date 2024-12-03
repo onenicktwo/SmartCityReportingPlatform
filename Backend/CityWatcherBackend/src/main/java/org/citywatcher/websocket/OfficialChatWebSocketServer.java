@@ -4,8 +4,6 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.citywatcher.model.Message;
 import org.citywatcher.service.OfficialChatService;
 import org.springframework.beans.factory.annotation.Autowired;
