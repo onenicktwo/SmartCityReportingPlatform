@@ -14,12 +14,12 @@ public class Comment {
     private Long id;
 
     @JsonBackReference(value = "issue-comments")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "issue_id", nullable = false)
     private Issue issue;
 
     @JsonBackReference(value = "user-comments")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 

@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import javax.websocket.Session;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -97,5 +99,23 @@ public class WebSocketManager {
                 e.printStackTrace();
             }
         });
+    }
+
+    public List<String> getAdminUsernames() {
+        List<String> adminUsernames = new ArrayList<>();
+
+        usernameSessionMap.keySet().forEach(username -> {
+            try {
+                userRepository.findByUsername(username).ifPresent(user -> {
+                    if (user.getRole() == UserRole.ADMIN) {
+                        adminUsernames.add(username);
+                    }
+                });
+            } catch (Exception e) {
+                System.err.println("Error checking role for user " + username + ": " + e.getMessage());
+            }
+        });
+
+        return adminUsernames;
     }
 }
