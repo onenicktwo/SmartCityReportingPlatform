@@ -1,118 +1,162 @@
 package org.citywatcher.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import org.citywatcher.model.User;
-import org.citywatcher.service.FileStorageService;
-import org.citywatcher.service.UserService;
-import org.junit.Before;
+import org.citywatcher.model.UserRole;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 
-import java.util.Arrays;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-@RunWith(SpringRunner.class)
-@WebMvcTest(controllers = UserController.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class NicholasMorrowSystemTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
-    private UserService userService;
-
-    @MockBean
-    private FileStorageService fileStorageService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+    @LocalServerPort
+    private int port;
 
     private User testUser;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    public void setUp() {
+        RestAssured.port = port;
+
         testUser = new User();
-        testUser.setId(0L);
-        testUser.setUsername("john_doe");
-        testUser.setEmail("john@example.com");
+        testUser.setUsername("testuser");
+        testUser.setEmail("testuser@example.com");
+        testUser.setPassword("password");
+        testUser.setRole(UserRole.CITIZEN);
     }
 
     @Test
-    public void testRegisterUserWithImage() throws Exception {
-        MockMultipartFile imageFile = new MockMultipartFile("image", "profile.jpg", MediaType.IMAGE_JPEG_VALUE, "image data".getBytes());
-        MockMultipartFile userFile = new MockMultipartFile("user", "", "application/json", objectMapper.writeValueAsBytes(testUser));
+    public void testRegisterUser() {
+        Response response = given()
+                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+                .multiPart("user", testUser, MediaType.APPLICATION_JSON_VALUE)
+                .multiPart("image", "profile.jpg", "image data".getBytes())
+                .when()
+                .post("/citywatcher/users/register")
+                .then()
+                .statusCode(HttpStatus.CREATED.value())
+                .extract().response();
 
-        when(userService.registerUser(any(User.class), any())).thenReturn(testUser);
-
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/citywatcher/users/register")
-                        .file(userFile)
-                        .file(imageFile)
-                        .contentType(MediaType.MULTIPART_FORM_DATA))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(testUser.getId()))
-                .andExpect(jsonPath("$.username").value(testUser.getUsername()));
+        User createdUser = response.as(User.class);
+        assertNotNull(createdUser.getId());
+        assertEquals(testUser.getUsername(), createdUser.getUsername());
     }
 
     @Test
-    public void testGetUserById() throws Exception {
-        when(userService.getUserById(0L)).thenReturn(testUser);
+    public void testGetUserById() {
+        Response createResponse = given()
+                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+                .multiPart("user", testUser, MediaType.APPLICATION_JSON_VALUE)
+                .when()
+                .post("/citywatcher/users/register")
+                .then()
+                .statusCode(HttpStatus.CREATED.value())
+                .extract().response();
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/citywatcher/users/0")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(testUser.getId()))
-                .andExpect(jsonPath("$.username").value(testUser.getUsername()));
+        User createdUser = createResponse.as(User.class);
+
+        given()
+                .when()
+                .get("/citywatcher/users/" + createdUser.getId())
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .body("id", equalTo(createdUser.getId().intValue()))
+                .body("username", equalTo(createdUser.getUsername()));
     }
 
     @Test
-    public void testGetAllUsers() throws Exception {
-        when(userService.getAllUsers()).thenReturn(Arrays.asList(testUser));
+    public void testGetAllUsers() {
+        given()
+                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+                .multiPart("user", testUser, MediaType.APPLICATION_JSON_VALUE)
+                .when()
+                .post("/citywatcher/users/register");
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/citywatcher/users")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(testUser.getId()))
-                .andExpect(jsonPath("$[0].username").value(testUser.getUsername()));
+        testUser.setUsername("testuser2");
+        testUser.setEmail("testuser2@example.com");
+
+        given()
+                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+                .multiPart("user", testUser, MediaType.APPLICATION_JSON_VALUE)
+                .when()
+                .post("/citywatcher/users/register");
+
+        given()
+                .when()
+                .get("/citywatcher/users")
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .body("size()", greaterThanOrEqualTo(2));
     }
 
     @Test
-    public void testUpdateUserWithImage() throws Exception {
-        MockMultipartFile imageFile = new MockMultipartFile("image", "updated_profile.jpg", MediaType.IMAGE_JPEG_VALUE, "updated image data".getBytes());
-        MockMultipartFile userFile = new MockMultipartFile("user", "", "application/json", objectMapper.writeValueAsBytes(testUser));
+    public void testUpdateUser() {
+        Response createResponse = given()
+                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+                .multiPart("user", testUser, MediaType.APPLICATION_JSON_VALUE)
+                .when()
+                .post("/citywatcher/users/register")
+                .then()
+                .statusCode(HttpStatus.CREATED.value())
+                .extract().response();
 
-        when(userService.updateUser(Mockito.eq(0L), any(User.class), any())).thenReturn(testUser);
+        User createdUser = createResponse.as(User.class);
+        createdUser.setUsername("updateduser");
+        createdUser.setEmail("updateduser@example.com");
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/citywatcher/users/0")
-                        .file(userFile)
-                        .file(imageFile)
-                        .with(request -> {
-                            request.setMethod("PUT");
-                            return request;
-                        })
-                        .contentType(MediaType.MULTIPART_FORM_DATA))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(testUser.getId()))
-                .andExpect(jsonPath("$.username").value(testUser.getUsername()));
+        Response updateResponse = given()
+                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+                .multiPart("user", createdUser, MediaType.APPLICATION_JSON_VALUE)
+                .multiPart("image", "profile.jpg", "image data".getBytes())
+                .when()
+                .put("/citywatcher/users/" + createdUser.getId())
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .extract().response();
+
+        User updatedUser = updateResponse.as(User.class);
+        assertEquals("updateduser", updatedUser.getUsername());
+        assertEquals("updateduser@example.com", updatedUser.getEmail());
     }
 
     @Test
-    public void testDeleteUser() throws Exception {
-        when(userService.deleteUser(0L)).thenReturn(true);
+    public void testDeleteUser() {
+        Response createResponse = given()
+                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+                .multiPart("user", testUser, MediaType.APPLICATION_JSON_VALUE)
+                .when()
+                .post("/citywatcher/users/register")
+                .then()
+                .statusCode(HttpStatus.CREATED.value())
+                .extract().response();
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/citywatcher/users/0"))
-                .andExpect(status().isNoContent());
+        User createdUser = createResponse.as(User.class);
+
+        given()
+                .when()
+                .delete("/citywatcher/users/" + createdUser.getId())
+                .then()
+                .statusCode(HttpStatus.NO_CONTENT.value());
+
+        given()
+                .when()
+                .get("/citywatcher/users/" + createdUser.getId())
+                .then()
+                .statusCode(HttpStatus.NOT_FOUND.value());
     }
 }
