@@ -1,9 +1,6 @@
 package org.citywatcher.model;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -28,6 +25,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role;
+
+    @Column(name = "profile_image_path")
+    private String profileImagePath;
 
     @OneToMany(mappedBy = "reporter")
     @JsonIgnore
@@ -109,5 +109,13 @@ public class User {
 
     public void setVolunteerIssues(List<Issue> volunteerIssues) {
         this.volunteerIssues = volunteerIssues;
+    }
+
+    public String getProfileImagePath() {
+        return profileImagePath;
+    }
+
+    public void setProfileImagePath(String profileImagePath) {
+        this.profileImagePath = profileImagePath;
     }
 }
