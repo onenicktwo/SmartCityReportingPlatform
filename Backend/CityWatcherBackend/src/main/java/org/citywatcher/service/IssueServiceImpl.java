@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
@@ -23,6 +24,7 @@ import java.util.List;
 
 @Service
 public class IssueServiceImpl implements IssueService {
+    private final FileStorageService fileStorageService;
 
     private final IssueRepository issueRepository;
     private final UserRepository userRepository;
@@ -30,14 +32,15 @@ public class IssueServiceImpl implements IssueService {
     private static final Logger logger = LoggerFactory.getLogger(IssueServiceImpl.class);
 
     @Autowired
-    public IssueServiceImpl(IssueRepository issueRepository, UserRepository userRepository, IssueWebSocketServer webSocketController) {
+    public IssueServiceImpl(IssueRepository issueRepository, UserRepository userRepository, IssueWebSocketServer webSocketController, FileStorageService fileStorageService) {
         this.issueRepository = issueRepository;
         this.userRepository = userRepository;
         this.issueWebSocketServer = webSocketController;
+        this.fileStorageService = fileStorageService;
     }
 
     @Override
-    public Issue createIssue(Long userId, Issue issue) {
+    public Issue createIssue(Long userId, Issue issue, MultipartFile imageFile) {
         User reporter = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid reporter ID"));
 
@@ -82,6 +85,12 @@ public class IssueServiceImpl implements IssueService {
             issue.setAssignedOfficial(assignedOfficial);
         }
 
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String imagePath = fileStorageService.saveIssueImage(userId, imageFile);
+            issue.setImagePath(imagePath);
+            issueRepository.save(issue); // Update issue with image path
+        }
+
         Date currentTime = new Date();
         issue.setReportedDate(currentTime);
         issue.setLastUpdatedDate(currentTime);
@@ -115,7 +124,7 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public Issue updateIssue(Long userId, Long issueId, Issue issueDetails) {
+    public Issue updateIssue(Long userId, Long issueId, Issue issueDetails, MultipartFile imageFile) {
         Issue existingIssue = getIssueById(userId, issueId);
         if (existingIssue != null) {
             // Dont update reporter
@@ -150,8 +159,12 @@ public class IssueServiceImpl implements IssueService {
             if (issueDetails.getAddress() != null) {
                 existingIssue.setAddress(issueDetails.getAddress());
             }
-            if (issueDetails.getImagePath() != null) {
-                existingIssue.setImagePath(issueDetails.getImagePath());
+            if (imageFile != null && !imageFile.isEmpty()) {
+                if (existingIssue.getImagePath() != null && !existingIssue.getImagePath().isEmpty()) {
+                    fileStorageService.deleteFile(existingIssue.getImagePath());
+                }
+                String newImagePath = fileStorageService.saveIssueImage(issueId, imageFile);
+                existingIssue.setImagePath(newImagePath);
             }
 
             if (issueDetails.getAssignedOfficial() != null) {
