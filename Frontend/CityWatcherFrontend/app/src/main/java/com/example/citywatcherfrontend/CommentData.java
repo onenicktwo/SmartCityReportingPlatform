@@ -10,7 +10,7 @@ public class CommentData {
     private int id;
     @JsonProperty("issue_id")
     private int issueId;
-    private UserInfo commenter;
+    private UserInfo commenter = new UserInfo();
     private String content;
     @JsonProperty("timestamp")
     private Date date;

@@ -4,13 +4,18 @@ import static androidx.core.content.ContextCompat.startActivity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.RouteListingPreference;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,9 +28,12 @@ import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONObject;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class CommentListAdapter extends ArrayAdapter<CommentData> {
     Context mContext;
@@ -48,25 +56,54 @@ public class CommentListAdapter extends ArrayAdapter<CommentData> {
 
         TextView commenter = view.findViewById(R.id.commenterLabel);
         TextView date = view.findViewById(R.id.commentDate);
+        ImageView menu = view.findViewById(R.id.commentMenu);
         TextView content = view.findViewById(R.id.commentContent);
-        Button buttonDeleteComment = view.findViewById(R.id.buttonDeleteComment);
-        Button buttonEditComment = view.findViewById(R.id.buttonEditComment);
 
-        // commenter.setText(comment.getCommenter().getUsername());
+        commenter.setText(comment.getCommenter().getUsername());
         date.setText(comment.getDate().toString());
         content.setText(comment.getContent());
 
-        buttonDeleteComment.setOnClickListener(new View.OnClickListener() {
+        PopupMenu popupMenu = new PopupMenu(getContext().getApplicationContext(), menu);
+        popupMenu.inflate(R.menu.menu_popup_comment);
+
+        if (!CityWatcherController.getInstance().getUsername().equals(comment.getCommenter().getUsername())) {
+            view.findViewById(R.id.popupEditComment).setVisibility(View.GONE);
+            view.findViewById(R.id.popupDeleteComment).setVisibility(View.GONE);
+        } else {
+            view.findViewById(R.id.popupDeleteComment).setVisibility(View.GONE);
+        }
+
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
-            public void onClick(View view) {
-                ((IssueDetailsActivity)mContext).makeDeleteCommentReq(position);
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                if (menuItem.getItemId() == R.id.popupEditComment) {
+                    ((IssueDetailsActivity)mContext).editComment(position);
+                    return true;
+                } else if (menuItem.getItemId() == R.id.popupDeleteComment) {
+                    ((IssueDetailsActivity)mContext).makeDeleteCommentReq(position);
+                    return true;
+                } else if (menuItem.getItemId() == R.id.popupReportComment) {
+                    Toast.makeText(mContext, "Reporting comment", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+                return true;
             }
         });
 
-        buttonEditComment.setOnClickListener(new View.OnClickListener() {
+        menu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((IssueDetailsActivity)mContext).editComment(position);
+                try {
+                    Field popup = PopupMenu.class.getDeclaredField("mPopup");
+                    popup.setAccessible(true);
+                    Object menu = popup.get(popupMenu);
+                    menu.getClass().getDeclaredMethod("setForceShowIcon", boolean.class).invoke(menu, true);
+                } catch (NoSuchFieldException | IllegalAccessException | NoSuchMethodException |
+                         InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    popupMenu.show();
+                }
             }
         });
 
