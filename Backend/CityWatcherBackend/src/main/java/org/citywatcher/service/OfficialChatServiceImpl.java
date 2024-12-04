@@ -1,8 +1,8 @@
 package org.citywatcher.service;
 
-import org.citywatcher.model.*;
-import org.citywatcher.repository.CommentsRepository;
-import org.citywatcher.repository.IssueRepository;
+import org.citywatcher.model.Message;
+import org.citywatcher.model.User;
+import org.citywatcher.model.UserRole;
 import org.citywatcher.repository.MessageRepository;
 import org.citywatcher.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

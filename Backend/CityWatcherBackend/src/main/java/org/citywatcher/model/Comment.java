@@ -1,7 +1,6 @@
 package org.citywatcher.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -14,11 +13,12 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JsonIgnore
+    @JsonBackReference(value = "issue-comments")
     @ManyToOne
     @JoinColumn(name = "issue_id", nullable = false)
     private Issue issue;
 
+    @JsonBackReference(value = "user-comments")
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
