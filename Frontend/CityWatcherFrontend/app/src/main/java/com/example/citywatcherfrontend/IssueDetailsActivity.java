@@ -45,7 +45,6 @@ public class IssueDetailsActivity extends CityWatcherActivity {
     private CommentData comment;
     private Button buttonEditComment;
 
-
     // Initialize activity variables
     private ImageView issueDetailsImage;
     private TextView issueDetailsTitle;
@@ -337,7 +336,7 @@ public class IssueDetailsActivity extends CityWatcherActivity {
         Bundle bundle = new Bundle();
         CommentData comment = commentArrayList.get(i);
         bundle.putInt("userID", comment.getCommenter().getId());
-        bundle.putInt("issueID", comment.getIssueId());
+        bundle.putInt("issueID", issueId);
         bundle.putInt("commentID", comment.getId());
         intent.putExtras(bundle);
         startActivity(intent);

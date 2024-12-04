@@ -67,6 +67,7 @@ public class ViewIssuesActivity extends CityWatcherActivity implements OnMapRead
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         URL = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/" + userId + "/issues";
+        Log.d("URL", URL);
 
         binding = ActivityViewIssuesBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -183,7 +184,7 @@ public class ViewIssuesActivity extends CityWatcherActivity implements OnMapRead
                         Intent intent = new Intent(ViewIssuesActivity.this, IssueDetailsActivity.class);
 
                         intent.putExtra("id", issueArrayList.get(i).getId());
-                        intent.putExtra("reporter", issueArrayList.get(i).getReporter().getId());
+                        intent.putExtra("reporter", issueArrayList.get(i).getReporter().getUsername());
                         intent.putExtra("title", issueArrayList.get(i).getTitle());
                         intent.putExtra("category", issueArrayList.get(i).getCategory());
                         intent.putExtra("address", issueArrayList.get(i).getAddress());

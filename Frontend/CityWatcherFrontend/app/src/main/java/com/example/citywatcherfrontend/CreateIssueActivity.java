@@ -146,8 +146,7 @@ public class CreateIssueActivity extends CityWatcherActivity {
 
         // Adding request to request queue
         VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonObjReq);
-        Intent intent = new Intent(CreateIssueActivity.this, ViewIssuesActivity.class);
-        startActivity(intent);
+        finish();
     }
 
     /**

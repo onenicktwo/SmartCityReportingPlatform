@@ -59,19 +59,19 @@ public class CommentListAdapter extends ArrayAdapter<CommentData> {
         ImageView menu = view.findViewById(R.id.commentMenu);
         TextView content = view.findViewById(R.id.commentContent);
 
-        // commenter.setText(comment.getCommenter().getUsername());
+        commenter.setText(comment.getCommenter().getUsername());
         date.setText(comment.getDate().toString());
         content.setText(comment.getContent());
 
         PopupMenu popupMenu = new PopupMenu(getContext().getApplicationContext(), menu);
         popupMenu.inflate(R.menu.menu_popup_comment);
 
-//        if (!CityWatcherController.getInstance().getUsername().equals(comment.getCommenter().getUsername())) {
-//            view.findViewById(R.id.popupEditComment).setVisibility(View.GONE);
-//            view.findViewById(R.id.popupDeleteComment).setVisibility(View.GONE);
-//        } else {
-//            view.findViewById(R.id.popupDeleteComment).setVisibility(View.GONE);
-//        }
+        if (!(CityWatcherController.getInstance().getUserId() == comment.getCommenter().getId())) {
+            view.findViewById(R.id.popupEditComment).setVisibility(View.GONE);
+            view.findViewById(R.id.popupDeleteComment).setVisibility(View.GONE);
+        } else if (!CityWatcherController.getInstance().isLoggedIn()){
+            view.findViewById(R.id.popupDeleteComment).setVisibility(View.GONE);
+        }
 
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
