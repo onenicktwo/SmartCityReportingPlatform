@@ -59,19 +59,19 @@ public class CommentListAdapter extends ArrayAdapter<CommentData> {
         ImageView menu = view.findViewById(R.id.commentMenu);
         TextView content = view.findViewById(R.id.commentContent);
 
-        commenter.setText(comment.getCommenter().getUsername());
+        // commenter.setText(comment.getCommenter().getUsername());
         date.setText(comment.getDate().toString());
         content.setText(comment.getContent());
 
         PopupMenu popupMenu = new PopupMenu(getContext().getApplicationContext(), menu);
         popupMenu.inflate(R.menu.menu_popup_comment);
 
-        if (!CityWatcherController.getInstance().getUsername().equals(comment.getCommenter().getUsername())) {
-            view.findViewById(R.id.popupEditComment).setVisibility(View.GONE);
-            view.findViewById(R.id.popupDeleteComment).setVisibility(View.GONE);
-        } else {
-            view.findViewById(R.id.popupDeleteComment).setVisibility(View.GONE);
-        }
+//        if (!CityWatcherController.getInstance().getUsername().equals(comment.getCommenter().getUsername())) {
+//            view.findViewById(R.id.popupEditComment).setVisibility(View.GONE);
+//            view.findViewById(R.id.popupDeleteComment).setVisibility(View.GONE);
+//        } else {
+//            view.findViewById(R.id.popupDeleteComment).setVisibility(View.GONE);
+//        }
 
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
@@ -83,7 +83,7 @@ public class CommentListAdapter extends ArrayAdapter<CommentData> {
                     ((IssueDetailsActivity)mContext).makeDeleteCommentReq(position);
                     return true;
                 } else if (menuItem.getItemId() == R.id.popupReportComment) {
-                    Toast.makeText(mContext, "Reporting comment", Toast.LENGTH_SHORT).show();
+                    ((IssueDetailsActivity)mContext).reportComment(position);
                     return true;
                 }
                 return true;

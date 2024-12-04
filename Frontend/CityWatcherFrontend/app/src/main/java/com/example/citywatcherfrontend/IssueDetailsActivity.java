@@ -332,4 +332,15 @@ public class IssueDetailsActivity extends CityWatcherActivity {
         startActivity(intent);
     }
 
+    public void reportComment(int i) {
+        Intent intent = new Intent(IssueDetailsActivity.this, ReportCommentActivity.class);
+        Bundle bundle = new Bundle();
+        CommentData comment = commentArrayList.get(i);
+        bundle.putInt("userID", comment.getCommenter().getId());
+        bundle.putInt("issueID", comment.getIssueId());
+        bundle.putInt("commentID", comment.getId());
+        intent.putExtras(bundle);
+        startActivity(intent);
+    }
+
 }
