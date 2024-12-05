@@ -23,14 +23,12 @@ public class ReportWebSocketServer {
 
     @OnOpen
     public void onOpen(Session session, @PathParam("username") String username) {
-        // Add session to WebSocket manager
         webSocketManager.addSession(username, session);
         System.out.println("New WebSocket connection for reports: " + username);
     }
 
     @OnClose
     public void onClose(Session session) {
-        // Remove session from WebSocket manager
         webSocketManager.removeSession(session);
         System.out.println("WebSocket connection for reports closed.");
     }
@@ -48,7 +46,7 @@ public class ReportWebSocketServer {
     }
 
     public void sendReportNotification(Report report) {
-        ReportNotificationDTO notificationDTO = new ReportNotificationDTO(report);
+        ReportNotificationDTO notificationDTO = new ReportNotificationDTO(report, "NEW_REPORT");
         String jsonMessage = webSocketManager.convertToJson(notificationDTO);
 
         List<String> adminUsernames = webSocketManager.getAdminUsernames();
