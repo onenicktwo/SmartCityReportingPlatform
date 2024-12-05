@@ -203,7 +203,7 @@ public class IssueDetailsActivity extends CityWatcherActivity {
                     public void onResponse(JSONArray response){
                         Log.d("Volley Response", "Comments retrieved");
 
-                        for (int i = 0; i < response.length(); i++) {
+                        for (int i = response.length() - 1; i >= 0; i--) {
                             try {
                                 String jsonString = response.get(i).toString();
                                 comment = mapper.readValue(jsonString, CommentData.class);

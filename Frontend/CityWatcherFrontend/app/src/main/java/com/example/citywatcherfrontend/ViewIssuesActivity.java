@@ -202,6 +202,7 @@ public class ViewIssuesActivity extends CityWatcherActivity implements OnMapRead
             IssueData issue = issueArrayList.get(issueIndex);
             LatLng latlng = new LatLng(issue.getLatitude(), issue.getLongitude());
             markerOptions = new MarkerOptions();
+            markerOptions.title(issue.getTitle());
             markerOptions.position(latlng);
             if (issue.getStatus().equals("UNDER_REVIEW")) {
                 markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
