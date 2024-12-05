@@ -7,9 +7,12 @@ import static androidx.test.espresso.action.ViewActions.typeText;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static org.hamcrest.Matchers.not;
 
 import android.content.Context;
 
+import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -41,6 +44,48 @@ public class SamHostetterSystemTest {
         // Click login button
         onView(withId(R.id.btnLogin)).perform(click());
 
+        onView(withId(R.id.btnAdminView))
+                .check(matches(isDisplayed()));
+
     }
+
+    @Test
+    public void testUnsuccessfulLogin() {
+
+        onView(withId(R.id.etUsername)).perform(typeText("Sam"));
+        onView(withId(R.id.etPassword)).perform(typeText("WrongPassword"), closeSoftKeyboard());
+
+        onView(withId(R.id.btnLogin)).perform(click());
+
+        onView(withId(R.id.btnLogin))
+                .check(matches(isDisplayed()));
+
+    }
+    @Test
+    public void testSuccessfulFetchUser() {
+        ActivityScenario.launch(EditUserActivity.class);
+
+        onView(withId(R.id.etUserId)).perform(typeText("13"), closeSoftKeyboard());
+
+        onView(withId(R.id.btnFetchUser)).perform(click());
+
+        onView(withId(R.id.etEditUsername))
+                .check(matches(not(withText(""))));
+    }
+
+    @Test
+    public void testUnsuccessfulFetchUser() {
+        ActivityScenario.launch(EditUserActivity.class);
+
+        onView(withId(R.id.etUserId)).perform(typeText("10000"), closeSoftKeyboard());
+
+        onView(withId(R.id.btnFetchUser)).perform(click());
+
+        onView(withId(R.id.etEditUsername))
+                .check(matches(withText("")));
+
+
+    }
+
 
 }
