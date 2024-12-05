@@ -21,6 +21,7 @@ public class CityWatcherController {
 
     private int userId;
     private String username;
+    private String role;
     private boolean loggedIn;
     private boolean connected;
 
@@ -54,6 +55,14 @@ public class CityWatcherController {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public void setLoggedIn(boolean loggedIn) {

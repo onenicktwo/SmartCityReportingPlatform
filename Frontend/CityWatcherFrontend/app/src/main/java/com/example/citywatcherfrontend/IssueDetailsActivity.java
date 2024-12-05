@@ -70,7 +70,7 @@ public class IssueDetailsActivity extends CityWatcherActivity {
 
         URL = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/" + userId + "/issues";
         issueId = bundle.getInt("id");
-        reporterId = bundle.getInt("reporter");
+        reporterId = bundle.getInt("reporterId");
 
         issueDetailsImage = findViewById(R.id.issueDetailsImage);
         issueDetailsCategory = findViewById(R.id.issueDetailsCategory);
@@ -202,7 +202,7 @@ public class IssueDetailsActivity extends CityWatcherActivity {
                     public void onResponse(JSONArray response){
                         Log.d("Volley Response", "Comments retrieved");
 
-                        for (int i = 0; i < response.length(); i++) {
+                        for (int i = response.length() - 1; i >= 0; i--) {
                             try {
                                 String jsonString = response.get(i).toString();
                                 comment = mapper.readValue(jsonString, CommentData.class);
@@ -285,7 +285,7 @@ public class IssueDetailsActivity extends CityWatcherActivity {
             Intent intent = new Intent(IssueDetailsActivity.this, EditCommentActivity.class);
             Bundle bundle = new Bundle();
             CommentData comment = commentArrayList.get(i);
-            bundle.putInt("userID", comment.getCommenter().getId());
+            bundle.putInt("userID", comment.getUser().getId());
             bundle.putInt("issueID", comment.getIssueId());
             bundle.putInt("commentID", comment.getId());
             intent.putExtras(bundle);
@@ -335,7 +335,7 @@ public class IssueDetailsActivity extends CityWatcherActivity {
         Intent intent = new Intent(IssueDetailsActivity.this, ReportCommentActivity.class);
         Bundle bundle = new Bundle();
         CommentData comment = commentArrayList.get(i);
-        bundle.putInt("userID", comment.getCommenter().getId());
+        bundle.putInt("userID", comment.getUser().getId());
         bundle.putInt("issueID", issueId);
         bundle.putInt("commentID", comment.getId());
         intent.putExtras(bundle);

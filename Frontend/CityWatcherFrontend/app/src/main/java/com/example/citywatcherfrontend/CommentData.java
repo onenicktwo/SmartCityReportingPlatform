@@ -10,7 +10,8 @@ public class CommentData {
     private int id;
     @JsonProperty("issue_id")
     private int issueId;
-    private UserInfo commenter = new UserInfo();
+    @JsonProperty("user")
+    private UserInfo user = new UserInfo();
     private String content;
     @JsonProperty("timestamp")
     private Date date;
@@ -28,12 +29,12 @@ public class CommentData {
         this.id = id;
     }
 
-    public UserInfo getCommenter() {
-        return commenter;
+    public UserInfo getUser() {
+        return user;
     }
 
-    public void setCommenter(UserInfo commenter) {
-        this.commenter = commenter;
+    public void setUser(UserInfo user) {
+        this.user = user;
     }
 
     public String getContent() {

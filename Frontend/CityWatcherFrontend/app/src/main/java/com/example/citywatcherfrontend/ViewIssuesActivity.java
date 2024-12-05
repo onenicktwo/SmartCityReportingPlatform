@@ -184,7 +184,7 @@ public class ViewIssuesActivity extends CityWatcherActivity implements OnMapRead
                         Intent intent = new Intent(ViewIssuesActivity.this, IssueDetailsActivity.class);
 
                         intent.putExtra("id", issueArrayList.get(i).getId());
-                        intent.putExtra("reporter", issueArrayList.get(i).getReporter().getUsername());
+                        intent.putExtra("reporterId", issueArrayList.get(i).getReporter().getId());
                         intent.putExtra("title", issueArrayList.get(i).getTitle());
                         intent.putExtra("category", issueArrayList.get(i).getCategory());
                         intent.putExtra("address", issueArrayList.get(i).getAddress());
