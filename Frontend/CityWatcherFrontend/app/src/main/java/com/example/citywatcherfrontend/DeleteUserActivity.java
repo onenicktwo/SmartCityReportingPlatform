@@ -17,6 +17,10 @@ public class DeleteUserActivity extends CityWatcherActivity {
 
 
     @Override
+    /**
+     * Creates the Delete User view from the layout
+     * @author Sam Hostetter
+     */
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_delete_user);
@@ -40,6 +44,11 @@ public class DeleteUserActivity extends CityWatcherActivity {
         });
 
     }
+    /**
+     * Deletes a user by sending a DELETE request to the server.
+     * @author Sam Hostetter
+     * @param userId User ID
+     */
     private void deleteUser(long userId) {
         String url = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/" + userId;
 

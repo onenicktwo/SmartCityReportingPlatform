@@ -59,6 +59,12 @@ public class RegisterActivity extends CityWatcherActivity {
         });
     }
 
+    /**
+     * Registers a new user by sending a POST request to the server.
+     * @author Sam Hostetter
+     * @throws JSONException Throws error if JSON is invalid
+     */
+
     private void registerUser() throws JSONException {
         String username = etUsername.getText().toString();
         String email = etEmail.getText().toString();

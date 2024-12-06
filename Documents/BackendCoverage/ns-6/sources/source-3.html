@@ -1,0 +1,439 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > IssueServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.citywatcher.service</a>
+</div>
+
+<h1>Coverage Summary for Class: IssueServiceImpl (org.citywatcher.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">IssueServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/122)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/161)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package org.citywatcher.service;
+&nbsp;
+&nbsp;import org.citywatcher.model.Issue;
+&nbsp;import org.citywatcher.model.IssueStatus;
+&nbsp;import org.citywatcher.model.User;
+&nbsp;import org.citywatcher.model.UserRole;
+&nbsp;import org.citywatcher.repository.IssueRepository;
+&nbsp;import org.citywatcher.repository.UserRepository;
+&nbsp;import org.citywatcher.websocket.IssueWebSocketServer;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.data.domain.PageRequest;
+&nbsp;import org.springframework.data.jpa.domain.Specification;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.web.multipart.MultipartFile;
+&nbsp;
+&nbsp;import javax.persistence.criteria.Expression;
+&nbsp;import javax.persistence.criteria.Predicate;
+&nbsp;import java.awt.*;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Service
+&nbsp;public class IssueServiceImpl implements IssueService {
+&nbsp;    private final FileStorageService fileStorageService;
+&nbsp;
+&nbsp;    private final IssueRepository issueRepository;
+&nbsp;    private final UserRepository userRepository;
+&nbsp;    private final IssueWebSocketServer issueWebSocketServer;
+<b class="nc">&nbsp;    private static final Logger logger = LoggerFactory.getLogger(IssueServiceImpl.class);</b>
+&nbsp;
+&nbsp;    @Autowired
+<b class="nc">&nbsp;    public IssueServiceImpl(IssueRepository issueRepository, UserRepository userRepository, IssueWebSocketServer webSocketController, FileStorageService fileStorageService) {</b>
+<b class="nc">&nbsp;        this.issueRepository = issueRepository;</b>
+<b class="nc">&nbsp;        this.userRepository = userRepository;</b>
+<b class="nc">&nbsp;        this.issueWebSocketServer = webSocketController;</b>
+<b class="nc">&nbsp;        this.fileStorageService = fileStorageService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Issue createIssue(Long userId, Issue issue, MultipartFile imageFile) {
+<b class="nc">&nbsp;        User reporter = userRepository.findById(userId)</b>
+<b class="nc">&nbsp;                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid reporter ID&quot;));</b>
+&nbsp;
+<b class="nc">&nbsp;        if (issue.getTitle() == null || issue.getTitle().trim().isEmpty()) {</b>
+<b class="nc">&nbsp;            issue.setTitle(&quot;Untitled&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (issue.getDescription() == null || issue.getDescription().trim().isEmpty()) {</b>
+<b class="nc">&nbsp;            issue.setDescription(&quot;&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (issue.getLatitude() == null || issue.getLongitude() == null) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;Location coordinates are required&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (issue.getAddress() == null || issue.getAddress().trim().isEmpty()) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;Address is required&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (issue.getStatus() == null) {</b>
+<b class="nc">&nbsp;            issue.setStatus(IssueStatus.REPORTED);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (issue.getCategory() == null) {</b>
+<b class="nc">&nbsp;            issue.setCategory(&quot;Other&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (issue.getImagePath() == null) {</b>
+<b class="nc">&nbsp;            issue.setImagePath(&quot;&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (issue.getVolunteers() == null) {</b>
+<b class="nc">&nbsp;            issue.setVolunteers(new ArrayList&lt;&gt;());</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (issue.getComments() == null) {</b>
+<b class="nc">&nbsp;            issue.setComments(new ArrayList&lt;&gt;());</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        issue.setReporter(reporter);</b>
+&nbsp;
+<b class="nc">&nbsp;        if (issue.getAssignedOfficial() != null) {</b>
+<b class="nc">&nbsp;            User assignedOfficial = userRepository.findById(issue.getAssignedOfficial().getId())</b>
+<b class="nc">&nbsp;                    .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid assigned official ID&quot;));</b>
+<b class="nc">&nbsp;            issue.setAssignedOfficial(assignedOfficial);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (imageFile != null &amp;&amp; !imageFile.isEmpty()) {</b>
+<b class="nc">&nbsp;            String imagePath = fileStorageService.saveIssueImage(userId, imageFile);</b>
+<b class="nc">&nbsp;            issue.setImagePath(imagePath);</b>
+<b class="nc">&nbsp;            issueRepository.save(issue); // Update issue with image path</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        Date currentTime = new Date();</b>
+<b class="nc">&nbsp;        issue.setReportedDate(currentTime);</b>
+<b class="nc">&nbsp;        issue.setLastUpdatedDate(currentTime);</b>
+&nbsp;
+<b class="nc">&nbsp;        Issue savedIssue = issueRepository.save(issue);</b>
+&nbsp;
+&nbsp;        try {
+<b class="nc">&nbsp;            if (savedIssue.getAssignedOfficial() != null) {</b>
+<b class="nc">&nbsp;                issueWebSocketServer.sendAssignmentNotification(savedIssue);</b>
+&nbsp;            }
+<b class="nc">&nbsp;        } catch (Exception e) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;Failed to send WebSocket notification for issue create: &quot; + e.getMessage(), e);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return savedIssue;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Issue getIssueById(Long userId, Long issueId) {
+<b class="nc">&nbsp;        User reporter = userRepository.findById(userId)</b>
+<b class="nc">&nbsp;                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid User ID&quot;));</b>
+<b class="nc">&nbsp;        return issueRepository.findByIdAndReporter(issueId, reporter)</b>
+<b class="nc">&nbsp;                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Issue does not belong to the specified user.&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;Issue&gt; getIssuesByUser(Long userId) {
+<b class="nc">&nbsp;        User user = userRepository.findById(userId)</b>
+<b class="nc">&nbsp;                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid User ID&quot;));</b>
+<b class="nc">&nbsp;        return issueRepository.findByReporter(user);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Issue updateIssue(Long userId, Long issueId, Issue issueDetails, MultipartFile imageFile) {
+<b class="nc">&nbsp;        Issue existingIssue = getIssueById(userId, issueId);</b>
+<b class="nc">&nbsp;        if (existingIssue != null) {</b>
+&nbsp;            // Dont update reporter
+<b class="nc">&nbsp;            User reporter = userRepository.findById(userId)</b>
+<b class="nc">&nbsp;                    .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid reporter ID&quot;));</b>
+&nbsp;
+<b class="nc">&nbsp;            boolean statusChanged = issueDetails.getStatus() != null &amp;&amp;</b>
+<b class="nc">&nbsp;                    !existingIssue.getStatus().equals(issueDetails.getStatus());</b>
+<b class="nc">&nbsp;            boolean isRelevantStatus = issueDetails.getStatus() != null &amp;&amp;</b>
+<b class="nc">&nbsp;                    (issueDetails.getStatus() == IssueStatus.UNDER_REVIEW</b>
+<b class="nc">&nbsp;                            || issueDetails.getStatus() == IssueStatus.COMPLETED);</b>
+<b class="nc">&nbsp;            User previousAssignedOfficial = existingIssue.getAssignedOfficial();</b>
+&nbsp;
+<b class="nc">&nbsp;            if (issueDetails.getTitle() != null) {</b>
+<b class="nc">&nbsp;                existingIssue.setTitle(issueDetails.getTitle());</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (issueDetails.getDescription() != null) {</b>
+<b class="nc">&nbsp;                existingIssue.setDescription(issueDetails.getDescription());</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (issueDetails.getCategory() != null) {</b>
+<b class="nc">&nbsp;                existingIssue.setCategory(issueDetails.getCategory());</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (issueDetails.getStatus() != null) {</b>
+<b class="nc">&nbsp;                existingIssue.setStatus(issueDetails.getStatus());</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (issueDetails.getLatitude() != null) {</b>
+<b class="nc">&nbsp;                existingIssue.setLatitude(issueDetails.getLatitude());</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (issueDetails.getLongitude() != null) {</b>
+<b class="nc">&nbsp;                existingIssue.setLongitude(issueDetails.getLongitude());</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (issueDetails.getAddress() != null) {</b>
+<b class="nc">&nbsp;                existingIssue.setAddress(issueDetails.getAddress());</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (imageFile != null &amp;&amp; !imageFile.isEmpty()) {</b>
+<b class="nc">&nbsp;                if (existingIssue.getImagePath() != null &amp;&amp; !existingIssue.getImagePath().isEmpty()) {</b>
+<b class="nc">&nbsp;                    fileStorageService.deleteFile(existingIssue.getImagePath());</b>
+&nbsp;                }
+<b class="nc">&nbsp;                String newImagePath = fileStorageService.saveIssueImage(issueId, imageFile);</b>
+<b class="nc">&nbsp;                existingIssue.setImagePath(newImagePath);</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            if (issueDetails.getAssignedOfficial() != null) {</b>
+<b class="nc">&nbsp;                User assignedOfficial = userRepository.findById(issueDetails.getAssignedOfficial().getId())</b>
+<b class="nc">&nbsp;                        .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid assigned official ID&quot;));</b>
+<b class="nc">&nbsp;                existingIssue.setAssignedOfficial(assignedOfficial);</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            existingIssue.setLastUpdatedDate(new Date());</b>
+<b class="nc">&nbsp;            Issue updatedIssue = issueRepository.save(existingIssue);</b>
+&nbsp;
+&nbsp;            try {
+<b class="nc">&nbsp;                if (statusChanged &amp;&amp; isRelevantStatus) {</b>
+<b class="nc">&nbsp;                    issueWebSocketServer.sendIssueStatusUpdate(updatedIssue);</b>
+&nbsp;                }
+&nbsp;
+<b class="nc">&nbsp;                User newAssignedOfficial = updatedIssue.getAssignedOfficial();</b>
+<b class="nc">&nbsp;                if (newAssignedOfficial != null) {</b>
+<b class="nc">&nbsp;                    if (previousAssignedOfficial == null ||</b>
+<b class="nc">&nbsp;                            !previousAssignedOfficial.getUsername().equals(newAssignedOfficial.getUsername())) {</b>
+<b class="nc">&nbsp;                        issueWebSocketServer.sendAssignmentNotification(updatedIssue);</b>
+&nbsp;                    }
+&nbsp;                }
+<b class="nc">&nbsp;            } catch (Exception e) {</b>
+<b class="nc">&nbsp;                logger.error(&quot;Failed to send WebSocket notification for issue update: &quot; + e.getMessage(), e);</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            return updatedIssue;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean deleteIssue(Long userId, Long issueId) {
+<b class="nc">&nbsp;        Issue issue = getIssueById(userId, issueId);</b>
+<b class="nc">&nbsp;        if (issue != null) {</b>
+<b class="nc">&nbsp;            issueRepository.delete(issue);</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Issue addVolunteer(Long userId, Long issueId, Long volunteerId) {
+<b class="nc">&nbsp;        User requester = userRepository.findById(userId)</b>
+<b class="nc">&nbsp;                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid user ID&quot;));</b>
+&nbsp;
+<b class="nc">&nbsp;        if (requester.getRole() != UserRole.ADMIN &amp;&amp; requester.getRole() != UserRole.CITY_OFFICIAL) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;Only administrators and city officials can assign volunteers&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        Issue existingIssue = (issueRepository.findById(issueId).isPresent()) ? issueRepository.findById(issueId).get() : null;</b>
+<b class="nc">&nbsp;        if (existingIssue == null) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;Issue not found&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        User volunteer = userRepository.findById(volunteerId)</b>
+<b class="nc">&nbsp;                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid volunteer ID&quot;));</b>
+&nbsp;
+<b class="nc">&nbsp;        if (volunteer.getRole() != UserRole.VOLUNTEER) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;User is not a volunteer&quot;);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // Check if volunteer is already assigned
+<b class="nc">&nbsp;        if (existingIssue.getVolunteers().stream()</b>
+<b class="nc">&nbsp;                .anyMatch(v -&gt; v.getId().equals(volunteerId))) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;Volunteer already assigned to this issue&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        existingIssue.getVolunteers().add(volunteer);</b>
+<b class="nc">&nbsp;        existingIssue.setLastUpdatedDate(new Date());</b>
+<b class="nc">&nbsp;        Issue updatedIssue = issueRepository.save(existingIssue);</b>
+&nbsp;
+<b class="nc">&nbsp;        return updatedIssue;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Issue removeVolunteer(Long userId, Long issueId, Long volunteerId) {
+<b class="nc">&nbsp;        User requester = userRepository.findById(userId)</b>
+<b class="nc">&nbsp;                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid user ID&quot;));</b>
+&nbsp;
+<b class="nc">&nbsp;        if (requester.getRole() != UserRole.ADMIN &amp;&amp; requester.getRole() != UserRole.CITY_OFFICIAL) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;Only administrators and city officials can assign volunteers&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        Issue existingIssue = (issueRepository.findById(issueId).isPresent()) ? issueRepository.findById(issueId).get() : null;</b>
+<b class="nc">&nbsp;        if (existingIssue == null) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;Issue not found&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        User volunteer = userRepository.findById(volunteerId)</b>
+<b class="nc">&nbsp;                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid volunteer ID&quot;));</b>
+&nbsp;
+<b class="nc">&nbsp;        boolean removed = existingIssue.getVolunteers().removeIf(v -&gt; v.getId().equals(volunteerId));</b>
+<b class="nc">&nbsp;        if (!removed) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;Volunteer not assigned to this issue&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        existingIssue.setLastUpdatedDate(new Date());</b>
+<b class="nc">&nbsp;        Issue updatedIssue = issueRepository.save(existingIssue);</b>
+&nbsp;
+<b class="nc">&nbsp;        return updatedIssue;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;Issue&gt; getIssuesByVolunteer(Long volunteerId) {
+<b class="nc">&nbsp;        User volunteer = userRepository.findById(volunteerId)</b>
+<b class="nc">&nbsp;                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid volunteer ID&quot;));</b>
+&nbsp;
+<b class="nc">&nbsp;        if (volunteer.getRole() != UserRole.VOLUNTEER) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;User is not a volunteer&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return issueRepository.findByVolunteersContaining(volunteer);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;User&gt; getVolunteersForIssue(Long issueId) {
+<b class="nc">&nbsp;        Issue issue = (issueRepository.findById(issueId).isPresent()) ? issueRepository.findById(issueId).get() : null;</b>
+<b class="nc">&nbsp;        if (issue == null) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;Issue not found&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return issue.getVolunteers();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;Issue&gt; searchIssues(String category, IssueStatus status, String title, String address, Double latitude, Double longitude, Double radius, int page, int size) {
+<b class="nc">&nbsp;        Specification&lt;Issue&gt; spec = (root, query, criteriaBuilder) -&gt; {</b>
+<b class="nc">&nbsp;            Predicate predicate = criteriaBuilder.conjunction();</b>
+&nbsp;
+<b class="nc">&nbsp;            if (category != null) {</b>
+<b class="nc">&nbsp;                predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get(&quot;category&quot;), category));</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (status != null) {</b>
+<b class="nc">&nbsp;                predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get(&quot;status&quot;), status));</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (title != null) {</b>
+<b class="nc">&nbsp;                predicate = criteriaBuilder.and(predicate, criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;title&quot;)), &quot;%&quot; + title.toLowerCase() + &quot;%&quot;));</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (address != null) {</b>
+<b class="nc">&nbsp;                predicate = criteriaBuilder.and(predicate, criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;address&quot;)), &quot;%&quot; + address.toLowerCase() + &quot;%&quot;));</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (latitude != null &amp;&amp; longitude != null &amp;&amp; radius != null) {</b>
+<b class="nc">&nbsp;                Expression&lt;Double&gt; distance = criteriaBuilder.function(&quot;ST_Distance_Sphere&quot;, Double.class,</b>
+<b class="nc">&nbsp;                        criteriaBuilder.function(&quot;ST_MakePoint&quot;, Point.class, root.get(&quot;longitude&quot;), root.get(&quot;latitude&quot;)),</b>
+<b class="nc">&nbsp;                        criteriaBuilder.function(&quot;ST_MakePoint&quot;, Point.class, criteriaBuilder.literal(longitude), criteriaBuilder.literal(latitude)));</b>
+<b class="nc">&nbsp;                predicate = criteriaBuilder.and(predicate, criteriaBuilder.le(distance, radius));</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            return predicate;</b>
+&nbsp;        };
+&nbsp;
+<b class="nc">&nbsp;        return issueRepository.findAll(spec, PageRequest.of(page, size)).getContent();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-11-27 14:57</div>
+</div>
+</body>
+</html>
