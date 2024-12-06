@@ -21,7 +21,7 @@ public class CityWatcherController {
 
     private int userId;
     private String username;
-    private String role;
+    private String role = "NONE";
     private boolean loggedIn;
     private boolean connected;
 
