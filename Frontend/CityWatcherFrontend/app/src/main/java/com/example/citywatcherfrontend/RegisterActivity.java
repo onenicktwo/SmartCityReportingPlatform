@@ -116,3 +116,4 @@ public class RegisterActivity extends CityWatcherActivity {
         requestQueue.add(jsonObjectRequest);
     }
 }
+
