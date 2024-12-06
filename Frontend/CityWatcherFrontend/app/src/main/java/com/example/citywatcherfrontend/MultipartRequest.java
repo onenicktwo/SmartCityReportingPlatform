@@ -1,190 +1,134 @@
 package com.example.citywatcherfrontend;
 
-import android.util.Log;
-
-import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
-import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.Response;
-import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.VolleyLog;
+
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+public abstract class MultipartRequest extends Request<String> {
 
+    private final Response.Listener<String> mListener;
+    private final File mFilePart;
+    private final Map<String, String> mStringParts;
 
-public class MultipartRequest extends Request<NetworkResponse> {
+    private final String boundary = "apiclient-" + System.currentTimeMillis();
+    private final String twoHyphens = "--";
+    private final String lineEnd = "\r\n";
 
-    private Map<String, String> headers;
-    private Response.Listener listener;
-    private Response.ErrorListener errorListener;
-
-    private final String boundary = Long.toHexString(System.currentTimeMillis());
-    private final String twoDashes = "--";
-    private final String newLine = "\r\n";
-
-    private List<MultiPart> parts = new ArrayList<MultiPart>();
-
-    public MultipartRequest(String url, Map<String,String> headers,
-                            Response.Listener<NetworkResponse> listener,
-                            Response.ErrorListener errorListener) {
+    public MultipartRequest(
+            String url,
+            Response.ErrorListener errorListener,
+            Response.Listener<String> listener,
+            File file,
+            Map<String, String> stringParts) {
         super(Method.POST, url, errorListener);
-        this.headers = headers;
-        this.listener = listener;
-        this.errorListener = errorListener;
 
-    }
-
-    public void addPart(MultiPart part) {
-        if (part != null) {
-            Log.d("MultipartRequest", "Adding part: " + part.getName());
-            parts.add(part);
-        }
+        this.mListener = listener;
+        this.mFilePart = file;
+        this.mStringParts = stringParts != null ? stringParts : new HashMap<>();
     }
 
     @Override
     public String getBodyContentType() {
-        return "multipart/form-data;boundary=" + boundary;
+        return "multipart/form-data; boundary=" + boundary;
     }
 
     @Override
-    public byte[] getBody() throws AuthFailureError {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream(byteArrayOutputStream);
+    public byte[] getBody() {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(bos);
 
         try {
-            for (MultiPart part: parts) {
-                dos.writeBytes(twoDashes + boundary + newLine);
-                if (part instanceof FormPart) {
-                    dos.writeBytes("Content-Disposition: form-data; name=\"" + part.getName() + "\"" + newLine);
-                    dos.writeBytes(newLine);
-                    dos.write(part.getData());
-                    dos.writeBytes(newLine);
-                } else if (part instanceof FilePart) {
-                    FilePart filePart = (FilePart) part;
-                    dos.writeBytes("Content-Disposition: form-data; name=\"" + part.getName()
-                            + "\"; filename=\"" + filePart.getFilename() + "\"" + newLine);
-                    dos.writeBytes("Content-type: " + filePart.getMimeType() + newLine);
-                    dos.writeBytes(newLine);
-                    dos.write(part.getData());
-                    dos.writeBytes(newLine);
-                }
+            // Add JSON string part (user details)
+            String userJson = new JSONObject(mStringParts).toString();
+            addJsonPart(dos, "user", userJson);
+
+            // Add file part (profile image)
+            if (mFilePart != null) {
+                addFilePart(dos, "file", mFilePart);
             }
 
-            //close out
-            dos.writeBytes(twoDashes + boundary + twoDashes + newLine);
-            Log.d("MultipartRequest", "Body: " + new String(byteArrayOutputStream.toByteArray()));
-            return byteArrayOutputStream.toByteArray();
+            // Final boundary
+            dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return null;
+        return bos.toByteArray();
+    }
+
+    private void addJsonPart(DataOutputStream dos, String key, String json) throws IOException {
+        dos.writeBytes(twoHyphens + boundary + lineEnd);
+        dos.writeBytes("Content-Disposition: form-data; name=\"" + key + "\"" + lineEnd);
+        dos.writeBytes("Content-Type: application/json" + lineEnd);
+        dos.writeBytes(lineEnd);
+        dos.writeBytes(json + lineEnd);
+    }
+
+
+    private void addFilePart(DataOutputStream dos, String key, File file) throws IOException {
+        dos.writeBytes(twoHyphens + boundary + lineEnd);
+        dos.writeBytes("Content-Disposition: form-data; name=\"" + key + "\"; filename=\"" + file.getName() + "\"" + lineEnd);
+        dos.writeBytes("Content-Type: " + java.net.URLConnection.guessContentTypeFromName(file.getName()) + lineEnd);
+        dos.writeBytes(lineEnd);
+
+        FileInputStream fis = new FileInputStream(file);
+        byte[] buffer = new byte[1024];
+        int length;
+        while ((length = fis.read(buffer)) != -1) {
+            dos.write(buffer, 0, length);
+        }
+        fis.close();
+
+        dos.writeBytes(lineEnd);
     }
 
     @Override
-    public Map<String, String> getHeaders() throws AuthFailureError {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", getBodyContentType());
-        Log.d("MultipartRequest", "Headers: " + headers);
-        return headers;
-    }
-    @Override
-    protected Response<NetworkResponse> parseNetworkResponse(NetworkResponse response) {
-        try {
-            return Response.success(
-                    response,
-                    HttpHeaderParser.parseCacheHeaders(response));
-        } catch (Exception e) {
-            return Response.error(new ParseError(e));
-        }
+    protected Response<String> parseNetworkResponse(NetworkResponse response) {
+        String responseBody = new String(response.data);
+        return Response.success(responseBody, getCacheEntry());
     }
 
     @Override
-    protected void deliverResponse(NetworkResponse response) {
-        listener.onResponse(response);
+    protected void deliverResponse(String response) {
+        mListener.onResponse(response);
     }
 
-    /**
-     * A generic part to add
-     */
-    protected static abstract class MultiPart {
+    protected abstract Map<String, DataPart> getByteData();
 
-        private String name;
-        private String mimeType;
+    public class DataPart {
+        private String fileName;
+        private byte[] content;
+        private String type;
 
-        public MultiPart(String name, String mimeType) {
-            this.name = name;
-            this.mimeType = mimeType;
+        public DataPart(String fileName, byte[] content, String type) {
+            this.fileName = fileName;
+            this.content = content;
+            this.type = type;
         }
 
-        public String getName() {
-            return name;
+        public String getFileName() {
+            return fileName;
         }
 
-        public String getMimeType() {
-            return mimeType;
+        public byte[] getContent() {
+            return content;
         }
 
-        public abstract byte[] getData();
-    }
-
-    /**
-     * A class to represent a basic form field to be added to the request
-     */
-    public static class FormPart extends MultiPart {
-
-        private String value;
-
-        /**
-         * Creates a form part with the supplied name and value
-         * @param name form field name
-         * @param value form field value
-         */
-        public FormPart(String name, String value) {
-            super(name, "");
-            this.value = value;
-        }
-
-        @Override
-        public byte[] getData() {
-            return value.getBytes();
+        public String getType() {
+            return type;
         }
     }
 
-    /**
-     * A class representing a file to be added to the request
-     */
-    public static class FilePart extends MultiPart {
-
-        private byte data[];
-        private String filename;
-
-        /**
-         * Creates a file with the given values to add to the request
-         * @param name form field name
-         * @param mimeType mime type for part
-         * @param filename filename (can be null)
-         * @param data the content of the file
-         */
-        public FilePart(String name, String mimeType, String filename, byte data[]){
-            super(name, mimeType);
-            this.data = data;
-            this.filename = filename;
-        }
-
-        public byte[] getData() {
-            return data;
-        }
-
-        public String getFilename() {
-            return filename;
-        }
-    }
 }
