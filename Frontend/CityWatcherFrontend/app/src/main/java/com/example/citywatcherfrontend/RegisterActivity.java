@@ -1,71 +1,52 @@
 package com.example.citywatcherfrontend;
 
-/*
-Author @Sam Hostetter
- */
-
-
-
+/* Author @Sam Hostetter */
 
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import com.android.volley.Request;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import com.android.volley.RequestQueue;
 import android.content.Intent;
 import android.widget.TextView;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
 public class RegisterActivity extends CityWatcherActivity {
+
     private EditText etUsername, etEmail, etPassword;
     private Button btnRegister;
     private TextView textView2;
-    private JSONObject jsonTest;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.register_activity);
-
         etUsername = findViewById(R.id.etUsername);
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         btnRegister = findViewById(R.id.btnRegister);
         textView2 = findViewById(R.id.textView2);
 
-
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try {
-                    registerUser();
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
+                registerUser();
             }
         });
     }
 
     /**
      * Registers a new user by sending a POST request to the server.
-     * @author Sam Hostetter
-     * @throws JSONException Throws error if JSON is invalid
      */
-
-    private void registerUser() throws JSONException {
+    private void registerUser() {
         String username = etUsername.getText().toString();
         String email = etEmail.getText().toString();
         String password = etPassword.getText().toString();
@@ -78,42 +59,63 @@ public class RegisterActivity extends CityWatcherActivity {
             return;
         }
 
-        // Create a JSON object with the input data
-        JSONObject jsonBody = new JSONObject();
-        jsonBody.put("username", username);
-        jsonBody.put("email", email);
-        jsonBody.put("password", password);
+        // Create the JSON string for the user object
+        JSONObject userJson = new JSONObject();
+        try {
+            userJson.put("username", username);
+            userJson.put("email", email);
+            userJson.put("password", password);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(RegisterActivity.this, "Failed to create user data.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        String url = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/register";
-
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, jsonBody,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Toast.makeText(RegisterActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
-                        Intent loginIntent = new Intent(RegisterActivity.this, LoginActivity.class);
-                        startActivity(loginIntent);
-                        textView2.setText(response.toString());
-                    }
+        // Prepare the request
+        MultipartRequest multipartRequest = new MultipartRequest(
+                "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/register",
+                null,
+                response -> {
+                    Toast.makeText(RegisterActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
+                    Intent loginIntent = new Intent(RegisterActivity.this, LoginActivity.class);
+                    startActivity(loginIntent);
                 },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(RegisterActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                        textView2.setText(error.getMessage());
-                    }
-                }) {
-            @Override
-            public Map<String, String> getHeaders() {
-                Map<String, String> headers = new HashMap<>();
-                headers.put("Content-Type", "application/json");
-                return headers;
-            }
-        };
+                error -> {
+                    Toast.makeText(RegisterActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+        );
 
-        // Add the request to the RequestQueue
+/// Add the user JSON as a form field
+        multipartRequest.addPart(new MultipartRequest.FormPart("user", userJson.toString()));
+
+// Add the default image as a file field
+        byte[] defaultImageBytes = getDefaultImageBytes();
+        if (defaultImageBytes != null) {
+            multipartRequest.addPart(new MultipartRequest.FilePart("image", "image/jpg", "default_pfp.jpg", defaultImageBytes));
+        }
+
+// Add the request to the queue
         RequestQueue requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(jsonObjectRequest);
+        requestQueue.add(multipartRequest);
+    }
+
+    private byte[] getDefaultImageBytes() {
+        try {
+            // Load the image from drawable resources
+            InputStream inputStream = getResources().openRawResource(R.drawable.default_pfp);
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int length;
+
+            // Read the image data into the byte array
+            while ((length = inputStream.read(buffer)) != -1) {
+                byteArrayOutputStream.write(buffer, 0, length);
+            }
+            inputStream.close();
+            return byteArrayOutputStream.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null; // Return null if there's an error
+        }
     }
 }
-
