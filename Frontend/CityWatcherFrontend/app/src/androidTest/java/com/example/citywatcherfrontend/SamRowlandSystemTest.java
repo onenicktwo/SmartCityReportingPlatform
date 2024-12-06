@@ -95,7 +95,9 @@ public class SamRowlandSystemTest {
 
         Thread.sleep(TIMEOUT);
 
-        onData(anything()).inAdapterView(withId(R.id.listComments)).atPosition(0).onChildView(withId(R.id.buttonEditComment)).check(matches(isDisplayed())).perform(click());
+        onData(anything()).inAdapterView(withId(R.id.listComments)).atPosition(0).onChildView(withId(R.id.popupCommentMenu)).perform(click());
+        onView(withText("Edit Comment")).check(matches(isDisplayed())).perform(click());
+
         Thread.sleep(TIMEOUT);
     }
 
