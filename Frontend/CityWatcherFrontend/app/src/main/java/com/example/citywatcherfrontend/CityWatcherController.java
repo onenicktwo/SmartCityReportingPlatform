@@ -1,5 +1,6 @@
 package com.example.citywatcherfrontend;
 
+import android.util.Log;
 import android.util.Pair;
 
 import com.google.android.gms.maps.model.LatLng;

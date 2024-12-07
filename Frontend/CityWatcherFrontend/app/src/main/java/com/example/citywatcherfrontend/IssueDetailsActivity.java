@@ -112,7 +112,7 @@ public class IssueDetailsActivity extends CityWatcherActivity {
         issueDetailsLocation.setText(bundle.getString("address"));
 
         if (loggedIn) {
-            if (CityWatcherController.getInstance().getUserId() != reporterId) {
+            if (userId != reporterId) {
                 buttonEditIssue.setVisibility(View.GONE);
                 buttonDeleteIssue.setVisibility(View.GONE);
             }
@@ -277,19 +277,19 @@ public class IssueDetailsActivity extends CityWatcherActivity {
             }
         };
         VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonObjReq);
-        Intent intent = new Intent(IssueDetailsActivity.this, ViewIssuesActivity.class);
-        startActivity(intent);
+        finish();
     };
 
     public void editComment(int i){
             Intent intent = new Intent(IssueDetailsActivity.this, EditCommentActivity.class);
             Bundle bundle = new Bundle();
             CommentData comment = commentArrayList.get(i);
-            bundle.putInt("userID", comment.getUser().getId());
-            bundle.putInt("issueID", comment.getIssueId());
+            bundle.putInt("issueID", issueId);
             bundle.putInt("commentID", comment.getId());
             intent.putExtras(bundle);
             startActivity(intent);
+            finish();
+
     };
 
     public void makeDeleteCommentReq(int i) {
@@ -327,8 +327,7 @@ public class IssueDetailsActivity extends CityWatcherActivity {
 
         // Adding request to request queue
         VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonObjReq);
-        Intent intent = new Intent(IssueDetailsActivity.this, ViewIssuesActivity.class);
-        startActivity(intent);
+        finish();
     }
 
     public void reportComment(int i) {

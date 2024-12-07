@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/popupCommentMenu">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/popupEditComment"
-        android:title="Edit comment" />
+        android:title="Edit Comment" />
     <item
         android:id="@+id/popupDeleteComment"
-        android:title="Delete comment" />
+        android:title="Delete Comment" />
     <item
         android:id="@+id/popupReportComment"
-        android:title="Report comment" />
+        android:title="Report Comment" />
 
 </menu>
