@@ -118,4 +118,8 @@ public class User {
     public void setProfileImagePath(String profileImagePath) {
         this.profileImagePath = profileImagePath;
     }
+
+    public List<Issue> getAssignedIssues() {
+        return assignedIssues;
+    }
 }
