@@ -7,6 +7,7 @@ import org.citywatcher.repository.IssueRepository;
 import org.citywatcher.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,16 +16,19 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final FileStorageService fileStorageService;
     private final IssueRepository issueRepository;
 
     @Autowired
+    public UserServiceImpl(UserRepository userRepository, FileStorageService fileStorageService) {
     public UserServiceImpl(UserRepository userRepository, IssueRepository issueRepository) {
         this.userRepository = userRepository;
+        this.fileStorageService = fileStorageService;
         this.issueRepository = issueRepository;
     }
 
     @Override
-    public User registerUser(User user) {
+    public User registerUser(User user, MultipartFile imageFile) {
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
             throw new RuntimeException("Username already exists");
         }
@@ -33,6 +37,10 @@ public class UserServiceImpl implements UserService {
         }
         if (user.getRole() == null) {
             user.setRole(UserRole.CITIZEN);
+        }
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String imagePath = fileStorageService.saveProfileImage(user.getUsername(), imageFile);
+            user.setProfileImagePath(imagePath);
         }
         return userRepository.save(user);
     }
@@ -48,22 +56,30 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(Long id, User userDetails) {
-        User user = getUserById(id);
-        if (user == null) {
+    public User updateUser(Long id, User userDetails, MultipartFile imageFile) {
+        User existingUser = getUserById(id);
+        if (existingUser == null) {
             return null;
         }
 
-        user.setUsername(userDetails.getUsername());
-        user.setEmail(userDetails.getEmail());
-        user.setRole(userDetails.getRole());
+        existingUser.setUsername(userDetails.getUsername());
+        existingUser.setEmail(userDetails.getEmail());
+        existingUser.setRole(userDetails.getRole());
 
         // Only update password if it's provided
         if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {
-            user.setPassword(userDetails.getPassword());
+            existingUser.setPassword(userDetails.getPassword());
         }
 
-        return userRepository.save(user);
+        if (imageFile != null && !imageFile.isEmpty()) {
+            if (existingUser.getProfileImagePath() != null) {
+                fileStorageService.deleteFile(existingUser.getProfileImagePath());
+            }
+            String imagePath = fileStorageService.saveProfileImage(existingUser.getUsername(), imageFile);
+            existingUser.setProfileImagePath(imagePath);
+        }
+
+        return userRepository.save(existingUser);
     }
 
     @Override

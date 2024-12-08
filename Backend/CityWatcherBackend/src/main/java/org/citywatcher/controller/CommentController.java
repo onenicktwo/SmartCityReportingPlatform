@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.citywatcher.model.Comment;
+import org.citywatcher.model.Report;
 import org.citywatcher.service.CommentsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -120,6 +121,27 @@ public class CommentController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Operation(summary = "Report a comment", description = "Allows citizens to report inappropriate comments")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Comment reported successfully"),
+            @ApiResponse(responseCode = "404", description = "Comment not found", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized to report comments", content = @Content)
+    })
+    @PostMapping("/{commentId}/report")
+    public ResponseEntity<Report> reportComment(
+            @PathVariable Long userId,
+            @PathVariable Long issueId,
+            @PathVariable Long commentId,
+            @RequestBody Report report) {
+
+        try {
+            Report comment = commentService.reportComment(commentId, userId, report);
+            return new ResponseEntity<>(comment, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 }

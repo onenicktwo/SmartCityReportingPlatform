@@ -4,7 +4,7 @@ package com.example.citywatcherfrontend;
 Author @Sam Hostetter
  */
 
-import androidx.appcompat.app.AppCompatActivity;
+
 
 
 import android.os.Bundle;
@@ -116,3 +116,4 @@ public class RegisterActivity extends CityWatcherActivity {
         requestQueue.add(jsonObjectRequest);
     }
 }
+

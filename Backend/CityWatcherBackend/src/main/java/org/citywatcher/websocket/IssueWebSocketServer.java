@@ -4,15 +4,11 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.citywatcher.dto.IssueNotificationDTO;
 import org.citywatcher.model.Issue;
 import org.citywatcher.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
 import java.util.ArrayList;
 

@@ -15,6 +15,7 @@ import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+
 /**
  * Abstract activity class that includes a navigation bar and has WebSocket functionality.
  */
@@ -109,6 +110,11 @@ public abstract class CityWatcherActivity extends AppCompatActivity implements W
                             String issueTitle = jsonObject.get("title").toString();
                             Toast.makeText(CityWatcherActivity.this, "New comment in issue \"" + issueTitle + "\"", Toast.LENGTH_LONG).show();
                             break;
+                        }
+                        case "REPORT": {
+                            String commentId = jsonObject.get("commentId").toString();
+                            String reason = jsonObject.get("reason").toString();
+                            Toast.makeText(CityWatcherActivity.this, "New report in comment " + commentId + " for reason: " + reason, Toast.LENGTH_LONG).show();
                         }
                     }
 

@@ -42,6 +42,13 @@ dependencies {
     implementation libs.volley
     implementation libs.ui.graphics.android
     implementation 'org.java-websocket:Java-WebSocket:1.5.2'
+    implementation libs.lifecycle.runtime.ktx
+    implementation libs.activity.compose
+    implementation platform(libs.compose.bom)
+    implementation libs.ui
+    implementation libs.ui.graphics
+    implementation libs.ui.tooling.preview
+    implementation libs.material3
 
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
@@ -49,4 +56,14 @@ dependencies {
     implementation 'org.java-websocket:Java-WebSocket:1.5.1'
 
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.13.0'
+    androidTestImplementation platform(libs.compose.bom)
+    androidTestImplementation libs.ui.test.junit4
+    debugImplementation libs.ui.tooling
+    debugImplementation libs.ui.test.manifest
+
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+    androidTestImplementation 'androidx.test:runner:1.6.1'
+    androidTestImplementation 'androidx.test:rules:1.6.1'
+    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.3.0-alpha03'
+
 }

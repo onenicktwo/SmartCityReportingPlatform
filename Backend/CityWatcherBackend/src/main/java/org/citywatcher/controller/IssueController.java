@@ -9,11 +9,17 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.citywatcher.model.Issue;
 import org.citywatcher.model.IssueStatus;
 import org.citywatcher.model.User;
+import org.citywatcher.service.FileStorageService;
 import org.citywatcher.service.IssueService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 
 @RestController
@@ -22,10 +28,12 @@ import java.util.List;
 public class IssueController {
 
     private final IssueService issueService;
+    private final FileStorageService fileStorageService;
 
     @Autowired
-    public IssueController(IssueService issueService) {
+    public IssueController(IssueService issueService, FileStorageService fileStorageService) {
         this.issueService = issueService;
+        this.fileStorageService = fileStorageService;
     }
 
     @Operation(summary = "Create a new issue", description = "After creating a new issue, a notification will be sent to an official (if there is one assigned)")
@@ -35,8 +43,10 @@ public class IssueController {
             @ApiResponse(responseCode = "400", description = "Invalid issue data", content = @Content)
     })
     @PostMapping
-    public ResponseEntity<Issue> createIssue(@PathVariable Long userId, @RequestBody Issue issue) {
-        Issue createdIssue = issueService.createIssue(userId, issue);
+    public ResponseEntity<Issue> createIssue(@PathVariable Long userId,
+                                             @RequestPart("issue") Issue issue,
+                                             @RequestPart(value = "image", required = false) MultipartFile imageFile) {
+        Issue createdIssue = issueService.createIssue(userId, issue, imageFile);
         return new ResponseEntity<>(createdIssue, HttpStatus.CREATED);
     }
 
@@ -75,8 +85,11 @@ public class IssueController {
             @ApiResponse(responseCode = "400", description = "Invalid issue data", content = @Content)
     })
     @PutMapping("/{issueId}")
-    public ResponseEntity<Issue> updateIssue(@PathVariable Long userId, @PathVariable Long issueId, @RequestBody Issue issue) {
-        Issue updatedIssue = issueService.updateIssue(userId, issueId, issue);
+    public ResponseEntity<Issue> updateIssue(@PathVariable Long userId,
+                                             @PathVariable Long issueId,
+                                             @RequestPart("issue") Issue issueDetails,
+                                             @RequestPart(value = "image", required = false) MultipartFile imageFile) {
+        Issue updatedIssue = issueService.updateIssue(userId, issueId, issueDetails, imageFile);
         if (updatedIssue != null) {
             return new ResponseEntity<>(updatedIssue, HttpStatus.OK);
         } else {
@@ -193,5 +206,23 @@ public class IssueController {
 
         List<Issue> issues = issueService.searchIssues(category, status, title, address, latitude, longitude, radius, page, size);
         return ResponseEntity.ok(issues);
+    }
+
+    @GetMapping("/{issueId}/image")
+    public ResponseEntity<Resource> getIssueImage(@PathVariable Long userId, @PathVariable Long issueId) {
+        try {
+            ResponseEntity<Issue> issue = getIssueById(userId, issueId);
+            if (issue.getBody() != null) {
+                Resource file = fileStorageService.loadFileAsResource(issue.getBody().getImagePath());
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getFilename() + "\"")
+                        .contentType(MediaType.IMAGE_JPEG)
+                        .body(file);
+            } else {
+                return ResponseEntity.status(issue.getStatusCode()).build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 }

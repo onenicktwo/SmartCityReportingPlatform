@@ -67,6 +67,7 @@ public class ViewIssuesActivity extends CityWatcherActivity implements OnMapRead
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         URL = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/" + userId + "/issues";
+        Log.d("URL", URL);
 
         binding = ActivityViewIssuesBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -93,7 +94,7 @@ public class ViewIssuesActivity extends CityWatcherActivity implements OnMapRead
         });
 
         makeGetIssuesReqMap();
-        mapFragment.getMapAsync((OnMapReadyCallback) this);
+
     }
 
     private void makeGetIssuesReqMap() {
@@ -111,10 +112,13 @@ public class ViewIssuesActivity extends CityWatcherActivity implements OnMapRead
                                 System.out.println(jsonString);
                                 issue = mapper.readValue(jsonString, IssueData.class);
                                 issueArrayList.add(issue);
+                                Log.d("Issue List", issueArrayList.get(i).getTitle());
+
                             } catch (JSONException | JsonProcessingException e) {
                                 throw new RuntimeException(e);
                             }
                         }
+                        mapFragment.getMapAsync((OnMapReadyCallback) ViewIssuesActivity.this);
                     }
                 },
                 new Response.ErrorListener() {
@@ -183,7 +187,7 @@ public class ViewIssuesActivity extends CityWatcherActivity implements OnMapRead
                         Intent intent = new Intent(ViewIssuesActivity.this, IssueDetailsActivity.class);
 
                         intent.putExtra("id", issueArrayList.get(i).getId());
-                        intent.putExtra("reporter", issueArrayList.get(i).getReporter().getId());
+                        intent.putExtra("reporterId", issueArrayList.get(i).getReporter().getId());
                         intent.putExtra("title", issueArrayList.get(i).getTitle());
                         intent.putExtra("category", issueArrayList.get(i).getCategory());
                         intent.putExtra("address", issueArrayList.get(i).getAddress());
@@ -198,10 +202,14 @@ public class ViewIssuesActivity extends CityWatcherActivity implements OnMapRead
             }
         });
 
+        Log.d("size", String.valueOf(issueArrayList.size()));
         for (int issueIndex = 0; issueIndex < issueArrayList.size(); issueIndex++) {
             IssueData issue = issueArrayList.get(issueIndex);
+            Log.d("Issue", issue.getTitle());
             LatLng latlng = new LatLng(issue.getLatitude(), issue.getLongitude());
             markerOptions = new MarkerOptions();
+            markerOptions.title(issue.getTitle());
+            Log.d("Marker Title", markerOptions.getTitle());
             markerOptions.position(latlng);
             if (issue.getStatus().equals("UNDER_REVIEW")) {
                 markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));

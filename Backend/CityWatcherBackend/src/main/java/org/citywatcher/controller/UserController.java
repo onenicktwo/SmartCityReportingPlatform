@@ -8,11 +8,17 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.citywatcher.model.Issue;
 import org.citywatcher.model.User;
+import org.citywatcher.service.FileStorageService;
 import org.citywatcher.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 
 @RestController
@@ -23,7 +29,7 @@ public class UserController {
     private final UserService userService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, FileStorageService fileStorageService) {
         this.userService = userService;
     }
 
@@ -34,8 +40,9 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content)
     })
     @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@RequestBody User user) {
-        User registeredUser = userService.registerUser(user);
+    public ResponseEntity<User> registerUser(@RequestPart("user") User user,
+                                             @RequestPart(value = "image", required = false) MultipartFile imageFile) {
+        User registeredUser = userService.registerUser(user, imageFile);
         return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
     }
 
@@ -75,8 +82,10 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Invalid user data provided", content = @Content)
     })
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
-        User updatedUser = userService.updateUser(id, user);
+    public ResponseEntity<User> updateUser(@PathVariable Long id,
+                                           @RequestPart("user") User user,
+                                           @RequestPart(value = "image", required = false) MultipartFile imageFile) {
+        User updatedUser = userService.updateUser(id, user, imageFile);
         if (updatedUser != null) {
             return new ResponseEntity<>(updatedUser, HttpStatus.OK);
         } else {
@@ -97,6 +106,29 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Operation(summary = "Get user's profile image")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Image retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Image not found")
+    })
+    @GetMapping("/{id}/image")
+    public ResponseEntity<Resource> getUserImage(@PathVariable Long id) {
+        try {
+            User user = userService.getUserById(id);
+            if (user != null && user.getProfileImagePath() != null) {
+                Resource file = fileStorageService.loadFileAsResource(user.getProfileImagePath());
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getFilename() + "\"")
+                        .contentType(MediaType.IMAGE_JPEG)
+                        .body(file);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
