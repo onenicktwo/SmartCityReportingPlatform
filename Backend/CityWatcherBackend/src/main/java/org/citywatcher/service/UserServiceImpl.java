@@ -20,8 +20,7 @@ public class UserServiceImpl implements UserService {
     private final IssueRepository issueRepository;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, FileStorageService fileStorageService) {
-    public UserServiceImpl(UserRepository userRepository, IssueRepository issueRepository) {
+    public UserServiceImpl(UserRepository userRepository, FileStorageService fileStorageService, IssueRepository issueRepository) {
         this.userRepository = userRepository;
         this.fileStorageService = fileStorageService;
         this.issueRepository = issueRepository;
