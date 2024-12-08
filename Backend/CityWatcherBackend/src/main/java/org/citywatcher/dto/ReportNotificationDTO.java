@@ -11,16 +11,21 @@ public class ReportNotificationDTO {
     private User reporter;
     private String reason;
     private Date timestamp;
+    private String type;
 
-    public ReportNotificationDTO(Report report) {
+    public ReportNotificationDTO(Report report, String type) {
         this.reportId = report.getId();
         this.commentId = report.getComment().getId();
         this.reporter = report.getReporter();
         this.reason = report.getReason();
         this.timestamp = report.getReportTime();
+        this.type = type;
     }
 
-    // Getters and setters
+    public String getType() {return type;}
+
+    public void setType(String type) {this.type = type;}
+
     public Long getReportId() {
         return reportId;
     }

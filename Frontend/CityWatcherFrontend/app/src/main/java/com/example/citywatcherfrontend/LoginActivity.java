@@ -80,6 +80,7 @@ public class LoginActivity extends CityWatcherActivity {
                                     CityWatcherController.getInstance().setLoggedIn(true);
                                     CityWatcherController.getInstance().setUserId(user.getInt("id"));
                                     CityWatcherController.getInstance().setUsername(user.get("username").toString());
+                                    CityWatcherController.getInstance().setRole(user.get("role").toString());
                                     break;
                                 }
 
