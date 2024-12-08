@@ -68,6 +68,9 @@ public class Issue {
     @OneToMany(mappedBy = "issue", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
+    @ManyToMany(mappedBy = "followedIssues")
+    private List<User> followers = new ArrayList<>();
+
     public Long getId() {
         return id;
     }
@@ -188,7 +191,6 @@ public class Issue {
         this.volunteers = volunteers;
     }
 
-    // Add convenience methods
     public void addVolunteer(User volunteer) {
         volunteers.add(volunteer);
         volunteer.getVolunteerIssues().add(this);
@@ -197,6 +199,18 @@ public class Issue {
     public void removeVolunteer(User volunteer) {
         volunteers.remove(volunteer);
         volunteer.getVolunteerIssues().remove(this);
+    }
+
+    public void addFollower(User user) {
+        followers.add(user);
+    }
+
+    public void removeFollower(User user) {
+        followers.remove(user);
+    }
+
+    public List<User> getFollowers() {
+        return followers;
     }
 
     @PrePersist

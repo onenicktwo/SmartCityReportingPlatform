@@ -1,12 +1,15 @@
 package org.citywatcher.service;
 
+import org.citywatcher.model.Issue;
 import org.citywatcher.model.User;
 import org.citywatcher.model.UserRole;
+import org.citywatcher.repository.IssueRepository;
 import org.citywatcher.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -14,11 +17,13 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
+    private final IssueRepository issueRepository;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, FileStorageService fileStorageService) {
+    public UserServiceImpl(UserRepository userRepository, FileStorageService fileStorageService, IssueRepository issueRepository) {
         this.userRepository = userRepository;
         this.fileStorageService = fileStorageService;
+        this.issueRepository = issueRepository;
     }
 
     @Override
@@ -83,5 +88,42 @@ public class UserServiceImpl implements UserService {
             return true;
         }
         return false;
+    }
+
+    public void followIssue(Long userId, Long issueId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        Issue issue = issueRepository.findById(issueId)
+                .orElseThrow(() -> new IllegalArgumentException("Issue not found"));
+
+        if (user.getFollowedIssues().contains(issue)) {
+            throw new IllegalArgumentException("Already following this issue");
+        }
+
+        user.followIssue(issue);
+        userRepository.save(user);
+    }
+
+    public void unfollowIssue(Long userId, Long issueId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        Issue issue = issueRepository.findById(issueId)
+                .orElseThrow(() -> new IllegalArgumentException("Issue not found"));
+
+        if (!user.getFollowedIssues().contains(issue)) {
+            throw new IllegalArgumentException("Not following this issue");
+        }
+
+        user.unfollowIssue(issue);
+        userRepository.save(user);
+    }
+
+    public List<Issue> getFollowedIssues(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        return new ArrayList<>(user.getFollowedIssues());
     }
 }

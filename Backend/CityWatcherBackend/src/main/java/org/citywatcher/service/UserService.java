@@ -1,5 +1,6 @@
 package org.citywatcher.service;
 
+import org.citywatcher.model.Issue;
 import org.citywatcher.model.User;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -11,4 +12,7 @@ public interface UserService {
     List<User> getAllUsers();
     User updateUser(Long id, User user, MultipartFile imageFile);
     boolean deleteUser(Long id);
+    void followIssue(Long userId, Long issueId);
+    void unfollowIssue(Long userId, Long issueId);
+    List<Issue> getFollowedIssues(Long userId);
 }
