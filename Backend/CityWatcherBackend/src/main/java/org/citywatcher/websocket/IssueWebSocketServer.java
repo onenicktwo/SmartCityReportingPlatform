@@ -102,8 +102,7 @@ public class IssueWebSocketServer {
     }
 
     private List<User> getSubscribedUsers(Issue issue) {
-        // Implement logic to get users subscribed to this issue
-        return new ArrayList<User>();
+        return issue.getFollowers();
     }
 
     public void broadcastToSubscribers(Issue issue, String message) {
