@@ -42,6 +42,8 @@ public class IssueDetailsActivity extends CityWatcherActivity {
     private ObjectMapper mapper = new ObjectMapper();
     private JSONObject requestParams = new JSONObject();
 
+    int followedIssueId;
+
     private CommentData comment;
     private Button buttonEditComment;
 
@@ -56,6 +58,7 @@ public class IssueDetailsActivity extends CityWatcherActivity {
     private TextView issueDetailsComment;
     private Button buttonEditIssue;
     private Button buttonDeleteIssue;
+    private Button buttonFollowIssue;
     private EditText addComment;
     private Button buttonAddComment;
     private ListView listComments;
@@ -81,18 +84,18 @@ public class IssueDetailsActivity extends CityWatcherActivity {
         issueDetailsDescription = findViewById(R.id.issueDetailsDescription);
         buttonEditIssue = findViewById(R.id.buttonEditIssue);
         buttonDeleteIssue = findViewById(R.id.buttonDeleteIssue);
+        buttonFollowIssue = findViewById(R.id.buttonFollowIssue);
         addComment = findViewById(R.id.editAddComment);
         buttonAddComment = findViewById(R.id.buttonAddComment);
         listComments = findViewById(R.id.listComments);
 
         makeGetCommentsReq();
+        setFollowButtonListener();
 
         // TODO Set image
         issueDetailsTitle.setText(bundle.getString("title"));
         issueDetailsCategory.setText(bundle.getString("category"));
-        // TODO Set reporter
         issueDetailsReporter.setText(bundle.getString("reporter"));
-        // TODO Set location
         issueDetailsLocation.setText(bundle.getString("address"));
 
 
@@ -119,6 +122,7 @@ public class IssueDetailsActivity extends CityWatcherActivity {
         } else {
             buttonEditIssue.setVisibility(View.GONE);
             buttonDeleteIssue.setVisibility(View.GONE);
+            buttonFollowIssue.setVisibility(View.GONE);
             addComment.setVisibility(View.GONE);
             buttonAddComment.setVisibility(View.GONE);
         }
@@ -190,6 +194,58 @@ public class IssueDetailsActivity extends CityWatcherActivity {
                 }
             }
         });
+    }
+
+    public void setFollowButtonListener() {
+        String URL = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/" + userId + "/followed-issues/";
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
+                URL,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        boolean issueFollowed = false;
+                        Log.d("Volley Response", "Followed issues retrieved for user " + userId);
+                        for (int i = 0; i < response.length(); i++) {
+                            try {
+                                followedIssueId = Integer.parseInt(response.getJSONObject(i).get("id").toString());
+                                if (issueId == followedIssueId) {
+                                    issueFollowed = true;
+                                }
+
+                            } catch (JSONException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+
+                        if (issueFollowed) {
+                            buttonFollowIssue.setText("UNFOLLOW");
+                            buttonFollowIssue.setBackgroundColor(Color.RED);
+                            buttonFollowIssue.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    makeUnfollowIssueReq();
+                                }
+                            });
+                        } else {
+                            buttonFollowIssue.setBackgroundColor(Color.GREEN);
+                            buttonFollowIssue.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    makeFollowIssueReq();
+                                }
+                            });
+                        }
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                }
+        );
+        VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonArrayRequest);
     }
 
 
@@ -339,6 +395,52 @@ public class IssueDetailsActivity extends CityWatcherActivity {
         bundle.putInt("commentID", comment.getId());
         intent.putExtras(bundle);
         startActivity(intent);
+    }
+
+    public void makeFollowIssueReq() {
+        JsonObjectRequest jsonObjReq = new JsonObjectRequest(
+                Request.Method.POST,
+                "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/" + userId + "/followed-issues/" + issueId,
+                null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d("Volley Response", response.toString());
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("Volley Error", error.toString());
+                    }
+                }
+
+        );
+        VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonObjReq);
+        finish();
+    }
+
+    public void makeUnfollowIssueReq() {
+        JsonObjectRequest jsonObjReq = new JsonObjectRequest(
+                Request.Method.DELETE,
+                "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/" + userId + "/followed-issues/" + issueId,
+                null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d("Volley Response", response.toString());
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("Volley Error", error.toString());
+                    }
+                }
+
+        );
+        VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonObjReq);
+        finish();
     }
 
 }
