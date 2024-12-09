@@ -10,16 +10,14 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
+import java.util.Map;
 
 public class RegisterActivity extends CityWatcherActivity {
 
@@ -56,86 +54,64 @@ public class RegisterActivity extends CityWatcherActivity {
             return;
         }
 
-        // Load default profile image and save it as a file
-        Bitmap defaultProfileImage = getDefaultProfileImage();
-        if (defaultProfileImage == null) {
-            Toast.makeText(this, "Default profile image could not be loaded.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Convert Bitmap to File
-        File imageFile = saveBitmapToFile(defaultProfileImage);
-
-        // Create a JSON object for user details
+        // Create user JSON
         JSONObject userJson = new JSONObject();
         try {
             userJson.put("username", username);
             userJson.put("email", email);
             userJson.put("password", password);
-        } catch (Exception e) {
+        } catch (JSONException e) {
             e.printStackTrace();
+            Toast.makeText(this, "Error creating user data", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        // Convert the Bitmap to a byte array
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        Bitmap bitmap = getDefaultProfileImage();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+        byte[] imageByteArray = stream.toByteArray();
+
+        // Define file and JSON parts
+        Map<String, String> jsonParts = new HashMap<>();
+        jsonParts.put("user", userJson.toString()); // Send the user as a JSON string
+
+        Map<String, byte[]> fileParts = new HashMap<>();
+        fileParts.put("image", imageByteArray); // Use "image" as the key to match the backend
 
         // Define the server endpoint
         String url = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/register";
 
         // Create a multipart request
-        RegisterActivityMulti multipartRequest = new RegisterActivityMulti(
-                url, // URL
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        if (error.networkResponse != null) {
-                            try {
-                                String responseBody = new String(error.networkResponse.data, "UTF-8");
-                                Log.e("RegisterError", "Response: " + responseBody);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        Toast.makeText(RegisterActivity.this, "Registration Failed: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
+        MultipartRequest multipartRequest = new MultipartRequest(
+                url,
+                response -> {
+                    // Handle success
+                    String jsonString = new String(response.data); // Convert response to string
+                    Toast.makeText(RegisterActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                    startActivity(intent);
                 },
-
-        new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // Handle success response
-                        Toast.makeText(RegisterActivity.this, "Registration Successful", Toast.LENGTH_SHORT).show();
-                        Intent loginIntent = new Intent(RegisterActivity.this, LoginActivity.class);
-                        startActivity(loginIntent);
-                    }
+                error -> {
+                    Log.e("Volley Error", "Error: " + error.toString());
+                    Toast.makeText(RegisterActivity.this, "Registration failed: " + error.getMessage(), Toast.LENGTH_SHORT).show();
                 },
-                imageFile, // Pass the image file
-                new HashMap<String, String>() {{
-                    put("user", userJson.toString()); // Add user JSON as a string
-                }}
-        );
+                jsonParts, // JSON data
+                fileParts  // File data
+        ) {
+            @Override
+            protected void deliverResponse(String response) {
+                // Handle the response if necessary
+            }
+        };
 
-        // Add the request to the Volley request queue
+        // Add the request to the request queue
         RequestQueue requestQueue = Volley.newRequestQueue(this);
         requestQueue.add(multipartRequest);
     }
 
-    /**
-     * Converts the Bitmap into a File.
-     */
-    private File saveBitmapToFile(Bitmap bitmap) {
-        File tempFile = new File(getCacheDir(), "profile_image.jpg");
-        try (FileOutputStream fos = new FileOutputStream(tempFile)) {
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-            fos.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return tempFile;
-    }
 
-    /**
-     * Loads a default profile image from the resources (optional).
-     */
     private Bitmap getDefaultProfileImage() {
-        // Returning null here because you are saving an image from Bitmap as file
-        return BitmapFactory.decodeResource(getResources(), R.drawable.default_pfp);
+        return BitmapFactory.decodeResource(getResources(), R.drawable.default_profile_3);
     }
-}
+    }
