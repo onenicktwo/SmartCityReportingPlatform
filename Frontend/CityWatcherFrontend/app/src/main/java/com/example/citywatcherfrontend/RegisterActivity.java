@@ -1,39 +1,28 @@
 package com.example.citywatcherfrontend;
 
-/*
-Author @Sam Hostetter
- */
-
-
-
-
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.view.View;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
-import java.util.HashMap;
-import java.util.Map;
 import com.android.volley.RequestQueue;
-import android.content.Intent;
-import android.widget.TextView;
+import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RegisterActivity extends CityWatcherActivity {
+
     private EditText etUsername, etEmail, etPassword;
     private Button btnRegister;
-    private TextView textView2;
-    private JSONObject jsonTest;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,32 +33,19 @@ public class RegisterActivity extends CityWatcherActivity {
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         btnRegister = findViewById(R.id.btnRegister);
-        textView2 = findViewById(R.id.textView2);
 
-
-        btnRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    registerUser();
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
+        btnRegister.setOnClickListener(view -> registerUser());
     }
 
     /**
      * Registers a new user by sending a POST request to the server.
-     * @author Sam Hostetter
-     * @throws JSONException Throws error if JSON is invalid
      */
+    private void registerUser() {
+        String username = etUsername.getText().toString().trim();
+        String email = etEmail.getText().toString().trim();
+        String password = etPassword.getText().toString().trim();
 
-    private void registerUser() throws JSONException {
-        String username = etUsername.getText().toString();
-        String email = etEmail.getText().toString();
-        String password = etPassword.getText().toString();
-
+        // Validate user input
         if (username.isEmpty() || email.isEmpty() || password.isEmpty()) {
             Toast.makeText(RegisterActivity.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
             return;
@@ -78,42 +54,64 @@ public class RegisterActivity extends CityWatcherActivity {
             return;
         }
 
-        // Create a JSON object with the input data
-        JSONObject jsonBody = new JSONObject();
-        jsonBody.put("username", username);
-        jsonBody.put("email", email);
-        jsonBody.put("password", password);
+        // Create user JSON
+        JSONObject userJson = new JSONObject();
+        try {
+            userJson.put("username", username);
+            userJson.put("email", email);
+            userJson.put("password", password);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error creating user data", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
+        // Convert the Bitmap to a byte array
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        Bitmap bitmap = getDefaultProfileImage();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+        byte[] imageByteArray = stream.toByteArray();
+
+        // Define file and JSON parts
+        Map<String, String> jsonParts = new HashMap<>();
+        jsonParts.put("user", userJson.toString()); // Send the user as a JSON string
+
+        Map<String, byte[]> fileParts = new HashMap<>();
+        fileParts.put("image", imageByteArray); // Use "image" as the key to match the backend
+
+        // Define the server endpoint
         String url = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/register";
 
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, jsonBody,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Toast.makeText(RegisterActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
-                        Intent loginIntent = new Intent(RegisterActivity.this, LoginActivity.class);
-                        startActivity(loginIntent);
-                        textView2.setText(response.toString());
-                    }
+        // Create a multipart request
+        MultipartRequest multipartRequest = new MultipartRequest(
+                url,
+                response -> {
+                    // Handle success
+                    String jsonString = new String(response.data); // Convert response to string
+                    Toast.makeText(RegisterActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                    startActivity(intent);
                 },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(RegisterActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                        textView2.setText(error.getMessage());
-                    }
-                }) {
+                error -> {
+                    Log.e("Volley Error", "Error: " + error.toString());
+                    Toast.makeText(RegisterActivity.this, "Registration failed: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                },
+                jsonParts, // JSON data
+                fileParts  // File data
+        ) {
             @Override
-            public Map<String, String> getHeaders() {
-                Map<String, String> headers = new HashMap<>();
-                headers.put("Content-Type", "application/json");
-                return headers;
+            protected void deliverResponse(String response) {
+                // Handle the response if necessary
             }
         };
 
-        // Add the request to the RequestQueue
+        // Add the request to the request queue
         RequestQueue requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(jsonObjectRequest);
+        requestQueue.add(multipartRequest);
     }
-}
 
+
+    private Bitmap getDefaultProfileImage() {
+        return BitmapFactory.decodeResource(getResources(), R.drawable.default_profile_3);
+    }
+    }

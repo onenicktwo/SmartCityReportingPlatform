@@ -25,6 +25,9 @@ public class CityWatcherController {
     private String role = "NONE";
     private boolean loggedIn;
     private boolean connected;
+    private String email;
+    private String role;
+
 
     /**
      * @return The instance of CityWatcherController
@@ -77,6 +80,14 @@ public class CityWatcherController {
     public void setConnected(boolean connected) {
         this.connected = connected;
     }
+
+    public String getEmail() { return email; }
+
+    public void setEmail(String email) { this.email = email; }
+
+    public String getRole() { return role; }
+
+    public void setRole(String role) { this.role = role; }
 
     /**
      * Connects and retrieves a response from a URL connection.
