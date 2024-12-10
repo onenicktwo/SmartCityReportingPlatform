@@ -7,12 +7,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -43,7 +40,7 @@ public class ViewProfileActivity extends CityWatcherActivity {
 
         requestQueue = Volley.newRequestQueue(this);
 
-        // Assume userId is passed via Intent or stored in Session
+        // Get user ID from CityWatcherController
         int userID = CityWatcherController.getInstance().getUserId();
 
         // Fetch profile data
@@ -51,8 +48,7 @@ public class ViewProfileActivity extends CityWatcherActivity {
 
         // Handle Edit Profile Button Click
         btnEditProfile.setOnClickListener(v -> {
-            Intent intent = new Intent(ViewProfileActivity.this, EditUserActivity.class);
-            intent.putExtra("USER_ID", userId);
+            Intent intent = new Intent(ViewProfileActivity.this, EditProfileActivity.class);
             startActivity(intent);
         });
 
