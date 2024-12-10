@@ -1,5 +1,6 @@
 package com.example.citywatcherfrontend;
 
+import android.util.Log;
 import android.util.Pair;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -21,6 +22,7 @@ public class CityWatcherController {
 
     private int userId;
     private String username;
+    private String role = "NONE";
     private boolean loggedIn;
     private boolean connected;
     private String email;
@@ -57,6 +59,14 @@ public class CityWatcherController {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public void setLoggedIn(boolean loggedIn) {

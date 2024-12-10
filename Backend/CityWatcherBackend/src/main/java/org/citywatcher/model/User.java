@@ -41,6 +41,15 @@ public class User {
     @JsonIgnore
     private List<Issue> volunteerIssues = new ArrayList<>();
 
+    @ManyToMany
+    @JoinTable(
+            name = "user_followed_issues",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "issue_id")
+    )
+    @JsonIgnore
+    private List<Issue> followedIssues = new ArrayList<>();
+
     public User() {
         this.id = null;
         this.username = null;
@@ -117,5 +126,21 @@ public class User {
 
     public void setProfileImagePath(String profileImagePath) {
         this.profileImagePath = profileImagePath;
+    }
+
+    public void followIssue(Issue issue) {
+        followedIssues.add(issue);
+    }
+
+    public void unfollowIssue(Issue issue) {
+        followedIssues.remove(issue);
+    }
+
+    public List<Issue> getFollowedIssues() {
+        return followedIssues;
+    }
+
+    public List<Issue> getAssignedIssues() {
+        return assignedIssues;
     }
 }

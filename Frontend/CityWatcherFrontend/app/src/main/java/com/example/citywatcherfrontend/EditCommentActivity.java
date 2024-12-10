@@ -17,7 +17,6 @@ public class EditCommentActivity extends CityWatcherActivity {
 
     private EditText etEditCommentText;
     private Button btnSaveCommentChanges;
-    private long userId;
     private long issueId;
     private long commentId;
 
@@ -32,9 +31,8 @@ public class EditCommentActivity extends CityWatcherActivity {
         Bundle bundle = getIntent().getExtras();
 
         // Extract values from the bundle
-        int userId = bundle.getInt("userID");
-        int issueId = bundle.getInt("issueID");
-        int commentId = bundle.getInt("commentID");
+         issueId = bundle.getInt("issueID");
+         commentId = bundle.getInt("commentID");
 
 
         if (commentId != -1 && userId != -1 && issueId != -1) {
@@ -98,5 +96,6 @@ public class EditCommentActivity extends CityWatcherActivity {
                 });
 
         Volley.newRequestQueue(this).add(request);
+        finish();
     }
 }

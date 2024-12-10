@@ -1,16 +1,15 @@
 package org.citywatcher.service;
 
+import org.citywatcher.service.FileStorageService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 
 @Service
 public class FileStorageServiceImpl implements FileStorageService {
@@ -27,31 +26,33 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public String saveIssueImage(Long userId, MultipartFile file) {
+    public String saveIssueImage(Long userId, byte[] imageBytes, String originalFilename) {
         try {
-            String fileName = "issue_" + userId + "_" + System.currentTimeMillis() + getFileExtension(file.getOriginalFilename());
+            String fileName = "issue_" + userId + "_" + System.currentTimeMillis() + getFileExtension(originalFilename);
             Path filePath = rootLocation.resolve("issues").resolve(fileName);
 
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            Files.write(filePath, imageBytes); // Writing byte array to file
             return "issues/" + fileName;
         } catch (IOException e) {
             throw new RuntimeException("Failed to store file", e);
         }
     }
 
+    // Updated method to save profile image from byte array
     @Override
-    public String saveProfileImage(String username, MultipartFile file) {
+    public String saveProfileImage(String username, byte[] imageBytes, String originalFilename) {
         try {
-            String fileName = "profile_" + username + "_" + System.currentTimeMillis() + getFileExtension(file.getOriginalFilename());
+            String fileName = "profile_" + username + "_" + System.currentTimeMillis() + getFileExtension(originalFilename);
             Path filePath = rootLocation.resolve("profile").resolve(fileName);
 
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            Files.write(filePath, imageBytes); // Writing byte array to file
             return "profile/" + fileName;
         } catch (IOException e) {
             throw new RuntimeException("Failed to store file", e);
         }
     }
 
+    // Method to load a file as a resource
     @Override
     public Resource loadFileAsResource(String filePath) {
         try {
@@ -67,6 +68,7 @@ public class FileStorageServiceImpl implements FileStorageService {
         }
     }
 
+    // Method to delete a file
     @Override
     public void deleteFile(String filePath) {
         try {
@@ -77,6 +79,7 @@ public class FileStorageServiceImpl implements FileStorageService {
         }
     }
 
+    // Helper method to extract file extension
     private String getFileExtension(String fileName) {
         if (fileName == null || fileName.lastIndexOf('.') == -1) {
             return "";

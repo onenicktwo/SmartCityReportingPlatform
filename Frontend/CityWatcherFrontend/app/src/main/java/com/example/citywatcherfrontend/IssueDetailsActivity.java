@@ -45,7 +45,6 @@ public class IssueDetailsActivity extends CityWatcherActivity {
     private CommentData comment;
     private Button buttonEditComment;
 
-
     // Initialize activity variables
     private ImageView issueDetailsImage;
     private TextView issueDetailsTitle;
@@ -71,7 +70,7 @@ public class IssueDetailsActivity extends CityWatcherActivity {
 
         URL = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/" + userId + "/issues";
         issueId = bundle.getInt("id");
-        reporterId = bundle.getInt("reporter");
+        reporterId = bundle.getInt("reporterId");
 
         issueDetailsImage = findViewById(R.id.issueDetailsImage);
         issueDetailsCategory = findViewById(R.id.issueDetailsCategory);
@@ -113,7 +112,7 @@ public class IssueDetailsActivity extends CityWatcherActivity {
         issueDetailsLocation.setText(bundle.getString("address"));
 
         if (loggedIn) {
-            if (CityWatcherController.getInstance().getUserId() != reporterId) {
+            if (userId != reporterId) {
                 buttonEditIssue.setVisibility(View.GONE);
                 buttonDeleteIssue.setVisibility(View.GONE);
             }
@@ -203,7 +202,7 @@ public class IssueDetailsActivity extends CityWatcherActivity {
                     public void onResponse(JSONArray response){
                         Log.d("Volley Response", "Comments retrieved");
 
-                        for (int i = 0; i < response.length(); i++) {
+                        for (int i = response.length() - 1; i >= 0; i--) {
                             try {
                                 String jsonString = response.get(i).toString();
                                 comment = mapper.readValue(jsonString, CommentData.class);
@@ -278,19 +277,19 @@ public class IssueDetailsActivity extends CityWatcherActivity {
             }
         };
         VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonObjReq);
-        Intent intent = new Intent(IssueDetailsActivity.this, ViewIssuesActivity.class);
-        startActivity(intent);
+        finish();
     };
 
     public void editComment(int i){
             Intent intent = new Intent(IssueDetailsActivity.this, EditCommentActivity.class);
             Bundle bundle = new Bundle();
             CommentData comment = commentArrayList.get(i);
-            bundle.putInt("userID", comment.getCommenter().getId());
-            bundle.putInt("issueID", comment.getIssueId());
+            bundle.putInt("issueID", issueId);
             bundle.putInt("commentID", comment.getId());
             intent.putExtras(bundle);
             startActivity(intent);
+            finish();
+
     };
 
     public void makeDeleteCommentReq(int i) {
@@ -328,7 +327,17 @@ public class IssueDetailsActivity extends CityWatcherActivity {
 
         // Adding request to request queue
         VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonObjReq);
-        Intent intent = new Intent(IssueDetailsActivity.this, ViewIssuesActivity.class);
+        finish();
+    }
+
+    public void reportComment(int i) {
+        Intent intent = new Intent(IssueDetailsActivity.this, ReportCommentActivity.class);
+        Bundle bundle = new Bundle();
+        CommentData comment = commentArrayList.get(i);
+        bundle.putInt("userID", comment.getUser().getId());
+        bundle.putInt("issueID", issueId);
+        bundle.putInt("commentID", comment.getId());
+        intent.putExtras(bundle);
         startActivity(intent);
     }
 

@@ -4,9 +4,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface FileStorageService {
-    String saveIssueImage(Long userId, MultipartFile file);
+    String saveIssueImage(Long userId, byte[] imageBytes, String originalFilename);
 
-    String saveProfileImage(String username, MultipartFile file);
+    String saveProfileImage(String username, byte[] imageBytes, String originalFilename);
 
     Resource loadFileAsResource(String filePath);
 

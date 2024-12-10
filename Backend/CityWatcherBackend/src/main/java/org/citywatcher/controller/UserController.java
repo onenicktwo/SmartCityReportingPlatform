@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.citywatcher.dto.ImageUploadRequest;
+import org.citywatcher.model.Issue;
 import org.citywatcher.model.User;
 import org.citywatcher.service.FileStorageService;
 import org.citywatcher.service.UserService;
@@ -18,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Base64;
 import java.util.List;
 
 @RestController
@@ -41,10 +44,30 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content)
     })
     @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@RequestPart("user") User user,
-                                             @RequestPart(value = "image", required = false) MultipartFile imageFile) {
-        User registeredUser = userService.registerUser(user, imageFile);
+    public ResponseEntity<User> registerUser(@RequestBody User user) {
+        User registeredUser = userService.registerUser(user);
         return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "Upload user profile image")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Image uploaded successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
+            @ApiResponse(responseCode = "404", description = "User not found", content = @Content)
+    })
+    @PostMapping("/{id}/image")
+    public ResponseEntity<Void> uploadUserImage(@PathVariable Long id, @RequestBody ImageUploadRequest imageUploadRequest) {
+        try {
+            byte[] imageBytes = Base64.getDecoder().decode(imageUploadRequest.getImageBase64());
+
+            userService.uploadUserImage(id, imageBytes, imageUploadRequest.getFileName());
+
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @Operation(summary = "Get a user by ID")
@@ -83,10 +106,8 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Invalid user data provided", content = @Content)
     })
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id,
-                                           @RequestPart("user") User user,
-                                           @RequestPart(value = "image", required = false) MultipartFile imageFile) {
-        User updatedUser = userService.updateUser(id, user, imageFile);
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
+        User updatedUser = userService.updateUser(id, user);
         if (updatedUser != null) {
             return new ResponseEntity<>(updatedUser, HttpStatus.OK);
         } else {
@@ -130,6 +151,54 @@ public class UserController {
             }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @Operation(summary = "Follow an issue")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully followed the issue"),
+            @ApiResponse(responseCode = "404", description = "User or Issue not found"),
+            @ApiResponse(responseCode = "400", description = "Already following the issue")
+    })
+    @PostMapping("/{userId}/followed-issues/{issueId}")
+    public ResponseEntity<Void> followIssue(@PathVariable Long userId, @PathVariable Long issueId) {
+        try {
+            userService.followIssue(userId, issueId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Operation(summary = "Unfollow an issue")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully unfollowed the issue"),
+            @ApiResponse(responseCode = "404", description = "User or Issue not found"),
+            @ApiResponse(responseCode = "400", description = "Not following the issue")
+    })
+    @DeleteMapping("/{userId}/followed-issues/{issueId}")
+    public ResponseEntity<Void> unfollowIssue(@PathVariable Long userId, @PathVariable Long issueId) {
+        try {
+            userService.unfollowIssue(userId, issueId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Operation(summary = "Get user's followed issues")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of followed issues retrieved successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Issue.class))),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    @GetMapping("/{userId}/followed-issues")
+    public ResponseEntity<List<Issue>> getFollowedIssues(@PathVariable Long userId) {
+        try {
+            List<Issue> followedIssues = userService.getFollowedIssues(userId);
+            return ResponseEntity.ok(followedIssues);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 }
