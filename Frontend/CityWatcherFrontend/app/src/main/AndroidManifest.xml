@@ -47,6 +47,7 @@
         <activity android:name=".ChatStartActivity"></activity>
         <activity android:name=".VolunteerApplyActivity"></activity>
         <activity android:name=".CitizenViewActivity"></activity>
+        <activity android:name=".ViewProfileActivity"></activity>
 
 
 
