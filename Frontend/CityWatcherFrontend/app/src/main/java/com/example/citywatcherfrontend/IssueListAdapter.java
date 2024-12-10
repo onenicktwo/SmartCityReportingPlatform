@@ -12,6 +12,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 
 public class IssueListAdapter extends ArrayAdapter<IssueData> {
@@ -28,15 +30,17 @@ public class IssueListAdapter extends ArrayAdapter<IssueData> {
             view = LayoutInflater.from(getContext()).inflate(R.layout.list_item_issue, parent, false);
         }
 
-        ImageView issueImage = view.findViewById(R.id.issueViewImage);
+        // ImageView issueImage = view.findViewById(R.id.issueViewImage);
         TextView issueTitle = view.findViewById(R.id.issueViewTitle);
+        TextView issueCategory = view.findViewById(R.id.issueViewCategory);
+        TextView issueREporter = view.findViewById(R.id.issueViewReporter);
         TextView issueLocation = view.findViewById(R.id.issueViewLocation);
         TextView issueStatus = view.findViewById(R.id.issueViewStatus);
 
-
-        // issueImage.setImageResource();
         issueTitle.setText(issue.getTitle());
-        issueLocation.setText("Location");
+        issueCategory.setText(issue.getCategory());
+        issueCategory.setText(issue.getReporter().getUsername());
+        issueLocation.setText(issue.getAddress());
 
         String status = issue.getStatus();
         if (status.equals("REPORTED")) {
@@ -49,6 +53,8 @@ public class IssueListAdapter extends ArrayAdapter<IssueData> {
             issueStatus.setText("Completed");
             issueStatus.setTextColor(Color.GREEN);
         }
+
+
 
         return view;
     }
