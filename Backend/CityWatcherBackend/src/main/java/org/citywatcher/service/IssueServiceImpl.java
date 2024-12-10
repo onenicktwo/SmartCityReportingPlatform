@@ -40,7 +40,7 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public Issue createIssue(Long userId, Issue issue, MultipartFile imageFile) {
+    public Issue createIssue(Long userId, Issue issue) {
         User reporter = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid reporter ID"));
 
@@ -57,39 +57,12 @@ public class IssueServiceImpl implements IssueService {
             throw new IllegalArgumentException("Address is required");
         }
 
-        if (issue.getStatus() == null) {
-            issue.setStatus(IssueStatus.REPORTED);
-        }
-
-        if (issue.getCategory() == null) {
-            issue.setCategory("Other");
-        }
-
-        if (issue.getImagePath() == null) {
-            issue.setImagePath("");
-        }
-
-        if (issue.getVolunteers() == null) {
-            issue.setVolunteers(new ArrayList<>());
-        }
-
-        if (issue.getComments() == null) {
-            issue.setComments(new ArrayList<>());
-        }
-
+        issue.setStatus(IssueStatus.REPORTED);
+        issue.setCategory(issue.getCategory() != null ? issue.getCategory() : "Other");
+        issue.setImagePath("");
+        issue.setVolunteers(new ArrayList<>());
+        issue.setComments(new ArrayList<>());
         issue.setReporter(reporter);
-
-        if (issue.getAssignedOfficial() != null) {
-            User assignedOfficial = userRepository.findById(issue.getAssignedOfficial().getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid assigned official ID"));
-            issue.setAssignedOfficial(assignedOfficial);
-        }
-
-        if (imageFile != null && !imageFile.isEmpty()) {
-            String imagePath = fileStorageService.saveIssueImage(userId, imageFile);
-            issue.setImagePath(imagePath);
-            issueRepository.save(issue); // Update issue with image path
-        }
 
         Date currentTime = new Date();
         issue.setReportedDate(currentTime);
@@ -109,6 +82,24 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
+    public void addImageToIssue(Long userId, Long issueId, byte[] imageBytes, String fileName) {
+        Issue existingIssue = getIssueById(userId, issueId);
+        if (existingIssue == null) {
+            throw new IllegalArgumentException("Issue not found or does not belong to the user");
+        }
+
+        if (imageBytes != null && imageBytes.length > 0) {
+            String imagePath = fileStorageService.saveIssueImage(issueId, imageBytes, fileName);
+
+            existingIssue.setImagePath(imagePath);
+            existingIssue.setLastUpdatedDate(new Date());
+            issueRepository.save(existingIssue);
+        } else {
+            throw new IllegalArgumentException("Invalid image data or filename");
+        }
+    }
+
+    @Override
     public Issue getIssueById(Long userId, Long issueId) {
         User reporter = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid User ID"));
@@ -124,13 +115,9 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public Issue updateIssue(Long userId, Long issueId, Issue issueDetails, MultipartFile imageFile) {
+    public Issue updateIssue(Long userId, Long issueId, Issue issueDetails) {
         Issue existingIssue = getIssueById(userId, issueId);
         if (existingIssue != null) {
-            // Dont update reporter
-            User reporter = userRepository.findById(userId)
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid reporter ID"));
-
             boolean statusChanged = issueDetails.getStatus() != null &&
                     !existingIssue.getStatus().equals(issueDetails.getStatus());
             boolean isRelevantStatus = issueDetails.getStatus() != null &&
@@ -138,34 +125,13 @@ public class IssueServiceImpl implements IssueService {
                             || issueDetails.getStatus() == IssueStatus.COMPLETED);
             User previousAssignedOfficial = existingIssue.getAssignedOfficial();
 
-            if (issueDetails.getTitle() != null) {
-                existingIssue.setTitle(issueDetails.getTitle());
-            }
-            if (issueDetails.getDescription() != null) {
-                existingIssue.setDescription(issueDetails.getDescription());
-            }
-            if (issueDetails.getCategory() != null) {
-                existingIssue.setCategory(issueDetails.getCategory());
-            }
-            if (issueDetails.getStatus() != null) {
-                existingIssue.setStatus(issueDetails.getStatus());
-            }
-            if (issueDetails.getLatitude() != null) {
-                existingIssue.setLatitude(issueDetails.getLatitude());
-            }
-            if (issueDetails.getLongitude() != null) {
-                existingIssue.setLongitude(issueDetails.getLongitude());
-            }
-            if (issueDetails.getAddress() != null) {
-                existingIssue.setAddress(issueDetails.getAddress());
-            }
-            if (imageFile != null && !imageFile.isEmpty()) {
-                if (existingIssue.getImagePath() != null && !existingIssue.getImagePath().isEmpty()) {
-                    fileStorageService.deleteFile(existingIssue.getImagePath());
-                }
-                String newImagePath = fileStorageService.saveIssueImage(issueId, imageFile);
-                existingIssue.setImagePath(newImagePath);
-            }
+            if (issueDetails.getTitle() != null) existingIssue.setTitle(issueDetails.getTitle());
+            if (issueDetails.getDescription() != null) existingIssue.setDescription(issueDetails.getDescription());
+            if (issueDetails.getCategory() != null) existingIssue.setCategory(issueDetails.getCategory());
+            if (issueDetails.getStatus() != null) existingIssue.setStatus(issueDetails.getStatus());
+            if (issueDetails.getLatitude() != null) existingIssue.setLatitude(issueDetails.getLatitude());
+            if (issueDetails.getLongitude() != null) existingIssue.setLongitude(issueDetails.getLongitude());
+            if (issueDetails.getAddress() != null) existingIssue.setAddress(issueDetails.getAddress());
 
             if (issueDetails.getAssignedOfficial() != null) {
                 User assignedOfficial = userRepository.findById(issueDetails.getAssignedOfficial().getId())

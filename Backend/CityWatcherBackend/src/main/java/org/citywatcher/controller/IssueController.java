@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.citywatcher.dto.ImageUploadRequest;
 import org.citywatcher.model.Issue;
 import org.citywatcher.model.IssueStatus;
 import org.citywatcher.model.User;
@@ -20,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Base64;
 import java.util.List;
 
 @RestController
@@ -36,18 +38,38 @@ public class IssueController {
         this.fileStorageService = fileStorageService;
     }
 
-    @Operation(summary = "Create a new issue", description = "After creating a new issue, a notification will be sent to an official (if there is one assigned)")
+    @Operation(summary = "Create a new issue", description = "Create a new issue without an image")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Issue created successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = Issue.class))),
             @ApiResponse(responseCode = "400", description = "Invalid issue data", content = @Content)
     })
     @PostMapping
-    public ResponseEntity<Issue> createIssue(@PathVariable Long userId,
-                                             @RequestPart("issue") Issue issue,
-                                             @RequestPart(value = "image", required = false) MultipartFile imageFile) {
-        Issue createdIssue = issueService.createIssue(userId, issue, imageFile);
+    public ResponseEntity<Issue> createIssue(@PathVariable Long userId, @RequestBody Issue issue) {
+        Issue createdIssue = issueService.createIssue(userId, issue);
         return new ResponseEntity<>(createdIssue, HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "Upload an image for an issue", description = "Upload an image for an existing issue")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Image uploaded successfully"),
+            @ApiResponse(responseCode = "404", description = "Issue not found", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Invalid image file", content = @Content)
+    })
+    @PostMapping("/{issueId}/image")
+    public ResponseEntity<Void> uploadIssueImage(@PathVariable Long userId,
+                                                 @PathVariable Long issueId,
+                                                 @RequestBody ImageUploadRequest imageUploadRequest) {
+        try {
+            byte[] imageBytes = Base64.getDecoder().decode(imageUploadRequest.getImageBase64());
+            issueService.addImageToIssue(userId, issueId, imageBytes, imageUploadRequest.getFileName());
+            return new ResponseEntity<>(HttpStatus.OK);
+
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @Operation(summary = "Get issue by it's ID")
@@ -87,9 +109,8 @@ public class IssueController {
     @PutMapping("/{issueId}")
     public ResponseEntity<Issue> updateIssue(@PathVariable Long userId,
                                              @PathVariable Long issueId,
-                                             @RequestPart("issue") Issue issueDetails,
-                                             @RequestPart(value = "image", required = false) MultipartFile imageFile) {
-        Issue updatedIssue = issueService.updateIssue(userId, issueId, issueDetails, imageFile);
+                                             @RequestBody Issue issueDetails) {
+        Issue updatedIssue = issueService.updateIssue(userId, issueId, issueDetails);
         if (updatedIssue != null) {
             return new ResponseEntity<>(updatedIssue, HttpStatus.OK);
         } else {
