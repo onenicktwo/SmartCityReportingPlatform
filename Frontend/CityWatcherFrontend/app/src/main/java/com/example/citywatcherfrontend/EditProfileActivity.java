@@ -1,6 +1,8 @@
 package com.example.citywatcherfrontend;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -13,6 +15,9 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class EditProfileActivity extends CityWatcherActivity {
 
     private EditText etUsername, etEmail, etPassword, etConfirmPassword;
@@ -21,6 +26,10 @@ public class EditProfileActivity extends CityWatcherActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Intent intent = getIntent();
+        String role = intent.getStringExtra("role");
+        String profileImagePath = intent.getStringExtra("profileImagePath");
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editprofile);
 
@@ -87,9 +96,12 @@ public class EditProfileActivity extends CityWatcherActivity {
             userJson.put("username", username);
             userJson.put("email", email);
             userJson.put("password", password);
+            userJson.put("role", role);
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        Log.d("EditProfileActivity", "Request JSON: " + userJson.toString());
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
@@ -97,9 +109,22 @@ public class EditProfileActivity extends CityWatcherActivity {
                 Request.Method.PUT,
                 url,
                 userJson,
-                response -> Toast.makeText(EditProfileActivity.this, "Profile updated successfully", Toast.LENGTH_SHORT).show(),
-                error -> Toast.makeText(EditProfileActivity.this, "Error updating profile", Toast.LENGTH_SHORT).show()
+                response -> {
+                    Toast.makeText(EditProfileActivity.this, "Profile updated successfully", Toast.LENGTH_SHORT).show();
+                    Log.d("EditProfileActivity", "Response: " + response.toString());
+                },
+                error -> {
+                    Log.e("EditProfileActivity", "Volley Error: " + error.toString());
+                    if (error.networkResponse != null) {
+                        Log.e("EditProfileActivity", "Status Code: " + error.networkResponse.statusCode);
+                        if (error.networkResponse.data != null) {
+                            Log.e("EditProfileActivity", "Response Data: " + new String(error.networkResponse.data));
+                        }
+                    }
+                    Toast.makeText(EditProfileActivity.this, "Error updating profile", Toast.LENGTH_SHORT).show();
+                }
         );
+
 
         requestQueue.add(request);
     }
