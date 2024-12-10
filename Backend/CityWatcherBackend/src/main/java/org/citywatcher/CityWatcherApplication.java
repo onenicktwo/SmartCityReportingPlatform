@@ -3,7 +3,6 @@ package org.citywatcher;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-// Testing cicd
 @SpringBootApplication
 public class CityWatcherApplication {
     public static void main(String[] args) {

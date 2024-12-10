@@ -27,7 +27,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User registerUser(User user, MultipartFile imageFile) {
+    public User registerUser(User user) {
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
             throw new RuntimeException("Username already exists");
         }
@@ -37,11 +37,28 @@ public class UserServiceImpl implements UserService {
         if (user.getRole() == null) {
             user.setRole(UserRole.CITIZEN);
         }
-        if (imageFile != null && !imageFile.isEmpty()) {
-            String imagePath = fileStorageService.saveProfileImage(user.getUsername(), imageFile);
-            user.setProfileImagePath(imagePath);
-        }
         return userRepository.save(user);
+    }
+
+    @Override
+    public void uploadUserImage(Long userId, byte[] imageBytes, String fileName) {
+        User user = getUserById(userId);
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+
+        if (imageBytes != null && imageBytes.length > 0) {
+            if (user.getProfileImagePath() != null) {
+                fileStorageService.deleteFile(user.getProfileImagePath());
+            }
+
+            String imagePath = fileStorageService.saveProfileImage(user.getUsername(), imageBytes, fileName);
+
+            user.setProfileImagePath(imagePath);
+            userRepository.save(user);
+        } else {
+            throw new IllegalArgumentException("Invalid image data");
+        }
     }
 
     @Override
@@ -55,7 +72,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(Long id, User userDetails, MultipartFile imageFile) {
+    public User updateUser(Long id, User userDetails) {
         User existingUser = getUserById(id);
         if (existingUser == null) {
             return null;
@@ -68,14 +85,6 @@ public class UserServiceImpl implements UserService {
         // Only update password if it's provided
         if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {
             existingUser.setPassword(userDetails.getPassword());
-        }
-
-        if (imageFile != null && !imageFile.isEmpty()) {
-            if (existingUser.getProfileImagePath() != null) {
-                fileStorageService.deleteFile(existingUser.getProfileImagePath());
-            }
-            String imagePath = fileStorageService.saveProfileImage(existingUser.getUsername(), imageFile);
-            existingUser.setProfileImagePath(imagePath);
         }
 
         return userRepository.save(existingUser);
