@@ -60,13 +60,7 @@ public class CityWatcherController {
         this.username = username;
     }
 
-    public String getRole() {
-        return role;
-    }
 
-    public void setRole(String role) {
-        this.role = role;
-    }
 
     public void setLoggedIn(boolean loggedIn) {
         this.loggedIn = loggedIn;

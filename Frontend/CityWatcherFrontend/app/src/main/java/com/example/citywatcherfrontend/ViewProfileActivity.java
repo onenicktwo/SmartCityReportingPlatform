@@ -67,7 +67,6 @@ public class ViewProfileActivity extends CityWatcherActivity {
 
         requestQueue = Volley.newRequestQueue(this);
 
-        // Assume userId is passed via Intent or stored in Session
 
 
         // Fetch profile data
@@ -78,8 +77,7 @@ public class ViewProfileActivity extends CityWatcherActivity {
 
         // Handle Edit Profile Button Click
         btnEditProfile.setOnClickListener(v -> {
-            Intent intent = new Intent(ViewProfileActivity.this, EditUserActivity.class);
-            intent.putExtra("USER_ID", profileId);
+            Intent intent = new Intent(ViewProfileActivity.this, EditProfileActivity.class);
             startActivity(intent);
         });
 

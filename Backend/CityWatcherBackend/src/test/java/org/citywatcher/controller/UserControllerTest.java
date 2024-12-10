@@ -13,6 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.Base64;
+
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
@@ -22,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class NicholasMorrowSystemTest {
+public class UserControllerTest {
 
     @LocalServerPort
     private int port;
@@ -43,9 +45,8 @@ public class NicholasMorrowSystemTest {
     @Test
     public void testRegisterUser() {
         Response response = given()
-                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
-                .multiPart("user", testUser, MediaType.APPLICATION_JSON_VALUE)
-                .multiPart("image", "profile.jpg", "image data".getBytes())
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(testUser)
                 .when()
                 .post("/citywatcher/users/register")
                 .then()
@@ -58,10 +59,35 @@ public class NicholasMorrowSystemTest {
     }
 
     @Test
+    public void testUploadUserImage() {
+        Response registerResponse = given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(testUser)
+                .when()
+                .post("/citywatcher/users/register")
+                .then()
+                .statusCode(HttpStatus.CREATED.value())
+                .extract().response();
+
+        User createdUser = registerResponse.as(User.class);
+
+        String imageBase64 = Base64.getEncoder().encodeToString("image data".getBytes());
+        String requestBody = "{ \"imageBase64\": \"" + imageBase64 + "\", \"fileName\": \"profile.jpg\" }";
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(requestBody)
+                .when()
+                .post("/citywatcher/users/" + createdUser.getId() + "/image")
+                .then()
+                .statusCode(HttpStatus.OK.value());
+    }
+
+    @Test
     public void testGetUserById() {
         Response createResponse = given()
-                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
-                .multiPart("user", testUser, MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(testUser)
                 .when()
                 .post("/citywatcher/users/register")
                 .then()
@@ -82,8 +108,8 @@ public class NicholasMorrowSystemTest {
     @Test
     public void testGetAllUsers() {
         given()
-                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
-                .multiPart("user", testUser, MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(testUser)
                 .when()
                 .post("/citywatcher/users/register");
 
@@ -91,8 +117,8 @@ public class NicholasMorrowSystemTest {
         testUser.setEmail("testuser2@example.com");
 
         given()
-                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
-                .multiPart("user", testUser, MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(testUser)
                 .when()
                 .post("/citywatcher/users/register");
 
@@ -107,8 +133,8 @@ public class NicholasMorrowSystemTest {
     @Test
     public void testUpdateUser() {
         Response createResponse = given()
-                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
-                .multiPart("user", testUser, MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(testUser)
                 .when()
                 .post("/citywatcher/users/register")
                 .then()
@@ -120,9 +146,8 @@ public class NicholasMorrowSystemTest {
         createdUser.setEmail("updateduser@example.com");
 
         Response updateResponse = given()
-                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
-                .multiPart("user", createdUser, MediaType.APPLICATION_JSON_VALUE)
-                .multiPart("image", "profile.jpg", "image data".getBytes())
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(createdUser)
                 .when()
                 .put("/citywatcher/users/" + createdUser.getId())
                 .then()
@@ -137,8 +162,8 @@ public class NicholasMorrowSystemTest {
     @Test
     public void testDeleteUser() {
         Response createResponse = given()
-                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
-                .multiPart("user", testUser, MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(testUser)
                 .when()
                 .post("/citywatcher/users/register")
                 .then()
@@ -158,5 +183,37 @@ public class NicholasMorrowSystemTest {
                 .get("/citywatcher/users/" + createdUser.getId())
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value());
+    }
+
+    @Test
+    public void testUploadAndGetUserImage() {
+        Response registerResponse = given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(testUser)
+                .when()
+                .post("/citywatcher/users/register")
+                .then()
+                .statusCode(HttpStatus.CREATED.value())
+                .extract().response();
+
+        User createdUser = registerResponse.as(User.class);
+
+        String imageBase64 = Base64.getEncoder().encodeToString("image data".getBytes());
+        String requestBody = "{ \"imageBase64\": \"" + imageBase64 + "\", \"fileName\": \"profile.jpg\" }";
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(requestBody)
+                .when()
+                .post("/citywatcher/users/" + createdUser.getId() + "/image")
+                .then()
+                .statusCode(HttpStatus.OK.value());
+
+        given()
+                .when()
+                .get("/citywatcher/users/" + createdUser.getId() + "/image")
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .contentType(MediaType.IMAGE_JPEG_VALUE);
     }
 }

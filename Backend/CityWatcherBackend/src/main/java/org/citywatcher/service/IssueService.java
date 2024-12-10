@@ -8,10 +8,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface IssueService {
-    Issue createIssue(Long userId, Issue issue, MultipartFile imageFile);
+    Issue createIssue(Long userId, Issue issue);
     Issue getIssueById(Long userId, Long issueId);
     List<Issue> getIssuesByUser(Long userId);
-    Issue updateIssue(Long userId, Long issueId, Issue issue, MultipartFile imageFile);
+    Issue updateIssue(Long userId, Long issueId, Issue issue);
     boolean deleteIssue(Long userId, Long issueId);
     Issue addVolunteer(Long userId, Long issueId, Long volunteerId);
     Issue removeVolunteer(Long userId, Long issueId, Long volunteerId);
@@ -20,4 +20,5 @@ public interface IssueService {
     List<Issue> searchIssues(String category, IssueStatus status, String title,
                              String address, Double latitude, Double longitude,
                              Double radius, int page, int size);
+    void addImageToIssue(Long userId, Long issueId, byte[] imageBytes, String fileName);
 }
