@@ -42,13 +42,10 @@ public class ViewIssuesActivity extends CityWatcherActivity implements OnMapRead
     private String URL;
 
     private ActivityViewIssuesBinding binding;
-    private IssueListAdapter issueListAdapter;
-    public JSONArray requestResponse;
-    private ArrayList<IssueData> issueArrayList = new ArrayList<>();
-    private ObjectMapper mapper = new ObjectMapper();
 
-    IssueData issue;
-    CommentData comment;
+    private ArrayList<IssueData> issueArrayList = new ArrayList<>();
+    private IssueData issue;
+    private ObjectMapper mapper = new ObjectMapper();
 
     private SupportMapFragment mapFragment;
     private MarkerOptions markerOptions;
@@ -187,6 +184,7 @@ public class ViewIssuesActivity extends CityWatcherActivity implements OnMapRead
                         Intent intent = new Intent(ViewIssuesActivity.this, IssueDetailsActivity.class);
 
                         intent.putExtra("id", issueArrayList.get(i).getId());
+                        intent.putExtra("reporter", issueArrayList.get(i).getReporter().getUsername());
                         intent.putExtra("reporterId", issueArrayList.get(i).getReporter().getId());
                         intent.putExtra("title", issueArrayList.get(i).getTitle());
                         intent.putExtra("category", issueArrayList.get(i).getCategory());

@@ -71,5 +71,18 @@
             android:text="Logout"
             android:textColor="#FFF" />
 
+        <TextView
+            android:id="@+id/tvFollowedIssues"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Followed Issues"
+            android:textSize="20sp" />
+
+        <ListView
+            android:id="@+id/lvFollowedIssues"
+            android:layout_width="match_parent"
+            android:layout_height="212dp" />
+
     </LinearLayout>
 </ScrollView>
