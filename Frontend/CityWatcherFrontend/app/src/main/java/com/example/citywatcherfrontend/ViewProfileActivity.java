@@ -39,7 +39,7 @@ public class ViewProfileActivity extends CityWatcherActivity {
     private Button btnEditProfile, btnLogout;
     private ListView lvFollowedIssues;
 
-    int profileId = CityWatcherController.getInstance().getUserId();
+    int profileId;
 
     private ActivityViewprofileBinding binding;
     private ArrayList<IssueData> followedIssueArrayList = new ArrayList<>();
@@ -53,8 +53,11 @@ public class ViewProfileActivity extends CityWatcherActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Bundle bundle = getIntent().getExtras();
         binding = ActivityViewprofileBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        profileId = bundle.getInt("profileId");
 
         ivProfilePicture = findViewById(R.id.ivProfilePicture);
         tvUsername = findViewById(R.id.tvUsername);
@@ -74,6 +77,12 @@ public class ViewProfileActivity extends CityWatcherActivity {
 
         // Fetch followed issues
         makeGetFollowedIssuesReq(profileId);
+
+        // Allows only the profile owner to edit profile or logout
+        if (!loggedIn || userId != profileId) {
+            btnEditProfile.setVisibility(View.GONE);
+            btnLogout.setVisibility(View.GONE);
+        }
 
         // Handle Edit Profile Button Click
         btnEditProfile.setOnClickListener(v -> {
