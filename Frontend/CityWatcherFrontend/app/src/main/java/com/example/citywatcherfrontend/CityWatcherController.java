@@ -22,7 +22,7 @@ public class CityWatcherController {
 
     private int userId;
     private String username;
-    private String role = "NONE";
+    private String role;
     private boolean loggedIn;
     private boolean connected;
     private String email;
@@ -83,6 +83,15 @@ public class CityWatcherController {
     public String getEmail() { return email; }
 
     public void setEmail(String email) { this.email = email; }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
 
     /**
      * Connects and retrieves a response from a URL connection.

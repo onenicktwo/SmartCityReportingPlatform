@@ -87,6 +87,10 @@ public class ViewProfileActivity extends CityWatcherActivity {
         // Handle Edit Profile Button Click
         btnEditProfile.setOnClickListener(v -> {
             Intent intent = new Intent(ViewProfileActivity.this, EditProfileActivity.class);
+            intent.putExtra("userId", profileId);
+            intent.putExtra("username", tvUsername.getText().toString());
+            intent.putExtra("email", tvEmail.getText().toString());
+            intent.putExtra("role", tvRole.getText().toString());
             startActivity(intent);
         });
 
@@ -134,6 +138,7 @@ public class ViewProfileActivity extends CityWatcherActivity {
                         String email = jsonObject.getString("email");
                         String role = jsonObject.getString("role");
                         String profileImagePath = jsonObject.optString("profileImagePath");
+
 
                         // Update UI elements
                         tvUsername.setText(username);
