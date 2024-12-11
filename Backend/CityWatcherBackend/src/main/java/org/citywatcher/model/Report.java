@@ -23,7 +23,7 @@ public class Report {
     private String reason;
 
     @Column(nullable = false)
-    private Date timestamp;
+    private Date reportTime;
 
     public Report() {
     }
@@ -67,11 +67,11 @@ public class Report {
     }
 
     public Date getReportTime() {
-        return  timestamp;
+        return  reportTime;
     }
 
     @PrePersist
     protected void onCreate() {
-        timestamp = new Date();
+        reportTime = new Date();
     }
 }
