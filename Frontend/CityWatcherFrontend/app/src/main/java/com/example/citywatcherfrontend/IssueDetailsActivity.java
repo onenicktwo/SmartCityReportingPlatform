@@ -129,6 +129,15 @@ public class IssueDetailsActivity extends CityWatcherActivity {
 
         // TODO Set buttons for admin view
 
+        issueDetailsReporter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(IssueDetailsActivity.this, ViewProfileActivity.class);
+                intent.putExtra("profileId", reporterId);
+                startActivity(intent);
+            }
+        });
+
         buttonEditIssue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -441,6 +450,12 @@ public class IssueDetailsActivity extends CityWatcherActivity {
         );
         VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonObjReq);
         finish();
+    }
+
+    public void viewProfileFromComment(int i) {
+        Intent intent = new Intent(IssueDetailsActivity.this, ViewProfileActivity.class);
+        intent.putExtra("profileId", commentArrayList.get(i).getUser().getId());
+        startActivity(intent);
     }
 
 }

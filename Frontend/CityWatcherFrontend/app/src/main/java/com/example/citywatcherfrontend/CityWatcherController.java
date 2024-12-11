@@ -60,8 +60,6 @@ public class CityWatcherController {
         this.username = username;
     }
 
-
-
     public void setLoggedIn(boolean loggedIn) {
         this.loggedIn = loggedIn;
     }
@@ -138,6 +136,4 @@ public class CityWatcherController {
 
         return new Pair<String, LatLng>(formattedAddress, latlng);
     }
-
-
 }
