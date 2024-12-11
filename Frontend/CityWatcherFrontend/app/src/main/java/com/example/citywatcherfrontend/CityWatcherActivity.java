@@ -48,8 +48,16 @@ public abstract class CityWatcherActivity extends AppCompatActivity implements W
     // the user opens the menu for the first time
     @Override
     public boolean onCreateOptionsMenu( Menu menu ) {
-
         getMenuInflater().inflate(R.menu.menu_navbar, menu);
+
+        if (loggedIn) {
+            menu.findItem(R.id.navbar_profile_login).setEnabled(false);
+            menu.findItem(R.id.navbar_profile_signUp).setEnabled(false);
+        } else {
+            menu.findItem(R.id.navbar_profile_viewProfile).setEnabled(false);
+            menu.findItem(R.id.navbar_profile_logOut).setEnabled(false);
+        }
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -79,6 +87,7 @@ public abstract class CityWatcherActivity extends AppCompatActivity implements W
         } else if (itemId == R.id.navbar_profile_viewProfile) {
             Toast.makeText(this, "Viewing Profile", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(this, ViewProfileActivity.class);
+            intent.putExtra("profileId", userId);
             startActivity(intent);
         } else if (itemId == R.id.navbar_profile_logOut) {
             Toast.makeText(this, "Logging out", Toast.LENGTH_SHORT).show();
