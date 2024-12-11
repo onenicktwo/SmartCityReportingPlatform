@@ -55,9 +55,6 @@ dependencies {
     androidTestImplementation libs.espresso.core
     implementation 'org.java-websocket:Java-WebSocket:1.5.1'
 
-
-
-
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.13.0'
     androidTestImplementation platform(libs.compose.bom)
     androidTestImplementation libs.ui.test.junit4
