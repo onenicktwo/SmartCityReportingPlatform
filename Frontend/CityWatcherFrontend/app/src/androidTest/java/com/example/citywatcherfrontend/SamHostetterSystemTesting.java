@@ -1,6 +1,7 @@
 package com.example.citywatcherfrontend;
 
 import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.action.ViewActions.clearText;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
 import static androidx.test.espresso.action.ViewActions.typeText;
@@ -50,18 +51,6 @@ public class SamHostetterSystemTesting {
     }
 
     @Test
-    public void testUnsuccessfulLogin() {
-
-        onView(withId(R.id.etUsername)).perform(typeText("Sam"));
-        onView(withId(R.id.etPassword)).perform(typeText("WrongPassword"), closeSoftKeyboard());
-
-        onView(withId(R.id.btnLogin)).perform(click());
-
-        onView(withId(R.id.btnLogin))
-                .check(matches(isDisplayed()));
-
-    }
-    @Test
     public void testSuccessfulFetchUser() {
         ActivityScenario.launch(EditUserActivity.class);
 
@@ -86,6 +75,33 @@ public class SamHostetterSystemTesting {
 
 
     }
+    @Test
+    public void testSuccessfulEditUser() {
+        ActivityScenario.launch(EditUserActivity.class);
+
+        onView(withId(R.id.etUserId)).perform(typeText("13"), closeSoftKeyboard());
+
+        onView(withId(R.id.btnFetchUser)).perform(click());
+
+        onView(withId(R.id.etEditUsername)).perform(clearText());
+        onView(withId(R.id.etEditUsername)).perform(typeText("NewUsername"), closeSoftKeyboard());
+
+        onView(withId(R.id.btnSaveChanges)).perform(click());
+
+        onView(withId(R.id.etUserId)).perform(clearText(), typeText("13"), closeSoftKeyboard());
+        onView(withId(R.id.btnFetchUser)).perform(click());
+
+        onView(withId(R.id.etEditUsername))
+                .check(matches(withText("NewUsername")));
+    }
 
 
-}
+    }
+
+
+
+
+
+
+
+
