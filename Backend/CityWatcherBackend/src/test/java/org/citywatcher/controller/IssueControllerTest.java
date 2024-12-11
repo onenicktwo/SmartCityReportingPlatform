@@ -1,7 +1,6 @@
 package org.citywatcher.controller;
 
 import io.restassured.RestAssured;
-import io.restassured.response.Response;
 import org.citywatcher.model.Issue;
 import org.citywatcher.model.IssueStatus;
 import org.citywatcher.model.User;
@@ -36,82 +35,101 @@ public class IssueControllerTest {
     @BeforeEach
     public void setUp() {
         RestAssured.port = port;
+        testUser = createTestUserObject(UserRole.ADMIN);
+        testIssue = createTestIssueObject();
+    }
 
-        testUser = new User();
-        testUser.setUsername("testuser");
-        testUser.setEmail("testuser@example.com");
-        testUser.setPassword("password");
-        testUser.setRole(UserRole.ADMIN);
+    private User createTestUserObject(UserRole role) {
+        User user = new User();
+        user.setUsername("testuser");
+        user.setEmail("testuser@example.com");
+        user.setPassword("password");
+        user.setRole(role);
+        return user;
+    }
 
-        testIssue = new Issue();
-        testIssue.setTitle("Broken Streetlight");
-        testIssue.setDescription("The streetlight on Main St. is not working.");
-        testIssue.setCategory("Infrastructure");
-        testIssue.setStatus(IssueStatus.REPORTED);
-        testIssue.setLatitude(40.7128);
-        testIssue.setLongitude(-74.0060);
-        testIssue.setAddress("123 Main St.");
+    private Issue createTestIssueObject() {
+        Issue issue = new Issue();
+        issue.setTitle("Broken Streetlight");
+        issue.setDescription("The streetlight on Main St. is not working.");
+        issue.setCategory("Infrastructure");
+        issue.setStatus(IssueStatus.REPORTED);
+        issue.setLatitude(40.7128);
+        issue.setLongitude(-74.0060);
+        issue.setAddress("123 Main St.");
+        return issue;
+    }
+
+    private User registerUser(User user) {
+        return given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(user)
+                .post("/citywatcher/users/register")
+                .then()
+                .statusCode(HttpStatus.CREATED.value())
+                .extract().as(User.class);
+    }
+
+    private Issue createIssue(Long userId, Issue issue) {
+        return given()
+                .pathParam("userId", userId)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(issue)
+                .post("/citywatcher/users/{userId}/issues")
+                .then()
+                .statusCode(HttpStatus.CREATED.value())
+                .extract().as(Issue.class);
+    }
+
+    private User createVolunteerUser() {
+        User volunteerUser = createTestUserObject(UserRole.VOLUNTEER);
+        volunteerUser.setUsername("volunteer");
+        volunteerUser.setEmail("volunteer@example.com");
+        return registerUser(volunteerUser);
+    }
+
+    private void assignVolunteerToIssue(Long userId, Long issueId, Long volunteerId) {
+        given()
+                .pathParam("userId", userId)
+                .pathParam("issueId", issueId)
+                .pathParam("volunteerId", volunteerId)
+                .post("/citywatcher/users/{userId}/issues/{issueId}/volunteers/{volunteerId}")
+                .then()
+                .statusCode(HttpStatus.OK.value());
+    }
+
+    private void uploadIssueImage(Long userId, Long issueId, String fileName) {
+        String imageBase64 = Base64.getEncoder().encodeToString("dummy image data".getBytes());
+        String imageRequestBody = String.format("{ \"imageBase64\": \"%s\", \"fileName\": \"%s\" }", imageBase64, fileName);
+
+        given()
+                .pathParam("userId", userId)
+                .pathParam("issueId", issueId)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(imageRequestBody)
+                .post("/citywatcher/users/{userId}/issues/{issueId}/image")
+                .then()
+                .statusCode(HttpStatus.OK.value());
     }
 
     @Test
     public void testCreateIssue() {
-        Response userResponse = given()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(testUser)
-                .when()
-                .post("/citywatcher/users/register")
-                .then()
-                .statusCode(HttpStatus.CREATED.value())
-                .extract().response();
-
-        User createdUser = userResponse.as(User.class);
-
-        Response issueResponse = given()
-                .pathParam("userId", createdUser.getId())
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(testIssue)
-                .when()
-                .post("/citywatcher/users/{userId}/issues")
-                .then()
-                .statusCode(HttpStatus.CREATED.value())
-                .extract().response();
-
-        Issue createdIssue = issueResponse.as(Issue.class);
+        User createdUser = registerUser(testUser);
+        Issue createdIssue = createIssue(createdUser.getId(), testIssue);
 
         assertNotNull(createdIssue.getId());
         assertEquals(testIssue.getTitle(), createdIssue.getTitle());
-        assertEquals(IssueStatus.REPORTED, createdIssue.getStatus()); // Default status
+        assertEquals(IssueStatus.REPORTED, createdIssue.getStatus());
     }
 
     @Test
     public void testGetIssueById() {
-        Response userResponse = given()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(testUser)
-                .when()
-                .post("/citywatcher/users/register")
-                .then()
-                .statusCode(HttpStatus.CREATED.value())
-                .extract().response();
-
-        User createdUser = userResponse.as(User.class);
-
-        Response issueResponse = given()
-                .pathParam("userId", createdUser.getId())
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(testIssue)
-                .when()
-                .post("/citywatcher/users/{userId}/issues")
-                .then()
-                .statusCode(HttpStatus.CREATED.value())
-                .extract().response();
-
-        Issue createdIssue = issueResponse.as(Issue.class);
+        User createdUser = registerUser(testUser);
+        Issue createdIssue = createIssue(createdUser.getId(), testIssue);
 
         given()
                 .pathParam("userId", createdUser.getId())
                 .pathParam("issueId", createdIssue.getId())
-                .when()
                 .get("/citywatcher/users/{userId}/issues/{issueId}")
                 .then()
                 .statusCode(HttpStatus.OK.value())
@@ -122,39 +140,15 @@ public class IssueControllerTest {
 
     @Test
     public void testGetIssuesByUser() {
-        Response userResponse = given()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(testUser)
-                .when()
-                .post("/citywatcher/users/register")
-                .then()
-                .statusCode(HttpStatus.CREATED.value())
-                .extract().response();
+        User user = registerUser(testUser);
+        createIssue(user.getId(), testIssue);
 
-        User createdUser = userResponse.as(User.class);
+        Issue secondIssue = createTestIssueObject();
+        secondIssue.setTitle("Pothole on Main Street");
+        createIssue(user.getId(), secondIssue);
 
         given()
-                .pathParam("userId", createdUser.getId())
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(testIssue)
-                .when()
-                .post("/citywatcher/users/{userId}/issues")
-                .then()
-                .statusCode(HttpStatus.CREATED.value());
-
-        testIssue.setTitle("Pothole on Main Street");
-        given()
-                .pathParam("userId", createdUser.getId())
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(testIssue)
-                .when()
-                .post("/citywatcher/users/{userId}/issues")
-                .then()
-                .statusCode(HttpStatus.CREATED.value());
-
-        given()
-                .pathParam("userId", createdUser.getId())
-                .when()
+                .pathParam("userId", user.getId())
                 .get("/citywatcher/users/{userId}/issues")
                 .then()
                 .statusCode(HttpStatus.OK.value())
@@ -165,28 +159,8 @@ public class IssueControllerTest {
 
     @Test
     public void testUpdateIssue() {
-        Response userResponse = given()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(testUser)
-                .when()
-                .post("/citywatcher/users/register")
-                .then()
-                .statusCode(HttpStatus.CREATED.value())
-                .extract().response();
-
-        User createdUser = userResponse.as(User.class);
-
-        Response issueResponse = given()
-                .pathParam("userId", createdUser.getId())
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(testIssue)
-                .when()
-                .post("/citywatcher/users/{userId}/issues")
-                .then()
-                .statusCode(HttpStatus.CREATED.value())
-                .extract().response();
-
-        Issue createdIssue = issueResponse.as(Issue.class);
+        User user = registerUser(testUser);
+        Issue createdIssue = createIssue(user.getId(), testIssue);
 
         Issue updatedIssue = new Issue();
         updatedIssue.setTitle("Updated Title");
@@ -194,11 +168,10 @@ public class IssueControllerTest {
         updatedIssue.setStatus(IssueStatus.UNDER_REVIEW);
 
         given()
-                .pathParam("userId", createdUser.getId())
+                .pathParam("userId", user.getId())
                 .pathParam("issueId", createdIssue.getId())
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(updatedIssue)
-                .when()
                 .put("/citywatcher/users/{userId}/issues/{issueId}")
                 .then()
                 .statusCode(HttpStatus.OK.value())
@@ -209,302 +182,85 @@ public class IssueControllerTest {
 
     @Test
     public void testDeleteIssue() {
-        Response userResponse = given()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(testUser)
-                .when()
-                .post("/citywatcher/users/register")
-                .then()
-                .statusCode(HttpStatus.CREATED.value())
-                .extract().response();
-
-        User createdUser = userResponse.as(User.class);
-
-        Response issueResponse = given()
-                .pathParam("userId", createdUser.getId())
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(testIssue)
-                .when()
-                .post("/citywatcher/users/{userId}/issues")
-                .then()
-                .statusCode(HttpStatus.CREATED.value())
-                .extract().response();
-
-        Issue createdIssue = issueResponse.as(Issue.class);
+        User user = registerUser(testUser);
+        Issue createdIssue = createIssue(user.getId(), testIssue);
 
         given()
-                .pathParam("userId", createdUser.getId())
+                .pathParam("userId", user.getId())
                 .pathParam("issueId", createdIssue.getId())
-                .when()
                 .delete("/citywatcher/users/{userId}/issues/{issueId}")
                 .then()
                 .statusCode(HttpStatus.NO_CONTENT.value());
     }
 
     @Test
-    public void testUploadIssueImage() {
-        Response userResponse = given()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(testUser)
-                .when()
-                .post("/citywatcher/users/register")
-                .then()
-                .statusCode(HttpStatus.CREATED.value())
-                .extract().response();
-
-        User createdUser = userResponse.as(User.class);
-
-        Response issueResponse = given()
-                .pathParam("userId", createdUser.getId())
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(testIssue)
-                .when()
-                .post("/citywatcher/users/{userId}/issues")
-                .then()
-                .statusCode(HttpStatus.CREATED.value())
-                .extract().response();
-
-        Issue createdIssue = issueResponse.as(Issue.class);
-
-        String imageBase64 = Base64.getEncoder().encodeToString("dummy image data".getBytes());
-        String requestBody = "{ \"imageBase64\": \"" + imageBase64 + "\", \"fileName\": \"issue_image.jpg\" }";
-
-        given()
-                .pathParam("userId", createdUser.getId())
-                .pathParam("issueId", createdIssue.getId())
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(requestBody)
-                .when()
-                .post("/citywatcher/users/{userId}/issues/{issueId}/image")
-                .then()
-                .statusCode(HttpStatus.OK.value());
-    }
-
-    @Test
     public void testAssignVolunteerToIssue() {
-        Response userResponse = given()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(testUser)
-                .when()
-                .post("/citywatcher/users/register")
-                .then()
-                .statusCode(HttpStatus.CREATED.value())
-                .extract().response();
+        User admin = registerUser(testUser);
+        User volunteer = createVolunteerUser();
+        Issue createdIssue = createIssue(admin.getId(), testIssue);
 
-        User createdAdmin = userResponse.as(User.class);
-
-        User volunteerUser = new User();
-        volunteerUser.setUsername("volunteer");
-        volunteerUser.setEmail("volunteer@example.com");
-        volunteerUser.setPassword("password");
-        volunteerUser.setRole(UserRole.VOLUNTEER);
-
-        Response volunteerResponse = given()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(volunteerUser)
-                .when()
-                .post("/citywatcher/users/register")
-                .then()
-                .statusCode(HttpStatus.CREATED.value())
-                .extract().response();
-
-        User createdVolunteer = volunteerResponse.as(User.class);
-
-        Response issueResponse = given()
-                .pathParam("userId", createdAdmin.getId())
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(testIssue)
-                .when()
-                .post("/citywatcher/users/{userId}/issues")
-                .then()
-                .statusCode(HttpStatus.CREATED.value())
-                .extract().response();
-
-        Issue createdIssue = issueResponse.as(Issue.class);
-
-        given()
-                .pathParam("userId", createdAdmin.getId())
-                .pathParam("issueId", createdIssue.getId())
-                .pathParam("volunteerId", createdVolunteer.getId())
-                .when()
-                .post("/citywatcher/users/{userId}/issues/{issueId}/volunteers/{volunteerId}")
-                .then()
-                .statusCode(HttpStatus.OK.value());
+        assignVolunteerToIssue(admin.getId(), createdIssue.getId(), volunteer.getId());
     }
 
     @Test
     public void testRemoveVolunteerFromIssue() {
-        Response userResponse = given()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(testUser)
-                .when()
-                .post("/citywatcher/users/register")
-                .then()
-                .statusCode(HttpStatus.CREATED.value())
-                .extract().response();
+        User admin = registerUser(testUser);
+        User volunteer = createVolunteerUser();
+        Issue createdIssue = createIssue(admin.getId(), testIssue);
 
-        User createdAdmin = userResponse.as(User.class);
-
-        User volunteerUser = new User();
-        volunteerUser.setUsername("volunteer");
-        volunteerUser.setEmail("volunteer@example.com");
-        volunteerUser.setPassword("password");
-        volunteerUser.setRole(UserRole.VOLUNTEER);
-
-        Response volunteerResponse = given()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(volunteerUser)
-                .when()
-                .post("/citywatcher/users/register")
-                .then()
-                .statusCode(HttpStatus.CREATED.value())
-                .extract().response();
-
-        User createdVolunteer = volunteerResponse.as(User.class);
-
-        Response issueResponse = given()
-                .pathParam("userId", createdAdmin.getId())
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(testIssue)
-                .when()
-                .post("/citywatcher/users/{userId}/issues")
-                .then()
-                .statusCode(HttpStatus.CREATED.value())
-                .extract().response();
-
-        Issue createdIssue = issueResponse.as(Issue.class);
+        assignVolunteerToIssue(admin.getId(), createdIssue.getId(), volunteer.getId());
 
         given()
-                .pathParam("userId", createdAdmin.getId())
+                .pathParam("userId", admin.getId())
                 .pathParam("issueId", createdIssue.getId())
-                .pathParam("volunteerId", createdVolunteer.getId())
-                .when()
-                .post("/citywatcher/users/{userId}/issues/{issueId}/volunteers/{volunteerId}")
-                .then()
-                .statusCode(HttpStatus.OK.value());
-
-        given()
-                .pathParam("userId", createdAdmin.getId())
-                .pathParam("issueId", createdIssue.getId())
-                .pathParam("volunteerId", createdVolunteer.getId())
-                .when()
+                .pathParam("volunteerId", volunteer.getId())
                 .delete("/citywatcher/users/{userId}/issues/{issueId}/volunteers/{volunteerId}")
                 .then()
                 .statusCode(HttpStatus.OK.value());
     }
 
+
     @Test
     public void testSearchIssuesByCategory() {
-        Response userResponse = given()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(testUser)
-                .when()
-                .post("/citywatcher/users/register")
-                .then()
-                .statusCode(HttpStatus.CREATED.value())
-                .extract().response();
+        User user = registerUser(testUser);
 
-        User createdUser = userResponse.as(User.class);
+        Issue electricalIssue = createTestIssueObject();
+        electricalIssue.setTitle("Power Outage");
+        electricalIssue.setCategory("Electrical");
+        createIssue(user.getId(), electricalIssue);
 
-        Issue issue1 = new Issue();
-        issue1.setTitle("Power Outage");
-        issue1.setDescription("There is a power outage in the area.");
-        issue1.setCategory("Electrical");
-        issue1.setStatus(IssueStatus.REPORTED);
-        issue1.setLatitude(40.7128);
-        issue1.setLongitude(-74.0060);
-        issue1.setAddress("456 Main St.");
-
-        Issue issue2 = new Issue();
-        issue2.setTitle("Water Leak");
-        issue2.setDescription("There is a water leak in the basement.");
-        issue2.setCategory("Plumbing");
-        issue2.setStatus(IssueStatus.REPORTED);
-        issue2.setLatitude(40.7128);
-        issue2.setLongitude(-74.0060);
-        issue2.setAddress("789 Main St.");
+        Issue plumbingIssue = createTestIssueObject();
+        plumbingIssue.setTitle("Water Leak");
+        plumbingIssue.setCategory("Plumbing");
+        createIssue(user.getId(), plumbingIssue);
 
         given()
-                .pathParam("userId", createdUser.getId())
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(issue1)
-                .when()
-                .post("/citywatcher/users/{userId}/issues")
-                .then()
-                .statusCode(HttpStatus.CREATED.value());
-
-        given()
-                .pathParam("userId", createdUser.getId())
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(issue2)
-                .when()
-                .post("/citywatcher/users/{userId}/issues")
-                .then()
-                .statusCode(HttpStatus.CREATED.value());
-
-        given()
-                .pathParam("userId", createdUser.getId())
+                .pathParam("userId", user.getId())
                 .param("category", "Electrical")
-                .when()
                 .get("/citywatcher/users/{userId}/issues/search")
                 .then()
                 .statusCode(HttpStatus.OK.value())
-                .body("$.size()", equalTo(1)) // Expecting only one issue to match
+                .body("$.size()", equalTo(1))
                 .body("[0].title", equalTo("Power Outage"))
                 .body("[0].category", equalTo("Electrical"));
     }
 
     @Test
+    public void testUploadIssueImage() {
+        User user = registerUser(testUser);
+        Issue issue = createIssue(user.getId(), testIssue);
+        uploadIssueImage(user.getId(), issue.getId(), "issue_image.jpg");
+    }
+
+    @Test
     public void testGetIssueImage() {
-        Response userResponse = given()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(testUser)
-                .when()
-                .post("/citywatcher/users/register")
-                .then()
-                .statusCode(HttpStatus.CREATED.value())
-                .extract().response();
-
-        User createdUser = userResponse.as(User.class);
-
-        Issue testIssue = new Issue();
-        testIssue.setTitle("Broken Streetlight");
-        testIssue.setDescription("The streetlight on Main St. is not working.");
-        testIssue.setCategory("Infrastructure");
-        testIssue.setStatus(IssueStatus.REPORTED);
-        testIssue.setLatitude(40.7128);
-        testIssue.setLongitude(-74.0060);
-        testIssue.setAddress("123 Main St.");
-
-        Response issueResponse = given()
-                .pathParam("userId", createdUser.getId())
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(testIssue)
-                .when()
-                .post("/citywatcher/users/{userId}/issues")
-                .then()
-                .statusCode(HttpStatus.CREATED.value())
-                .extract().response();
-
-        Issue createdIssue = issueResponse.as(Issue.class);
-
-        String imageBase64 = Base64.getEncoder().encodeToString("dummy image data".getBytes());
-        String imageRequestBody = "{ \"imageBase64\": \"" + imageBase64 + "\", \"fileName\": \"issue_image.jpg\" }";
+        User user = registerUser(testUser);
+        Issue issue = createIssue(user.getId(), testIssue);
+        uploadIssueImage(user.getId(), issue.getId(), "issue_image.jpg");
 
         given()
-                .pathParam("userId", createdUser.getId())
-                .pathParam("issueId", createdIssue.getId())
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(imageRequestBody)
-                .when()
-                .post("/citywatcher/users/{userId}/issues/{issueId}/image")
-                .then()
-                .statusCode(HttpStatus.OK.value());
-
-        given()
-                .pathParam("userId", createdUser.getId())
-                .pathParam("issueId", createdIssue.getId())
-                .when()
+                .pathParam("userId", user.getId())
+                .pathParam("issueId", issue.getId())
                 .get("/citywatcher/users/{userId}/issues/{issueId}/image")
                 .then()
                 .statusCode(HttpStatus.OK.value())
