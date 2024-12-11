@@ -63,6 +63,13 @@ public class CommentListAdapter extends ArrayAdapter<CommentData> {
         date.setText(comment.getDate().toString());
         content.setText(comment.getContent());
 
+        commenter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ((IssueDetailsActivity)mContext).viewProfileFromComment(position);
+            }
+        });
+
         PopupMenu popupMenu = new PopupMenu(getContext().getApplicationContext(), menu);
         popupMenu.inflate(R.menu.menu_popup_comment);
 
