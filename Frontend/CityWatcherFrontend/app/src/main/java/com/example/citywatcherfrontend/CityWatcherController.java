@@ -22,9 +22,11 @@ public class CityWatcherController {
 
     private int userId;
     private String username;
-    private String role = "NONE";
+    private String role;
     private boolean loggedIn;
     private boolean connected;
+    private String email;
+
 
     /**
      * @return The instance of CityWatcherController
@@ -58,14 +60,6 @@ public class CityWatcherController {
         this.username = username;
     }
 
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
     public void setLoggedIn(boolean loggedIn) {
         this.loggedIn = loggedIn;
     }
@@ -77,6 +71,19 @@ public class CityWatcherController {
     public void setConnected(boolean connected) {
         this.connected = connected;
     }
+
+    public String getEmail() { return email; }
+
+    public void setEmail(String email) { this.email = email; }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
 
     /**
      * Connects and retrieves a response from a URL connection.
@@ -129,6 +136,4 @@ public class CityWatcherController {
 
         return new Pair<String, LatLng>(formattedAddress, latlng);
     }
-
-
 }

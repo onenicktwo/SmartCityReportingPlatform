@@ -4,9 +4,6 @@ package com.example.citywatcherfrontend;
 Author @Sam Hostetter
  */
 
-
-
-
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -116,4 +113,3 @@ public class RegisterActivity extends CityWatcherActivity {
         requestQueue.add(jsonObjectRequest);
     }
 }
-
