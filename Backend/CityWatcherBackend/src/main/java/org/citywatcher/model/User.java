@@ -41,7 +41,7 @@ public class User {
     @JsonIgnore
     private List<Issue> volunteerIssues = new ArrayList<>();
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "user_followed_issues",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -134,6 +134,15 @@ public class User {
 
     public void unfollowIssue(Issue issue) {
         followedIssues.remove(issue);
+        issue.getFollowers().remove(this);
+    }
+
+    public void reportIssue(Issue issue) {
+        reportedIssues.add(issue);
+    }
+
+    public List<Issue> getReportedIssues() {
+        return reportedIssues;
     }
 
     public List<Issue> getFollowedIssues() {

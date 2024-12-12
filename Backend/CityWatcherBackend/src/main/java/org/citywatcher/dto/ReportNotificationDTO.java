@@ -18,7 +18,7 @@ public class ReportNotificationDTO {
         this.commentId = report.getComment().getId();
         this.reporter = report.getReporter();
         this.reason = report.getReason();
-        this.timestamp = report.getReportTime();
+        this.timestamp = report.getTimestamp();
         this.type = type;
     }
 

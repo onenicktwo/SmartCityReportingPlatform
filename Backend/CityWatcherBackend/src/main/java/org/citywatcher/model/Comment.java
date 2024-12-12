@@ -1,9 +1,12 @@
 package org.citywatcher.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "comments")
@@ -24,6 +27,9 @@ public class Comment {
 
     @Column(nullable = false)
     private String content;
+
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Report> reports = new ArrayList<>();
 
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
@@ -65,6 +71,20 @@ public class Comment {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public List<Report> getReports() {
+        return reports;
+    }
+
+    public void addReport(Report report) {
+        reports.add(report);
+        report.setComment(this);
+    }
+
+    public void removeReport(Report report) {
+        reports.remove(report);
+        report.setComment(null);
     }
 
     public Date getTimestamp() {

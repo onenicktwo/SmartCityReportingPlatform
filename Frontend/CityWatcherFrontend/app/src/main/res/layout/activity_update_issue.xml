@@ -17,7 +17,7 @@
         android:hint="Issue Status"
         android:inputType="text"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/updateIssueType" />
+        app:layout_constraintTop_toBottomOf="@+id/updateIssueCategory" />
 
     <EditText
         android:id="@+id/updateIssueDescription"
@@ -34,37 +34,37 @@
         app:layout_constraintTop_toBottomOf="@+id/updateIssueStatus" />
 
     <Button
-        android:id="@+id/buttonSubmitIssue"
+        android:id="@+id/buttonUpdateIssue"
         android:layout_width="159dp"
         android:layout_height="63dp"
         android:layout_marginBottom="20dp"
-        android:text="Submit Issue"
+        android:text="Update Issue"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
-        android:id="@+id/updateIssueName"
+        android:id="@+id/updateIssueTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="15dp"
         android:ems="10"
-        android:hint="Issue Name"
+        android:hint="Issue Title"
         android:inputType="text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
-        android:id="@+id/updateIssueType"
+        android:id="@+id/updateIssueCategory"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="15dp"
         android:ems="10"
-        android:hint="Issue Type"
+        android:hint="Issue Category"
         android:inputType="text"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/updateIssueName" />
+        app:layout_constraintTop_toBottomOf="@+id/updateIssueTitle" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

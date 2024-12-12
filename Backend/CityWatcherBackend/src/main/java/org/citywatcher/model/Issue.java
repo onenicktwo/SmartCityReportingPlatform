@@ -1,5 +1,6 @@
 package org.citywatcher.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
@@ -68,7 +69,8 @@ public class Issue {
     @OneToMany(mappedBy = "issue", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "followedIssues")
+    @ManyToMany(mappedBy = "followedIssues", cascade = {CascadeType.ALL})
+    @JsonIgnore
     private List<User> followers = new ArrayList<>();
 
     public Long getId() {
@@ -207,6 +209,7 @@ public class Issue {
 
     public void removeFollower(User user) {
         followers.remove(user);
+        user.getFollowedIssues().remove(this);
     }
 
     public List<User> getFollowers() {

@@ -122,6 +122,8 @@ public class CommentsServiceImpl implements CommentsService {
         report.setReporter(reporter);
         report.setComment(comment);
         Report savedReport = reportRepository.save(report);
+        comment.addReport(report);
+        commentRepository.save(comment);
         try {
             reportWebSocketServer.sendReportNotification(savedReport);
         } catch (Exception e) {

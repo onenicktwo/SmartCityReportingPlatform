@@ -1,10 +1,9 @@
 package org.citywatcher.service;
 
-import org.citywatcher.model.Issue;
-import org.citywatcher.model.IssueStatus;
-import org.citywatcher.model.User;
-import org.citywatcher.model.UserRole;
+import org.citywatcher.model.*;
+import org.citywatcher.repository.CommentsRepository;
 import org.citywatcher.repository.IssueRepository;
+import org.citywatcher.repository.ReportRepository;
 import org.citywatcher.repository.UserRepository;
 import org.citywatcher.websocket.IssueWebSocketServer;
 import org.slf4j.Logger;
@@ -13,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
@@ -27,15 +27,21 @@ public class IssueServiceImpl implements IssueService {
 
     private final IssueRepository issueRepository;
     private final UserRepository userRepository;
+    private final CommentsRepository commentsRepository;
+    private final ReportRepository reportRepository;
     private final IssueWebSocketServer issueWebSocketServer;
     private static final Logger logger = LoggerFactory.getLogger(IssueServiceImpl.class);
 
     @Autowired
-    public IssueServiceImpl(IssueRepository issueRepository, UserRepository userRepository, IssueWebSocketServer webSocketController, FileStorageService fileStorageService) {
+    public IssueServiceImpl(IssueRepository issueRepository, UserRepository userRepository,
+                            IssueWebSocketServer webSocketController, FileStorageService fileStorageService,
+                            CommentsRepository commentsRepository, ReportRepository reportRepository) {
         this.issueRepository = issueRepository;
         this.userRepository = userRepository;
         this.issueWebSocketServer = webSocketController;
         this.fileStorageService = fileStorageService;
+        this.commentsRepository = commentsRepository;
+        this.reportRepository = reportRepository;
     }
 
     @Override
@@ -163,10 +169,30 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
+    @Transactional
     public boolean deleteIssue(Long userId, Long issueId) {
         Issue issue = getIssueById(userId, issueId);
+
         if (issue != null) {
+            for (User follower : new ArrayList<>(issue.getFollowers())) {
+                follower.getFollowedIssues().remove(issue);
+                userRepository.save(follower);
+            }
+
+            for (Comment comment : new ArrayList<>(issue.getComments())) {
+                for (Report report : new ArrayList<>(comment.getReports())) {
+                    report.setComment(null);
+                    reportRepository.delete(report);
+                }
+                comment.getReports().clear();
+
+                comment.setIssue(null);
+                commentsRepository.delete(comment);
+            }
+            issue.getComments().clear();
+
             issueRepository.delete(issue);
+
             return true;
         }
         return false;

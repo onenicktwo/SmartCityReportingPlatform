@@ -2,11 +2,9 @@ package com.example.citywatcherfrontend;
 
 import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static androidx.test.espresso.action.ViewActions.clearText;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
-import static androidx.test.espresso.action.ViewActions.swipeUp;
 import static androidx.test.espresso.action.ViewActions.typeText;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
@@ -19,9 +17,6 @@ import static org.hamcrest.CoreMatchers.anything;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsInstanceOf.instanceOf;
-
-import android.widget.ListView;
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -30,17 +25,20 @@ import androidx.test.uiautomator.UiObject;
 import androidx.test.uiautomator.UiObjectNotFoundException;
 import androidx.test.uiautomator.UiSelector;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.FixMethodOrder;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 
 import java.util.Date;
+import java.util.Random;
 
 @RunWith(AndroidJUnit4.class)
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class SamRowlandSystemTest {
     public static final int TIMEOUT = 5000;
+
     private final Date commentDate = new Date();
     private Date commentEditDate;
 
@@ -59,7 +57,40 @@ public class SamRowlandSystemTest {
     }
 
     @Test
-    public void makeComment() throws InterruptedException, UiObjectNotFoundException {
+    public void a_makeIssue() throws InterruptedException, UiObjectNotFoundException {
+        LogIn("johndoe", "securepassword");
+
+        onView(withId(R.id.navbar_menu)).perform(click());
+        onView(withText("Create Issue")).perform(click());
+
+        Thread.sleep(TIMEOUT);
+
+        onView(withId(R.id.editIssueTitle)).perform(typeText("Espresso Test Issue"), closeSoftKeyboard());
+        onView(withId(R.id.editIssueCategory)).perform(typeText("Test"), closeSoftKeyboard());
+        onView(withId(R.id.editIssueLocation)).perform(typeText("725 E 13th St, Ames, IA 50010"), closeSoftKeyboard());
+        onView(withId(R.id.editIssueDescription)).perform(typeText("This is an Espresso test for creating an issue."), closeSoftKeyboard());
+        onView(withId(R.id.buttonSubmitIssue)).perform(click());
+
+        Thread.sleep(TIMEOUT);
+
+        onView(withId(R.id.navbar_menu)).perform(click());
+        onView(withText("View Issues")).perform(click());
+
+        Thread.sleep(TIMEOUT);
+
+        UiDevice device = UiDevice.getInstance(getInstrumentation());
+        UiObject marker = device.findObject(new UiSelector().descriptionContains("Espresso Test Issue"));
+        marker.click();
+        onView(withId(R.id.buttonViewIssuesPopupDetails)).perform(click());
+
+        Thread.sleep(TIMEOUT);
+
+        onView(withId(R.id.issueDetailsTitle)).check(matches(withText("Espresso Test Issue")));
+
+    }
+
+    @Test
+    public void b_editIssue() throws InterruptedException, UiObjectNotFoundException {
         LogIn("johndoe", "securepassword");
 
         onView(withId(R.id.navbar_menu)).perform(click());
@@ -68,7 +99,43 @@ public class SamRowlandSystemTest {
         Thread.sleep(TIMEOUT);
 
         UiDevice device = UiDevice.getInstance(getInstrumentation());
-        UiObject marker = device.findObject(new UiSelector().descriptionContains("Pothole on Main Street"));
+        UiObject marker = device.findObject(new UiSelector().descriptionContains("Espresso Test Issue"));
+        marker.click();
+        onView(withId(R.id.buttonViewIssuesPopupDetails)).perform(click());
+
+        Thread.sleep(TIMEOUT);
+
+        onView(withId(R.id.buttonEditIssue)).perform(click());
+
+        Thread.sleep(TIMEOUT);
+
+        onView(withId(R.id.updateIssueDescription)).perform(clearText());
+        onView(withId(R.id.updateIssueDescription)).perform(typeText("This is an Espresso test for editing an issue."), closeSoftKeyboard());
+        onView(withId(R.id.buttonUpdateIssue)).perform(click());
+
+        Thread.sleep(TIMEOUT);
+
+        device = UiDevice.getInstance(getInstrumentation());
+        marker = device.findObject(new UiSelector().descriptionContains("Espresso Test Issue"));
+        marker.click();
+        onView(withId(R.id.buttonViewIssuesPopupDetails)).perform(click());
+
+        Thread.sleep(TIMEOUT);
+
+        onView(withId(R.id.issueDetailsDescription)).check(matches(withText("This is an Espresso test for editing an issue.")));
+    }
+
+    @Test
+    public void c_makeComment() throws InterruptedException, UiObjectNotFoundException {
+        LogIn("johndoe", "securepassword");
+
+        onView(withId(R.id.navbar_menu)).perform(click());
+        onView(withText("View Issues")).perform(click());
+
+        Thread.sleep(TIMEOUT);
+
+        UiDevice device = UiDevice.getInstance(getInstrumentation());
+        UiObject marker = device.findObject(new UiSelector().descriptionContains("Espresso Test Issue"));
         marker.click();
         onView(withId(R.id.buttonViewIssuesPopupDetails)).perform(click());
 
@@ -85,7 +152,7 @@ public class SamRowlandSystemTest {
     }
 
     @Test
-    public void editComment() throws InterruptedException, UiObjectNotFoundException {
+    public void d_editComment() throws InterruptedException, UiObjectNotFoundException {
         LogIn("johndoe", "securepassword");
         commentEditDate = new Date();
 
@@ -95,7 +162,7 @@ public class SamRowlandSystemTest {
         Thread.sleep(TIMEOUT);
 
         UiDevice device = UiDevice.getInstance(getInstrumentation());
-        UiObject marker = device.findObject(new UiSelector().descriptionContains("Pothole on Main Street"));
+        UiObject marker = device.findObject(new UiSelector().descriptionContains("Espresso Test Issue"));
         marker.click();
         onView(withId(R.id.buttonViewIssuesPopupDetails)).perform(click());
 
@@ -117,7 +184,7 @@ public class SamRowlandSystemTest {
     }
 
     @Test
-    public void reportComment() throws InterruptedException, UiObjectNotFoundException {
+    public void e_reportComment() throws InterruptedException, UiObjectNotFoundException {
         LogIn("janedoe", "securepassword");
 
         onView(withId(R.id.navbar_menu)).perform(click());
@@ -126,7 +193,7 @@ public class SamRowlandSystemTest {
         Thread.sleep(TIMEOUT);
 
         UiDevice device = UiDevice.getInstance(getInstrumentation());
-        UiObject marker = device.findObject(new UiSelector().descriptionContains("Pothole on Main Street"));
+        UiObject marker = device.findObject(new UiSelector().descriptionContains("Espresso Test Issue"));
         marker.click();
         onView(withId(R.id.buttonViewIssuesPopupDetails)).perform(click());
 
@@ -142,7 +209,7 @@ public class SamRowlandSystemTest {
     }
 
     @Test
-    public void deleteComment() throws InterruptedException, UiObjectNotFoundException {
+    public void f_deleteComment() throws InterruptedException, UiObjectNotFoundException {
         LogIn("johndoe", "securepassword");
 
         onView(withId(R.id.navbar_menu)).perform(click());
@@ -151,7 +218,7 @@ public class SamRowlandSystemTest {
         Thread.sleep(TIMEOUT);
 
         UiDevice device = UiDevice.getInstance(getInstrumentation());
-        UiObject marker = device.findObject(new UiSelector().descriptionContains("Pothole on Main Street"));
+        UiObject marker = device.findObject(new UiSelector().descriptionContains("Espresso Test Issue"));
         marker.click();
         onView(withId(R.id.buttonViewIssuesPopupDetails)).perform(click());
 
@@ -167,6 +234,29 @@ public class SamRowlandSystemTest {
         Thread.sleep(TIMEOUT);
 
         onData(anything()).inAdapterView(withId(R.id.listComments)).atPosition(0).onChildView(withId(R.id.commentContent)).check(matches(not(withText("This is an Espresso test comment written at " + commentEditDate))));
+    }
+
+    @Test
+    public void g_deleteIssue() throws InterruptedException, UiObjectNotFoundException {
+        LogIn("johndoe", "securepassword");
+
+        onView(withId(R.id.navbar_menu)).perform(click());
+        onView(withText("View Issues")).perform(click());
+
+        Thread.sleep(TIMEOUT);
+
+        UiDevice device = UiDevice.getInstance(getInstrumentation());
+        UiObject marker = device.findObject(new UiSelector().descriptionContains("Espresso Test Issue"));
+        marker.click();
+        onView(withId(R.id.buttonViewIssuesPopupDetails)).perform(click());
+
+        Thread.sleep(TIMEOUT);
+
+        onView(withId(R.id.buttonDeleteIssue)).perform(click());
+
+        Thread.sleep(TIMEOUT);
+
+
     }
 
 
