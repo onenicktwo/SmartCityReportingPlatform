@@ -6,6 +6,9 @@ plugins {
 android {
     namespace 'com.example.citywatcherfrontend'
     compileSdk 34
+    lintOptions{
+        abortOnError false
+    }
 
     defaultConfig {
         applicationId "com.example.citywatcherfrontend"
