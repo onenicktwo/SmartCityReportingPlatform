@@ -90,7 +90,6 @@ public class IssueDetailsActivity extends CityWatcherActivity {
         listComments = findViewById(R.id.listComments);
 
         makeGetCommentsReq();
-        setFollowButtonListener();
 
         // TODO Set image
         issueDetailsTitle.setText(bundle.getString("title"));
@@ -115,6 +114,7 @@ public class IssueDetailsActivity extends CityWatcherActivity {
         issueDetailsLocation.setText(bundle.getString("address"));
 
         if (loggedIn) {
+            setFollowButtonListener();
             if (userId != reporterId) {
                 buttonEditIssue.setVisibility(View.GONE);
                 buttonDeleteIssue.setVisibility(View.GONE);
@@ -158,7 +158,7 @@ public class IssueDetailsActivity extends CityWatcherActivity {
                         new Response.Listener<JSONObject>() {
                             @Override
                             public void onResponse(JSONObject response) {
-                                Log.d("Volley Response", response.toString());
+                                Log.d("Volley Response", "Issue deleted: " + response.toString());
                             }
                         },
                         new Response.ErrorListener() {

@@ -223,7 +223,7 @@ public class IssueController {
             @RequestParam(required = false) Double longitude,
             @RequestParam(required = false) Double radius,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10000") int size) {
 
         List<Issue> issues = issueService.searchIssues(category, status, title, address, latitude, longitude, radius, page, size);
         return ResponseEntity.ok(issues);

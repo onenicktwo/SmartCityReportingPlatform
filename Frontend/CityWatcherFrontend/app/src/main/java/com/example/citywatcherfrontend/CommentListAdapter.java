@@ -75,7 +75,7 @@ public class CommentListAdapter extends ArrayAdapter<CommentData> {
 
         if (!(CityWatcherController.getInstance().getUserId() == comment.getUser().getId())) {
             popupMenu.getMenu().findItem(R.id.popupEditComment).setEnabled(false);
-            if (!(CityWatcherController.getInstance().getRole().equals("ADMIN"))) {
+            if (CityWatcherController.getInstance().isLoggedIn() && !(CityWatcherController.getInstance().getRole().equals("ADMIN"))) {
                 popupMenu.getMenu().findItem(R.id.popupDeleteComment).setEnabled(false);
             }
 
