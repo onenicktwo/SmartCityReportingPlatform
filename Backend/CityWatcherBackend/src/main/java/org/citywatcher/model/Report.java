@@ -1,5 +1,7 @@
 package org.citywatcher.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.util.Date;
 
@@ -12,7 +14,8 @@ public class Report {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "comment_id", nullable = false)
+    @JoinColumn(name = "comment_id")  // Remove nullable = false
+    @JsonIgnore
     private Comment comment;
 
     @ManyToOne
@@ -22,8 +25,9 @@ public class Report {
     @Column(nullable = false)
     private String reason;
 
-    @Column(nullable = false)
-    private Date reportTime;
+    @Column(name = "timestamp", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date timestamp;
 
     public Report() {
     }
@@ -66,12 +70,17 @@ public class Report {
         this.reason = reason;
     }
 
-    public Date getReportTime() {
-        return  reportTime;
-    }
-
     @PrePersist
     protected void onCreate() {
-        reportTime = new Date();
+        timestamp = new Date();
+    }
+
+    // Update getter and setter
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Date reportTime) {
+        this.timestamp = reportTime;
     }
 }
