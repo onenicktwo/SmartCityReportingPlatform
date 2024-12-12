@@ -9,7 +9,7 @@ import android.widget.Toast;
 
 public class AdminViewActivity extends CityWatcherActivity {
 
-    private Button editUserButton, deleteUserButton, chatButton, volunteerApplyButton;
+    private Button editUserButton, deleteUserButton, chatButton, volunteerApplyButton, analyticsBtn;
 
     @Override
     /**
@@ -24,6 +24,7 @@ public class AdminViewActivity extends CityWatcherActivity {
         deleteUserButton = findViewById(R.id.deleteUserButton);
         chatButton = findViewById(R.id.chatButton);
         volunteerApplyButton = findViewById(R.id.volunteerApplyButton);
+        analyticsBtn = findViewById(R.id.analyticsBtn);
 
 
         editUserButton.setOnClickListener(new View.OnClickListener() {
@@ -58,6 +59,13 @@ public class AdminViewActivity extends CityWatcherActivity {
                 //startActivity(mainIntent);
 
 
+            }
+        });
+        analyticsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent analyticsIntent = new Intent(AdminViewActivity.this, AdminAnalyticsActivity.class);
+                startActivity(analyticsIntent);
             }
         });
     }
