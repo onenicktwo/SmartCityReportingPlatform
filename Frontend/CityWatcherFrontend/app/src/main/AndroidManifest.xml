@@ -54,6 +54,8 @@
         <activity android:name=".CitizenViewActivity"></activity>
         <activity android:name=".ViewProfileActivity"></activity>
         <activity android:name=".EditProfileActivity"></activity>
+        <activity android:name=".AdminAnalyticsActivity"></activity>
+        
 
 
 

@@ -61,6 +61,13 @@ public class AdminViewActivity extends CityWatcherActivity {
 
             }
         });
+        analyticsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent analyticsIntent = new Intent(AdminViewActivity.this, AdminAnalyticsActivity.class);
+                startActivity(analyticsIntent);
+            }
+        });
     }
 }
 
