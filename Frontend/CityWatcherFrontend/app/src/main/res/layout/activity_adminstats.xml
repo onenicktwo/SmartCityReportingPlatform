@@ -37,19 +37,7 @@
             android:layout_height="wrap_content"
             android:padding="8dp" />
 
-        <TextView
-            android:id="@+id/tvLocationStatsTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Location Statistics"
-            android:textStyle="bold"
-            android:textSize="18sp" />
 
-        <TextView
-            android:id="@+id/tvLocationStats"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp" />
 
         <TextView
             android:id="@+id/tvResponseTimeTitle"

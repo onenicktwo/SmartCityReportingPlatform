@@ -28,6 +28,7 @@ public class AdminAnalyticsActivity extends CityWatcherActivity {
 
         fetchStatusStats();
         fetchOfficialWorkloadStats();
+        fetchResponseTimeStats();
     }
 
     private void fetchStatusStats() {
@@ -114,46 +115,15 @@ public class AdminAnalyticsActivity extends CityWatcherActivity {
         return builder.toString();
     }
 
-    private void fetchLocationStats() {
-        String url = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/analytics/location-stats";
 
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null,
-                response -> {
 
-                    String stats = parseLocationStats(response);
-                    TextView tvLocationStats = findViewById(R.id.tvLocationStats);
-                    tvLocationStats.setText(stats);
-                },
-                error -> {
-                    TextView tvLocationStats = findViewById(R.id.tvLocationStats);
-                    tvLocationStats.setText("Error fetching location stats: " + error.getMessage());
-                }
-        );
 
-        Volley.newRequestQueue(this).add(request);
-    }
-
-    private String parseLocationStats(JSONArray response) {
-        StringBuilder builder = new StringBuilder();
-        try {
-            for (int i = 0; i < response.length(); i++) {
-                JSONObject location = response.getJSONObject(i);
-                builder.append("Region: ").append(location.getString("region"))
-                        .append("\nIssues: ").append(location.getInt("issueCount"))
-                        .append("\n\n");
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return "Error parsing location stats.";
-        }
-        return builder.toString();
-    }
 
 
 
 
     private void fetchResponseTimeStats() {
-        String url = "https://coms-3090-026.class.las.iastate.edu:8080/citywatcher/analytics/response-time-stats";
+        String url = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/analytics/response-time-stats";
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
                 response -> {
@@ -172,8 +142,8 @@ public class AdminAnalyticsActivity extends CityWatcherActivity {
 
     private String parseResponseTimeStats(JSONObject response) {
         try {
-            double averageResponseTime = response.getDouble("averageResponseTime");
-            double medianResponseTime = response.getDouble("medianResponseTime");
+            double averageResponseTime = response.getDouble("averageTimeToAssignment");
+            double medianResponseTime = response.getDouble("averageTimeToResolution");
             return "Average Response Time: " + averageResponseTime + " hours\n" +
                     "Median Response Time: " + medianResponseTime + " hours";
         } catch (JSONException e) {
