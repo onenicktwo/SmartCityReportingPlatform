@@ -2,30 +2,22 @@ package com.example.citywatcherfrontend;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
-import android.util.Pair;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 public class UpdateIssueActivity extends CityWatcherActivity {
 
@@ -39,7 +31,7 @@ public class UpdateIssueActivity extends CityWatcherActivity {
     private EditText updateIssueType;
     private EditText updateIssueStatus;
     private EditText updateIssueDescription;
-    private Button buttonSubmitIssue;
+    private Button buttonUpdateIssue;
     private JSONObject requestParams = new JSONObject();
 
 
@@ -52,14 +44,14 @@ public class UpdateIssueActivity extends CityWatcherActivity {
         issueId = bundle.getInt("id");
         URL = "http://coms-3090-026.class.las.iastate.edu:8080/citywatcher/users/" + userId + "/issues/" + issueId;
 
-        updateIssueName = findViewById(R.id.updateIssueName);
-        updateIssueType = findViewById(R.id.updateIssueType);
+        updateIssueName = findViewById(R.id.updateIssueTitle);
+        updateIssueType = findViewById(R.id.updateIssueCategory);
         updateIssueStatus = findViewById(R.id.updateIssueStatus);
         updateIssueDescription = findViewById(R.id.updateIssueDescription);
-        buttonSubmitIssue = findViewById(R.id.buttonSubmitIssue);
+        buttonUpdateIssue = findViewById(R.id.buttonUpdateIssue);
 
         // Submit listener
-        buttonSubmitIssue.setOnClickListener(new View.OnClickListener() {
+        buttonUpdateIssue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                     try {

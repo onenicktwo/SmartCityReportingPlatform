@@ -8,28 +8,28 @@
     tools:context=".CreateIssueActivity">
 
     <EditText
-        android:id="@+id/editIssueName"
+        android:id="@+id/editIssueTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
         android:ems="10"
-        android:hint="Issue Name"
+        android:hint="Issue Title"
         android:inputType="text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
-        android:id="@+id/editIssueType"
+        android:id="@+id/editIssueCategory"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="15dp"
         android:ems="10"
-        android:hint="Issue Type"
+        android:hint="Issue Category"
         android:inputType="text"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editIssueName" />
+        app:layout_constraintTop_toBottomOf="@+id/editIssueTitle" />
 
     <EditText
         android:id="@+id/editIssueLocation"
@@ -41,7 +41,7 @@
         android:hint="Issue Location"
         android:inputType="text"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editIssueType" />
+        app:layout_constraintTop_toBottomOf="@+id/editIssueCategory" />
 
     <EditText
         android:id="@+id/editIssueDescription"

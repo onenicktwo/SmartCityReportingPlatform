@@ -144,6 +144,7 @@ public class IssueDetailsActivity extends CityWatcherActivity {
                 Intent intent = new Intent(IssueDetailsActivity.this, UpdateIssueActivity.class);
                 intent.putExtra("id", issueId);
                 startActivity(intent);
+                finish();
             }
         });
 

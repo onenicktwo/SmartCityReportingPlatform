@@ -1,6 +1,5 @@
 package com.example.citywatcherfrontend;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -53,8 +52,8 @@ public class CreateIssueActivity extends CityWatcherActivity {
 
         setContentView(R.layout.activity_create_issue);
 
-        editIssueName = findViewById(R.id.editIssueName);
-        editIssueType = findViewById(R.id.editIssueType);
+        editIssueName = findViewById(R.id.editIssueTitle);
+        editIssueType = findViewById(R.id.editIssueCategory);
         editIssueLocation = findViewById(R.id.editIssueLocation);
         editIssueDescription = findViewById(R.id.editIssueDescription);
         buttonSubmitIssue = findViewById(R.id.buttonSubmitIssue);
@@ -132,7 +131,7 @@ public class CreateIssueActivity extends CityWatcherActivity {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 HashMap<String, String> headers = new HashMap<String, String>();
-                // headers.put("Content-Type", "application/json");
+                headers.put("Content-Type", "application/json; charset=utf-8");
                 return headers;
             }
 
