@@ -18,6 +18,7 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,23 +32,25 @@ import static org.junit.Assert.*;
  */
 @RunWith(AndroidJUnit4.class)
 public class SamHostetterSystemTesting {
+
+    public static final int TIMEOUT = 5000;
+
     @Rule
-    public ActivityScenarioRule<LoginActivity> activityRule =
-            new ActivityScenarioRule<>(LoginActivity.class);
+    public ActivityScenarioRule<LoginOrReg> activityRule =
+            new ActivityScenarioRule<>(LoginOrReg.class);
 
     @Test
-    public void testSuccessfulLogin() {
+    public void testSuccessfulLoginUser() {
 
-        // Enter valid username and password
-        onView(withId(R.id.etUsername)).perform(typeText("Sam"));
-        onView(withId(R.id.etPassword)).perform(typeText("Password123"), closeSoftKeyboard());
-
-        // Click login button
         onView(withId(R.id.btnLogin)).perform(click());
 
-        onView(withId(R.id.btnAdminView))
-                .check(matches(isDisplayed()));
+        onView(withId(R.id.etUsername)).perform(typeText("NewUser123"), closeSoftKeyboard());
 
+        onView(withId(R.id.etPassword)).perform(typeText("Password123"), closeSoftKeyboard());
+
+        onView(withId(R.id.btnLogin)).perform(click());
+        onView(withId(R.id.btnCitizenView))
+                .check(matches(isDisplayed()));
     }
 
     @Test
@@ -63,40 +66,56 @@ public class SamHostetterSystemTesting {
     }
 
     @Test
-    public void testUnsuccessfulFetchUser() {
-        ActivityScenario.launch(EditUserActivity.class);
+    public void testSuccessfulEditProfile(){
+        onView(withId(R.id.btnLogin)).perform(click());
 
-        onView(withId(R.id.etUserId)).perform(typeText("10000"), closeSoftKeyboard());
+        onView(withId(R.id.etUsername)).perform(typeText("NewUser123"), closeSoftKeyboard());
 
-        onView(withId(R.id.btnFetchUser)).perform(click());
+        onView(withId(R.id.etPassword)).perform(typeText("Password123"), closeSoftKeyboard());
 
-        onView(withId(R.id.etEditUsername))
-                .check(matches(withText("")));
+        onView(withId(R.id.btnLogin)).perform(click());
+
+        ActivityScenario.launch(EditProfileActivity.class);
+
+        onView(withId(R.id.etConfirmPassword)).perform(typeText("Password123"), closeSoftKeyboard());
 
 
     }
+
     @Test
-    public void testSuccessfulEditUser() {
-        ActivityScenario.launch(EditUserActivity.class);
+    public void testVolunteerApply(){
+        onView(withId(R.id.btnLogin)).perform(click());
 
-        onView(withId(R.id.etUserId)).perform(typeText("13"), closeSoftKeyboard());
+        onView(withId(R.id.etUsername)).perform(typeText("NewUser123"), closeSoftKeyboard());
 
-        onView(withId(R.id.btnFetchUser)).perform(click());
+        onView(withId(R.id.etPassword)).perform(typeText("Password123"), closeSoftKeyboard());
 
-        onView(withId(R.id.etEditUsername)).perform(clearText());
-        onView(withId(R.id.etEditUsername)).perform(typeText("NewUsername"), closeSoftKeyboard());
+        onView(withId(R.id.btnLogin)).perform(click());
 
-        onView(withId(R.id.btnSaveChanges)).perform(click());
+        onView(withId(R.id.btnCitizenView)).perform(click());
 
-        onView(withId(R.id.etUserId)).perform(clearText(), typeText("13"), closeSoftKeyboard());
-        onView(withId(R.id.btnFetchUser)).perform(click());
+        onView(withId(R.id.vonunteerApplyBtn)).perform(click());
 
-        onView(withId(R.id.etEditUsername))
-                .check(matches(withText("NewUsername")));
+        onView(withId(R.id.et_name)).perform((typeText("TestName")), closeSoftKeyboard());
+
+        onView(withId(R.id.et_email)).perform((typeText("TestEmail")), closeSoftKeyboard());
+
+        onView(withId(R.id.et_reason)).perform((typeText("TestReason")), closeSoftKeyboard());
+
+        onView(withId(R.id.btn_submit_application)).perform(click());
+
+
     }
 
 
-    }
+
+
+
+
+
+
+
+}
 
 
 
